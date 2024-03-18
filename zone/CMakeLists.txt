@@ -281,9 +281,19 @@ SET(zone_headers
     zone_reload.h
     zone_cli.cpp)
 
-ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers})
 
-INSTALL(TARGETS zone RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+
+#ADD_LIBRARY(zonelib STATIC ${zone_sources} ${zone_headers})
+
+# Remove reference to perl and lua in this
+add_compile_options(
+  "$<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:Clang>>:-UEMBPERL>"
+)
+add_compile_options(
+  "$<$<OR:$<C_COMPILER_ID:GNU>,$<C_COMPILER_ID:Clang>>:-ULUA_EQEMU>"
+)
+
+ADD_EXECUTABLE(zone)
 
 IF (WIN32 AND EQEMU_BUILD_PCH)
     TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/pch.h)
@@ -293,6 +303,144 @@ ENDIF()
 
 ADD_DEFINITIONS(-DZONE)
 
-TARGET_LINK_LIBRARIES(zone ${ZONE_LIBS})
+SET(BUILD_DIR "${CMAKE_SOURCE_DIR}/build/bin")
+
+
+## DOTNET
+## Swig exec: swig -csharp -c++ -outfile RoslynBridge/dotnet_quests.cs questinterface.i
+set(dotnet_sources
+    dotnet_quests/dotnet_quest_interface.h
+    dotnet_quests/dotnet_quest_interface.cpp
+    dotnet_quests/dotnet_runtime.h
+    dotnet_quests/dotnet_runtime.cpp
+)
+
+execute_process(COMMAND dotnet --info OUTPUT_VARIABLE DOTNET_INFO)
+string(REGEX MATCH "Base Path:[ ]*([^\n\r]*)" DOTNET_BASE_PATH_MATCH "${DOTNET_INFO}")
+set(DOTNET_BASE_PATH "${CMAKE_MATCH_1}")
+get_filename_component(UP_ONE_DIR "${DOTNET_BASE_PATH}" DIRECTORY)
+get_filename_component(UP_TWO_DIRS "${UP_ONE_DIR}" DIRECTORY)
+file(GLOB_RECURSE LIBNETHOST_PATHS LIST_DIRECTORIES true "${UP_TWO_DIRS}/packs/**/native")
+
+MESSAGE(STATUS "DOTNET_BASE_PATH PATHS ${UP_TWO_DIRS}")
+
+foreach(DIR IN LISTS LIBNETHOST_PATHS)
+    if("${DIR}" MATCHES "native$")
+        SET(NETHOST_PATH "${DIR}")
+        break()
+    endif()
+endforeach()
+
+
+set(NETHOST_LIBRARY_NAME "")
+
+if(WIN32)
+    set(NETHOST_LIBRARY_NAME "nethost.lib")
+else()
+    set(NETHOST_LIBRARY_NAME "libnethost.a")
+endif()
+
+MESSAGE(STATUS "Looking for ${NETHOST_LIBRARY_NAME}")
+
+add_custom_target(dotnet_types_build
+  COMMAND dotnet restore
+  COMMAND dotnet publish "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/DotNetTypes" -c Debug --output "${BUILD_DIR}"
+  WORKING_DIRECTORY  "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/DotNetTypes"
+  COMMENT "Building DotNetTypes .NET project..."
+)
+
+add_custom_target(dotnet_build
+  COMMAND dotnet restore
+  COMMAND dotnet publish "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynBridge" -c Debug --output "${BUILD_DIR}"
+  WORKING_DIRECTORY  "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynBridge"
+  COMMENT "Building .NET project..."
+)
+
+if (MSVC)
+    # We ship libnethost.lib as a static library for external consumption, so
+    # LTCG must be disabled to ensure that non-MSVC toolchains can work with it.
+
+    set_target_properties(libnethost PROPERTIES INTERPROCEDURAL_OPTIMIZATION OFF)
+
+    string(REPLACE "/LTCG" "" CMAKE_STATIC_LINKER_FLAGS_RELEASE ${CMAKE_STATIC_LINKER_FLAGS_RELEASE})
+    string(REPLACE "/LTCG" "" CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO ${CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO})
+endif()
+
+
+# add_custom_command(OUTPUT "${BUILD_DIR}/RoslynBridge.dll"
+#     COMMAND dotnet build "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/quest_interface/RoslynBridge" --output "${BUILD_DIR}"
+#     DEPENDS "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/quest_interface/RoslynBridge/RoslynBridge.csproj"
+#     WORKING_DIRECTORY  "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/quest_interface/RoslynBridge"
+#     COMMENT "Building .NET Roslyn Bridge"
+# )
+
+# NODEJS
+
+file(GLOB NODE_QUEST_SOURCES "${CMAKE_SOURCE_DIR}/zone/node_quests/*.cpp")
+file(GLOB NODE_QUEST_HEADERS "${CMAKE_SOURCE_DIR}/zone/node_quests/*.h")
+
+# Include Node.js headers and our headers
+include_directories(
+    ${CMAKE_SOURCE_DIR}/zone
+    ${CMAKE_SOURCE_DIR}/submodules/nodejs/src
+    ${CMAKE_SOURCE_DIR}/submodules/nodejs/deps/v8/include
+    ${CMAKE_SOURCE_DIR}/submodules/nodejs/deps/uv/include
+)
+
+
+
+if(MSVC)
+    file(GLOB NODE_LIBRARIES "${CMAKE_SOURCE_DIR}/submodules/nodejs/out/Release/*.lib")
+else()
+    file(GLOB NODE_LIBRARIES "${CMAKE_SOURCE_DIR}/submodules/nodejs/out/Release/*.a")
+endif()
+
+add_library(questinterface SHARED dotnet_quests/questinterface/questinterface_wrap.cxx)
+add_library(node_quests SHARED ${NODE_QUEST_SOURCES} ${NODE_QUEST_HEADERS} ${zone_sources} ${zone_headers} ${dotnet_sources})
+
+set_target_properties(node_quests PROPERTIES PREFIX "")
+set_target_properties(questinterface PROPERTIES PREFIX "")
+
+target_include_directories(node_quests PRIVATE ${NETHOST_PATH})
+
+target_link_libraries(node_quests ${NODE_LIBRARIES} ${PERL_LIBRARY} ${ZONE_LIBS} "${NETHOST_PATH}/${NETHOST_LIBRARY_NAME}" "-framework CoreFoundation")
+target_link_libraries(questinterface node_quests)
+
+target_compile_definitions(node_quests PRIVATE NODE_WANT_INTERNALS=1 HAVE_INSPECTOR=1 NODE_QUEST_EXPORT=1)
+
+
+
+# Compiler-specific logic
+if(MSVC)
+    # Set .dll extension for MSVC compiler
+    set_target_properties(node_quests PROPERTIES SUFFIX ".dll")
+    set_target_properties(questinterface PROPERTIES SUFFIX ".dll")
+else()
+    # Set .so extension for Unix-like systems (default behavior)
+endif()
+
+# If using MSVC and building Node.js as a DLL, make sure to define NODE_SHARED as a preprocessor definition
+if(MSVC)
+    target_compile_definitions(node_quests PRIVATE NODE_SHARED=1)
+endif()
+
+
+set_target_properties(node_quests PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY ${BUILD_DIR}
+    ARCHIVE_OUTPUT_DIRECTORY ${BUILD_DIR} # For static libs or import libs on Windows
+    RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR} # For Windows DLLs
+)
+
+set_target_properties(questinterface PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY ${BUILD_DIR}
+    ARCHIVE_OUTPUT_DIRECTORY ${BUILD_DIR} # For static libs or import libs on Windows
+    RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR} # For Windows DLLs
+)
+
+
+TARGET_LINK_LIBRARIES(zone node_quests)
+
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+
+# ADD_SUBDIRECTORY(node_quests)

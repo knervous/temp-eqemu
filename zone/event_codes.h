@@ -2,7 +2,7 @@
 #define EVENT_CODES_H
 
 typedef enum {
-	EVENT_SAY = 0,
+EVENT_SAY = 0,
 	EVENT_TRADE,		//being given an item or money
 	EVENT_DEATH,		//being killed
 	EVENT_SPAWN,		//triggered when we first spawn

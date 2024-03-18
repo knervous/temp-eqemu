@@ -1,0 +1,3 @@
+#!/bin/sh
+unset LUA_PATH LUA_PATH_5_2 LUA_PATH_5_3 LUA_PATH_5_4 LUA_CPATH LUA_CPATH_5_2 LUA_CPATH_5_3 LUA_CPATH_5_4
+LUAROCKS_SYSCONFDIR="/usr/local/etc/luarocks" LUA_PATH="/Users/Paul/source/eqemu-server/l/luarocks-3.10.0/src/?.lua;;" exec "/opt/homebrew/opt/lua@5.1/bin/lua5.1" "/Users/Paul/source/eqemu-server/l/luarocks-3.10.0/src/bin/luarocks-admin" --project-tree="/Users/Paul/source/eqemu-server/l/luarocks-3.10.0/lua_modules" "$@"

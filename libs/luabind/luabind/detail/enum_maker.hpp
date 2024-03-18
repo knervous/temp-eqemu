@@ -24,17 +24,14 @@
 #ifndef LUABIND_ENUM_MAKER_HPP_INCLUDED
 #define LUABIND_ENUM_MAKER_HPP_INCLUDED
 
-#include <vector>
-#include <string>
-
 #include <luabind/config.hpp>
 #include <luabind/detail/class_rep.hpp>
 
-namespace luabind
-{
+namespace luabind {
+
 	struct value;
 
-	struct value_vector : public std::vector<value>
+	struct value_vector : public luabind::vector<value>
 	{
 		// a bug in intel's compiler forces us to declare these constructors explicitly.
 		value_vector();
@@ -45,7 +42,7 @@ namespace luabind
 
 	struct value
 	{
-	friend class std::vector<value>;
+		friend class std::vector<value>;
 		template<class T>
 		value(const char* name, T v)
 			: name_(name)
@@ -65,20 +62,20 @@ namespace luabind
 			return v;
 		}
 
-	private: 
+	private:
 
 		value() {}
 	};
 
 	inline value_vector::value_vector()
-		: std::vector<value>()
+		: luabind::vector<value>()
 	{
 	}
 
 	inline value_vector::~value_vector() {}
 
 	inline value_vector::value_vector(const value_vector& rhs)
-		: std::vector<value>(rhs)
+		: luabind::vector<value>(rhs)
 	{
 	}
 
@@ -93,19 +90,18 @@ namespace luabind
 		template<class From>
 		struct enum_maker
 		{
-			explicit enum_maker(From& from): from_(from) {}
+			explicit enum_maker(From& from) : from_(from) {}
 
 			From& operator[](const value& val)
 			{
 				from_.add_static_constant(val.name_, val.val_);
 				return from_;
 			}
-			
+
 			From& operator[](const value_vector& values)
 			{
-				for (value_vector::const_iterator i = values.begin(); i != values.end(); ++i)
-				{
-					from_.add_static_constant(i->name_, i->val_);
+				for(const auto& val : values) {
+					from_.add_static_constant(val.name_, val.val_);
 				}
 
 				return from_;
@@ -114,10 +110,11 @@ namespace luabind
 			From& from_;
 
 		private:
-            void operator=(enum_maker const&); // C4512, assignment operator could not be generated
+			void operator=(enum_maker const&); // C4512, assignment operator could not be generated
 			template<class T> void operator,(T const&) const;
 		};
 	}
 }
 
 #endif // LUABIND_ENUM_MAKER_HPP_INCLUDED
+

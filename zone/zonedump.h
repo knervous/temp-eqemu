@@ -30,7 +30,7 @@ spawn2 mediumblob, npcs mediumblob, npc_loot mediumblob, gmspawntype mediumblob,
 #include "../common/eq_packet_structs.h"
 #include "../common/inventory_profile.h"
 
-#pragma pack(1)
+//#pragma pack(1)
 
 struct NPCType
 {
@@ -156,6 +156,6 @@ struct NPCType
 	bool            keeps_sold_items;
 };
 
-#pragma pack()
+//#pragma pack()
 
 #endif

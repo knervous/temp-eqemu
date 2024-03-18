@@ -25,6 +25,11 @@ public:
 
 	DBcore();
 	~DBcore();
+	DBcore& operator=(const DBcore&) {
+		return *this;
+	};
+
+
 	eStatus GetStatus() { return pStatus; }
 	MySQLRequestResult QueryDatabase(const char *query, uint32 querylen, bool retryOnFailureOnce = true);
 	MySQLRequestResult QueryDatabase(const std::string& query, bool retryOnFailureOnce = true);

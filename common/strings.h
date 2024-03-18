@@ -107,6 +107,7 @@ public:
 	static std::string Commify(int16 number) { return Strings::Commify(std::to_string(number)); };
 	static std::string Commify(int32 number) { return Strings::Commify(std::to_string(number)); };
 	static std::string Commify(int64 number) { return Strings::Commify(std::to_string(number)); };
+	static std::string Commify(size_t number) { return Strings::Commify(std::to_string(number)); };
 	static std::string ConvertToDigit(int n, const std::string& suffix);
 	static std::string Escape(const std::string &s);
 	static std::string GetBetween(const std::string &s, std::string start_delim, std::string stop_delim);

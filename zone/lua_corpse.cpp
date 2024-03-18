@@ -263,7 +263,7 @@ luabind::scope lua_register_corpse() {
 
 luabind::scope lua_register_corpse_loot_list() {
 	return luabind::class_<Lua_Corpse_Loot_List>("CorpseLootList")
-	.def_readwrite("entries", &Lua_Corpse_Loot_List::entries, luabind::return_stl_iterator);
+	.def_readwrite("entries", &Lua_Corpse_Loot_List::entries, luabind::policy::return_stl_iterator());
 }
 
 #endif

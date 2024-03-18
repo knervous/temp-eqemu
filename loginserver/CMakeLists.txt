@@ -32,6 +32,10 @@ ADD_EXECUTABLE(loginserver ${eqlogin_sources} ${eqlogin_headers})
 
 INSTALL(TARGETS loginserver RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
-TARGET_LINK_LIBRARIES(loginserver ${SERVER_LIBS})
+TARGET_LINK_LIBRARIES(loginserver ${SERVER_LIBS} "-framework CoreFoundation")
+if(APPLE)
+    # Link against the CoreFoundation framework on macOS
+    #target_link_libraries(loginserver "-framework CoreFoundation")
+endif(APPLE)
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)

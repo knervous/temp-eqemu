@@ -1,0 +1,27 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/Paul/source/eqemu-server/zone/dotnet_quests/questinterface/RoslynBridge/CompilerBridge.cs" relfile="CompilerBridge.cs" line="37" column="1" />
+      <Breakpoint file="/Users/Paul/source/eqemu-server/zone/dotnet_quests/questinterface/RoslynBridge/CompilerBridge.cs" relfile="CompilerBridge.cs" line="42" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workbench ActiveDocument="CompilerBridge.cs">
+    <Files>
+      <File FileName="CompilerBridge.cs" Line="38" Column="14" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="RoslynBridge" expanded="True">
+            <Node name="RoslynBridge" expanded="True">
+              <Node name="CompilerBridge.cs" selected="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MultiItemStartupConfigurations />
+</Properties>

@@ -17,6 +17,9 @@
 *.out
 *.app
 
+node_modules
+submodules/nodejs
+
 .bash_history
 
 # CMake
@@ -34,7 +37,7 @@ perl/
 .idea/*
 *cbp
 
-submodules/*
+#submodules/*
 cmake-build-debug/
 
 .nfs.*

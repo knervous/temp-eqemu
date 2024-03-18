@@ -52,6 +52,8 @@
 #include "task_manager.h"
 #include "quest_parser_collection.h"
 #include "embparser.h"
+#include "node_quests/node_quest_interface.h"
+#include "dotnet_quests/dotnet_quest_interface.h"
 #include "lua_parser.h"
 #include "questmgr.h"
 #include "npc_scale_manager.h"
@@ -65,14 +67,17 @@
 #undef new
 #define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
 #endif
-
 #ifdef _WINDOWS
-#else
+#include <Windows.h>
 
+#else
+#include <dlfcn.h>
 #include <pthread.h>
 #include "../common/unix.h"
 
 #endif
+
+#include <iostream>
 
 volatile bool RunLoops = true;
 #ifdef __FreeBSD__
@@ -119,6 +124,8 @@ void UpdateWindowTitle(char *iNewTitle);
 void CatchSignal(int sig_num);
 
 extern void MapOpcodes();
+
+typedef NodeParser* (*GetNodeParser)();
 
 int main(int argc, char **argv)
 {
@@ -439,18 +446,68 @@ int main(int argc, char **argv)
 	}
 
 	parse = new QuestParserCollection();
+
+
+// Node
+NodeParser* node_parser = nullptr;
+// #ifdef _WINDOWS
+// 	HMODULE hLib = LoadLibrary(TEXT("node_quests.dll"));
+//     if (!hLib) {
+//         std::cerr << "Unable to load DLL\n";
+//         return 1;
+//     }
+
+//     GetNodeParser createInstance = (GetNodeParser)GetProcAddress(hLib, "GetNodeParserInstance");
+//     if (!createInstance) {
+//         std::cerr << "Unable to find function\n";
+//         FreeLibrary(hLib);
+//         return 1;
+//     }
+// 	node_parser = createInstance();
+// #else 
+// 	#ifdef __APPLE__
+// 	const char* path = "./node_quests.dylib";
+// 	#else
+// 	const char* path = "./node_quests.so";
+// 	#endif
+// 	 void* hLib = dlopen(path, RTLD_LAZY); // Use .dylib for macOS
+//     if (!hLib) {
+//         std::cerr << "Unable to load library\n";
+//         return 1;
+//     }
+
+//     dlerror(); // Clear existing errors
+//     GetNodeParser createInstance = (GetNodeParser)dlsym(hLib, "GetNodeParserInstance");
+//     const char* dlsym_error = dlerror();
+//     if (dlsym_error) {
+//         std::cerr << "Unable to find function: " << dlsym_error << '\n';
+//         dlclose(hLib);
+//         return 1;
+//     }
+
+//     node_parser = createInstance();
+// #endif
+
+
+
 #ifdef LUA_EQEMU
-	parse->RegisterQuestInterface(LuaParser::Instance(), "lua");
+	//parse->RegisterQuestInterface(LuaParser::Instance(), "lua");
 #endif
 
 #ifdef EMBPERL
 	auto perl_parser = new PerlembParser();
-	parse->RegisterQuestInterface(perl_parser, "pl");
+	// parse->RegisterQuestInterface(perl_parser, "pl");
 
-	/* Load Perl Event Export Settings */
-	parse->LoadPerlEventExportSettings(parse->perl_event_export_settings);
+	// /* Load Perl Event Export Settings */
+	// parse->LoadPerlEventExportSettings(parse->perl_event_export_settings);
 
 #endif
+
+if (node_parser) {
+	parse->RegisterQuestInterface(node_parser, "js");
+}
+	parse->RegisterQuestInterface(new DotnetParser(), "csx");
+
 
 	//now we have our parser, load the quests
 	LogInfo("Loading quests");
@@ -488,6 +545,10 @@ int main(int argc, char **argv)
 #elif defined(__FreeBSD__)
 	LogDebug("Main thread running with thread id [{}]", pthread_getthreadid_np());
 #endif
+
+
+
+
 
 	bool worldwasconnected       = worldserver.Connected();
 	bool eqsf_open               = false;

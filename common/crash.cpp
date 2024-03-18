@@ -63,9 +63,9 @@ void SendCrashReport(const std::string &crash_report)
 		p["os_release"]        = os.release;
 		p["os_version"]        = os.version;
 		p["os_sysname"]        = os.sysname;
-		p["process_id"]        = process_id;
+		p["process_id"]        = Json::Value(static_cast<long long>(process_id));
 		p["rss_memory"]        = rss;
-		p["cpus"]              = cpus.size();
+		p["cpus"]              = Json::Value(static_cast<long long>(cpus.size()));
 		p["origination_info"]  = "";
 
 		if (!LogSys.origination_info.zone_short_name.empty()) {

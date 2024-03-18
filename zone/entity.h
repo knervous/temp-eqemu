@@ -133,16 +133,16 @@ private:
 	time_t spawn_timestamp;
 };
 
+struct Area {
+	int id;
+	int type;
+	float min_x, max_x;
+	float min_y, max_y;
+	float min_z, max_z;
+};
 class EntityList
 {
 public:
-	struct Area {
-		int id;
-		int type;
-		float min_x, max_x;
-		float min_y, max_y;
-		float min_z, max_z;
-	};
 
 	EntityList();
 	~EntityList();
@@ -529,7 +529,7 @@ public:
 
 	void GetMobList(std::list<Mob*> &m_list);
 	void GetNPCList(std::list<NPC*> &n_list);
-	void GetMercList(std::list<Merc*> &n_list);
+	//void GetMercList(std::list<Merc*> &n_list);
 	void GetClientList(std::list<Client*> &c_list);
 	void GetCorpseList(std::list<Corpse*> &c_list);
 	void GetObjectList(std::list<Object*> &o_list);
@@ -574,22 +574,6 @@ public:
 
 	int MovePlayerCorpsesToGraveyard(bool force_move_from_instance = false);
 
-protected:
-	friend class Zone;
-	void	Depop(bool StartSpawnTimer = false);
-
-private:
-	void	AddToSpawnQueue(uint16 entityid, NewSpawn_Struct** app);
-	void	CheckSpawnQueue();
-
-	//used for limiting spawns
-	class SpawnLimitRecord { public: uint32 spawngroup_id; uint32 npc_type; };
-	std::map<uint16, SpawnLimitRecord> npc_limit_list;		//entity id -> npc type
-
-	uint32	tsFirstSpawnOnQueue; // timestamp that the top spawn on the spawnqueue was added, should be 0xFFFFFFFF if queue is empty
-	uint32	NumSpawnsOnQueue;
-	LinkedList<NewSpawn_Struct*> SpawnQueue;
-
 	std::unordered_map<uint16, Client *> client_list;
 	std::unordered_map<uint16, Mob *> mob_list;
 	std::unordered_map<uint16, NPC *> npc_list;
@@ -604,6 +588,22 @@ private:
 	std::list<Group *> group_list;
 	std::list<Raid *> raid_list;
 	std::list<Area> area_list;
+
+protected:
+	friend class Zone;
+	void	Depop(bool StartSpawnTimer = false);
+	void	AddToSpawnQueue(uint16 entityid, NewSpawn_Struct** app);
+	void	CheckSpawnQueue();
+
+	//used for limiting spawns
+	class SpawnLimitRecord { public: uint32 spawngroup_id; uint32 npc_type; };
+	std::map<uint16, SpawnLimitRecord> npc_limit_list;		//entity id -> npc type
+
+	uint32	tsFirstSpawnOnQueue; // timestamp that the top spawn on the spawnqueue was added, should be 0xFFFFFFFF if queue is empty
+	uint32	NumSpawnsOnQueue;
+	LinkedList<NewSpawn_Struct*> SpawnQueue;
+
+
 	std::queue<uint16> free_ids;
 
 	Timer object_timer;

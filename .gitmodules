@@ -16,3 +16,6 @@
 [submodule "submodules/recastnavigation"]
 	path = submodules/recastnavigation
 	url = https://github.com/EQEmu/recastnavigation.git
+[submodule "submodules/nodejs"]
+	path = submodules/nodejs
+	url = https://github.com/nodejs/node.git

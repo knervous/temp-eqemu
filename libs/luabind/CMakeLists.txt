@@ -1,38 +1,20 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
+cmake_minimum_required(VERSION 3.22)
 
-SET(lb_sources
-    src/class.cpp
-	src/class_info.cpp
-	src/class_registry.cpp
-	src/class_rep.cpp
-	src/create_class.cpp
-	src/error.cpp
-	src/exception_handler.cpp
-	src/function.cpp
-	src/inheritance.cpp
-	src/link_compatibility.cpp
-	src/object_rep.cpp
-	src/open.cpp
-	src/pcall.cpp
-	src/scope.cpp
-	src/stack_content_by_name.cpp
-	src/weak_ref.cpp
-	src/wrapper_base.cpp
-)
+project(luabind)
 
-SET(lb_headers
+set(CMAKE_CXX_STANDARD 17)
 
-)
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    option(LUABIND_BUILD_TESTING "Build luabind with tests" OFF)
+    option(LUABIND_BUILD_SHARED "Build luabind as a shared library" ON)
+endif()
 
-ADD_LIBRARY(luabind ${lb_sources} ${lb_headers})
+add_subdirectory(luabind)
+add_subdirectory(src)
 
-
-IF(UNIX)
-    set_source_files_properties(${lb_sources} PROPERTY COMPILE_FLAGS -Wno-deprecated-declarations)
-ENDIF(UNIX)
-
-IF(MSVC)
-	set_source_files_properties(${lb_sources} PROPERTY COMPILE_FLAGS " /W0 " )
-ENDIF(MSVC)
-
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    if(LUABIND_BUILD_TESTING)
+        add_subdirectory(test)
+    endif()
+    add_subdirectory(doc)
+endif()

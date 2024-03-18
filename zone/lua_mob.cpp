@@ -3798,7 +3798,7 @@ luabind::scope lua_register_mob() {
 	.def("TempName", (void(Lua_Mob::*)(const char*))&Lua_Mob::TempName)
 	.def("TempName", (void(Lua_Mob::*)(void))&Lua_Mob::TempName)
 	.def("ThrowingAttack", &Lua_Mob::ThrowingAttack)
-	.def("TryFinishingBlow", &Lua_Mob::TryFinishingBlow)
+	.def("TryFinishingBlow", (void(Lua_Mob::*)(int64))&Lua_Mob::TryFinishingBlow)
 	.def("TryMoveAlong", (void(Lua_Mob::*)(float,float))&Lua_Mob::TryMoveAlong)
 	.def("TryMoveAlong", (void(Lua_Mob::*)(float,float,bool))&Lua_Mob::TryMoveAlong)
 	.def("UnStun", (void(Lua_Mob::*)(void))&Lua_Mob::UnStun)

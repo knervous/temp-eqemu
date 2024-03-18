@@ -20,57 +20,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 // OR OTHER DEALINGS IN THE SOFTWARE.
 
-
 #ifndef LUABIND_CONFIG_HPP_INCLUDED
 #define LUABIND_CONFIG_HPP_INCLUDED
-
-#include <boost/config.hpp>
-
-#ifdef BOOST_MSVC
-	#define LUABIND_ANONYMOUS_FIX static
-#else
-	#define LUABIND_ANONYMOUS_FIX
-#endif
-
-#if defined (BOOST_MSVC) && (BOOST_MSVC <= 1200)
-
-#define for if (false) {} else for
-
-#include <cstring>
-
-namespace std
-{
-	using ::strlen;
-	using ::strcmp;
-	using ::type_info;
-}
-
-#endif
-
-
-#if defined (BOOST_MSVC) && (BOOST_MSVC <= 1300)
-	#define LUABIND_MSVC_TYPENAME
-#else
-	#define LUABIND_MSVC_TYPENAME typename
-#endif
 
 // the maximum number of arguments of functions that's
 // registered. Must at least be 2
 #ifndef LUABIND_MAX_ARITY
-	#define LUABIND_MAX_ARITY 10
+#define LUABIND_MAX_ARITY 100
 #elif LUABIND_MAX_ARITY <= 1
-	#undef LUABIND_MAX_ARITY
-	#define LUABIND_MAX_ARITY 2
+#undef LUABIND_MAX_ARITY
+#define LUABIND_MAX_ARITY 2
 #endif
 
 // the maximum number of classes one class
 // can derive from
 // max bases must at least be 1
 #ifndef LUABIND_MAX_BASES
-	#define LUABIND_MAX_BASES 4
+#define LUABIND_MAX_BASES 100
 #elif LUABIND_MAX_BASES <= 0
-	#undef LUABIND_MAX_BASES
-	#define LUABIND_MAX_BASES 1
+#undef LUABIND_MAX_BASES
+#define LUABIND_MAX_BASES 1
 #endif
 
 // LUABIND_NO_ERROR_CHECKING
@@ -100,15 +69,34 @@ namespace std
 // by luabind throws an exception (throwing exceptions through
 // C code has undefined behavior, lua is written in C).
 
+// LUABIND_XRAY_NO_BACKWARDS_COMPATIBILITY
+// In VS2017: Go to Property Manager -> Common.props -> C\C++ -> Preprocessor to turn it on\off
+// this define will turn OFF some code for backward compability with some original .lua-code
+// from XRay 1.6 Engine, like:
+//  - native converter from number to string\char*
+
+// XRAY_SCRIPTS_NO_BACKWARDS_COMPATIBILITY
+// In VS2017: Go to Property Manager -> Common.props -> C\C++ -> Preprocessor to turn it on\off
+// this define will turn OFF some code for backward compability with some original .lua-code
+// from XRay 1.6 Engine, like:
+//  - original script behaviour when you didn't pass some parametres
+//  - turn off "LUA error: cannot cast lua value to ..." 
+
 #ifdef LUABIND_DYNAMIC_LINK
-# ifdef BOOST_WINDOWS
+# if defined (_WIN32)
 #  ifdef LUABIND_BUILDING
 #   define LUABIND_API __declspec(dllexport)
 #  else
 #   define LUABIND_API __declspec(dllimport)
 #  endif
+# elif defined (__CYGWIN__)
+#  ifdef LUABIND_BUILDING
+#   define LUABIND_API __attribute__ ((dllexport))
+#  else
+#   define LUABIND_API __attribute__ ((dllimport))
+#  endif
 # else
-#  if defined(_GNUC_) && _GNUC_ >=4
+#  if defined(__GNUC__) && __GNUC__ >=4
 #   define LUABIND_API __attribute__ ((visibility("default")))
 #  endif
 # endif
@@ -118,11 +106,29 @@ namespace std
 # define LUABIND_API
 #endif
 
+#ifndef _WIN32
+#include <cstddef>
+#define __cdecl
+#endif // _WIN32
+#ifndef _FARQ
+#define _FARQ
+#endif // _FARQ
+
 namespace luabind {
 
-LUABIND_API void disable_super_deprecation();
+	LUABIND_API void disable_super_deprecation();
+	LUABIND_API void set_custom_type_marking(bool enable);
+
+	namespace detail {
+		const int max_argument_count = 100;
+		const int max_hierarchy_depth = 100;
+	}
+
+	const int no_match = -(detail::max_argument_count*detail::max_hierarchy_depth + 1);
 
 } // namespace luabind
+
+#include <luabind/types.hpp>
 
 #endif // LUABIND_CONFIG_HPP_INCLUDED
 

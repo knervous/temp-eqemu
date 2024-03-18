@@ -39,7 +39,9 @@ public:
 
 	~ListElement ();
 
-	ListElement<TYPE>&	operator= (const ListElement<TYPE>&);
+	ListElement<TYPE>&	operator= (const ListElement<TYPE>&) {
+		return *this;
+	};
 
 	ListElement<TYPE>*	GetLast ()
 	{
@@ -79,7 +81,9 @@ public:
 	LinkedList();
 	~LinkedList();
 	bool dont_delete;
-	LinkedList<TYPE>&			operator= (const LinkedList<TYPE>&);
+	LinkedList<TYPE>&			operator= (const LinkedList<TYPE>&) {
+		return *this;
+	};
 
 	void Append (const TYPE&);
 	void Insert (const TYPE&);

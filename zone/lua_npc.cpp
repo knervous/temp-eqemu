@@ -993,7 +993,7 @@ luabind::scope lua_register_npc() {
 
 luabind::scope lua_register_npc_loot_list() {
 	return luabind::class_<Lua_NPC_Loot_List>("NPCLootList")
-	.def_readwrite("entries", &Lua_NPC_Loot_List::entries, luabind::return_stl_iterator);
+	.def_readwrite("entries", &Lua_NPC_Loot_List::entries, luabind::policy::return_stl_iterator());
 }
 
 #endif
