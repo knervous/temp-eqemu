@@ -11,6 +11,7 @@
 #include "../quest_parser_collection.h"
 #include "../quest_interface.h"
 #include "../zone_config.h"
+#include "../zone.h"
 
 extern const ZoneConfig *Config;
 

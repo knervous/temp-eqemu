@@ -5,10 +5,42 @@
 %module questinterface
 
 %ignore Mob::GetSeeInvisibleLevelFromNPCStat;
+%ignore Mob::SpecialAbility::timer;
+%ignore Mob::GetSpecialAbilityTimer;
+%ignore Mob::GetAIThinkTimer;
+%ignore Mob::GetAttackTimer;
+%ignore Mob::GetAttackDWTimer;
+%ignore Mob::GetAIMovementTimer;
+%ignore Mob::mob_close_scan_timer;
+%ignore Mob::mob_check_moving_timer;
+%ignore Mob::AddAura;
+%ignore Mob::AddTrap;
+%ignore Mob::AuraInfo::aura;
+%ignore Mob::GetCombatRecord;
+%ignore NPC::GetRefaceTimer;
+%ignore NPC::m_SpawnPoint;
+%ignore Doors::GetPosition;
+%ignore Mob::GetTargetRingLocation;
+%ignore Mob::GetPosition;
+%ignore Mob::GetRelativePosition;
+%ignore Client::GetLastPositionBeforeBulkUpdate;
+%ignore ZoneSpellsBlocked::m_Location;
+%ignore ZoneSpellsBlocked::m_Difference;
+%ignore Trap::m_Position;
+
+%ignore Merc::GetRawACNoShield;
 %ignore Raid::RemoveGroupLeader;
+%ignore EQApplicationPacket::combine;
+
 %ignore Trap::SpellOnTarget;
+%ignore Trap::respawn_timer;
+%ignore Trap::chkarea_timer;
+%ignore Trap::reset_timer;
 %ignore Group::SendWorldGroup;
 %ignore Client::GetEXPModifiers;
+%ignore Client::GetMercTimer;
+%ignore Client::GetPickLockTimer;
+%ignore Client::m_list_task_timers_rate_limit;
 %ignore Client::SetEXPModifiers;
 %ignore Client::SendTaskComplete;
 %ignore Client::Flurry;
@@ -31,11 +63,17 @@
 %ignore Zone::dynamic_zone_cache;
 %ignore Zone::dz_template_cache;
 %ignore NPC::AIautocastspell_timer;
+%ignore Zone::GetInstanceTimer;
+%ignore Zone::spawn2_timer;
+%ignore Zone::hot_reload_timer;
+%ignore Zone::GetInitgridsTimer;
+%ignore Spawn2::GetTimer;
 %ignore ZoneDatabase::AddLootTableToNPC;
 %ignore ZoneDatabase::AddLootDropToNPC;
 %ignore ZoneDatabase::GetServerFilters;
 %ignore ZoneDatabase::SetServerFilters;
 %ignore QuestEventSubroutines;
+%ignore QuestManager::ClearTimers;
 
 %ignore ListElement::ListElement();
 
@@ -47,27 +85,41 @@
 %ignore ListElement::ListElement(const ListElement<Spawn2*>&);
 %ignore ListElement::ListElement(const ListElement<ZonePoint*>&);
 
-// %include typemaps.swg
+%inline %{
+    namespace custom_glm {
+        struct vec4 {
+            public:
+            float x, y, z, w;
+            vec4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+        };
+        struct vec3 {
+            public:
+            float x, y, z;
+            vec3(float x, float y, float z) : x(x), y(y), z(z) {}
+        };
+    }
+%}
 
 %{
+
 #include <string>
 #include <list>
 #include <any>
 #include <set>
 #include <vector>
 #include <memory>
-#undef EMBPERL
-#undef LUA_EQEMU
-#undef USE_PERL_SWITCH_LOCALE_CONTEXT
+
 #include "../../../common/ruletypes.h"
+#include "../../../common/eq_packet.h"
 #include "../../../common/expedition_lockout_timer.h"
-#include "../../../common/timer.h"
+#include "../../../common/eqemu_logsys_log_aliases.h"
 #include "../../../common/linked_list.h"
-//#include "../../../common/emu_constants.h"
+
 
 #include "../../common.h"
 #include "../../entity.h"
 #include "../../mob.h"
+#include "../../merc.h"
 #include "../../event_codes.h"
 #include "../../npc.h"
 #include "../../encounter.h"
@@ -83,24 +135,86 @@
 #include "../../spawn2.h"
 #include "../../spawngroup.h"
 #include "../../zonedb.h"
+#include "../../worldserver.h"
+#include "../../questmgr.h"
 
+
+#include "../../../common/item_instance.h"
+#include "../../../common/item_data.h"
+
+#include "../../../common/eqemu_logsys.h"
+
+using namespace EQ;
+using namespace Logs;
+using namespace glm;
+using namespace custom_glm;
 %}
-
 
 %include <std_list.i>
 %include <std_vector.i>
+%include <std_string.i>
 %include <std_unordered_map.i>
 %include <std_shared_ptr.i>
+%include <stdint.i>
 
+
+
+%typemap(cstype) glm::vec4*, glm::vec4& "vec4"
+%typemap(imtype) glm::vec4*, glm::vec4& "vec4"
+%typemap(csin) glm::vec4* "new vec4($csinput.x, $csinput.y, $csinput.z, $csinput.w)"
+%typemap(csin) glm::vec4& "$csinput"
+%typemap(in) glm::vec4* %{
+    $1 = new glm::vec4;
+    if (!SWIG_IsOK(SWIG_ConvertPtr($input, (void**)$1, $descriptor(glm::vec4 *), 0))) {
+        SWIG_exception_fail(SWIG_ArgError(res), "Expected a glm::vec4 object");
+    }
+%}
+%typemap(freearg) glm::vec4* %{
+    delete $1;
+%}
+%typemap(out) glm::vec4* {
+    $result = SWIG_NewPointerObj(new glm::vec4($1->x, $1->y, $1->z, $1->w), $descriptor(glm::vec4 *), SWIG_POINTER_OWN);
+}
+%typemap(out) glm::vec4& {
+    $result = SWIG_NewPointerObj(new vec4($1.x, $1.y, $1.z, $1.w), $descriptor(Vec4 *), SWIG_POINTER_OWN | SWIG_POINTER_DISOWN);
+}
+
+%typemap(cstype) glm::vec3*, glm::vec3& "vec3"
+%typemap(imtype) glm::vec3*, glm::vec3& "vec3"
+%typemap(csin) glm::vec3* "new vec3($csinput.x, $csinput.y, $csinput.z)"
+%typemap(csin) glm::vec3& "$csinput"
+
+%typemap(in) glm::vec3* %{
+    $1 = new glm::vec3;
+    if (!SWIG_IsOK(SWIG_ConvertPtr($input, (void**)$1, $descriptor(glm::vec3 *), 0))) {
+        SWIG_exception_fail(SWIG_ArgError(res), "Expected a glm::vec3 object");
+    }
+%}
+%typemap(freearg) glm::vec3* %{
+    delete $1;
+%}
+%typemap(out) glm::vec3* {
+    $result = SWIG_NewPointerObj(new glm::vec3($1->x, $1->y, $1->z), $descriptor(glm::vec3 *), SWIG_POINTER_OWN);
+}
+%typemap(out) glm::vec3& {
+    $result = SWIG_NewPointerObj(new vec3($1.x, $1.y, $1.z), $descriptor(vec3 *), SWIG_POINTER_OWN | SWIG_POINTER_DISOWN);
+}
 
 %include "../../../common/ruletypes.h"
+%include "../../../common/eq_packet.h"
 %include "../../../common/expedition_lockout_timer.h"
+%include "../../../common/eqemu_logsys_log_aliases.h"
+
+%ignore Timer;
+
 %include "../../../common/linked_list.h"
+
 //%include "../../../common/emu_constants.h"
 
 %include "../../common.h"
 %include "../../entity.h"
 %include "../../mob.h"
+%include "../../merc.h"
 %include "../../event_codes.h"
 %include "../../npc.h"
 %include "../../encounter.h"
@@ -116,10 +230,15 @@
 %include "../../spawn2.h"
 %include "../../spawngroup.h"
 %include "../../zonedb.h"
+%include "../../worldserver.h"
+%include "../../questmgr.h"
+
+%include "../../../common/item_instance.h"
+%include "../../../common/item_data.h"
+%include "../../../common/eqemu_logsys.h"
+
 
 // Typedefs
-%include <stdint.i>
-
 typedef uint8_t byte;
 typedef uint8_t uint8;
 typedef uint16_t uint16;
@@ -129,6 +248,7 @@ typedef int8_t int8;
 typedef int16_t int16;
 typedef int32_t int32;
 typedef int64_t int64;
+
 
 %template(LinkedListNewSpawn) LinkedList<NewSpawn_Struct*>;
 %template(LinkedListSpawn2) LinkedList<Spawn2*>;
@@ -150,11 +270,11 @@ typedef int64_t int64;
     }
 }
 
-%template(IntVector) std::vector<int>;
-%template(DoubleVector) std::vector<double>;
-
-%template(IntList) std::list<int>;
-%template(DoubleList) std::list<double>;
+%template(ExtraDataVector) std::vector<std::any>;
+%template(StringVector) std::vector<std::string>;
+%template(ItemVector) std::vector<EQ::ItemInstance*>;
+%template(MobVector) std::vector<Mob*>;
+%template(PacketVector) std::vector<EQApplicationPacket*>;
 %template(AltCurrencyDefinitionList) std::list<AltCurrencyDefinition_Struct>;
 %template(InternalVeteranRewardList) std::list<InternalVeteranReward>;
 

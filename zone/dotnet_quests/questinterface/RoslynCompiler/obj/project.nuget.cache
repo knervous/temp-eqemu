@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "dgSpecHash": "3hevWRd7ysr634XzWN77m35OxlfeOP9RQ6yUfb1MoNAXQXDTwlh4T/yBGtHW7/RsWG4zDIhHAYr0D6BAhxMxnw==",
+  "success": true,
+  "projectFilePath": "/Users/Paul/source/eqemu-server/zone/dotnet_quests/questinterface/RoslynCompiler/RoslynCompiler.csproj",
+  "expectedPackageFiles": [
+    "/Users/Paul/.nuget/packages/dllexport/1.7.4/dllexport.1.7.4.nupkg.sha512",
+    "/Users/Paul/.nuget/packages/microsoft.codeanalysis.analyzers/3.3.4/microsoft.codeanalysis.analyzers.3.3.4.nupkg.sha512",
+    "/Users/Paul/.nuget/packages/microsoft.codeanalysis.common/4.9.2/microsoft.codeanalysis.common.4.9.2.nupkg.sha512",
+    "/Users/Paul/.nuget/packages/microsoft.codeanalysis.csharp/4.9.2/microsoft.codeanalysis.csharp.4.9.2.nupkg.sha512",
+    "/Users/Paul/.nuget/packages/microsoft.codeanalysis.csharp.scripting/4.9.2/microsoft.codeanalysis.csharp.scripting.4.9.2.nupkg.sha512",
+    "/Users/Paul/.nuget/packages/microsoft.codeanalysis.scripting.common/4.9.2/microsoft.codeanalysis.scripting.common.4.9.2.nupkg.sha512",
+    "/Users/Paul/.nuget/packages/microsoft.csharp/4.7.0/microsoft.csharp.4.7.0.nupkg.sha512",
+    "/Users/Paul/.nuget/packages/microsoft.netcore.dotnetapphost/8.0.3/microsoft.netcore.dotnetapphost.8.0.3.nupkg.sha512",
+    "/Users/Paul/.nuget/packages/system.collections.immutable/8.0.0/system.collections.immutable.8.0.0.nupkg.sha512",
+    "/Users/Paul/.nuget/packages/system.reflection.metadata/8.0.0/system.reflection.metadata.8.0.0.nupkg.sha512",
+    "/Users/Paul/.nuget/packages/system.runtime.compilerservices.unsafe/6.0.0/system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

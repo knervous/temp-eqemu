@@ -307,7 +307,7 @@ SET(BUILD_DIR "${CMAKE_SOURCE_DIR}/build/bin")
 
 
 ## DOTNET
-## Swig exec: swig -csharp -c++ -outfile RoslynBridge/dotnet_quests.cs questinterface.i
+## Swig exec: swig -csharp -c++ -I../../../submodules/fmt/include -outfile DotNetTypes/dotnet_quests.cs questinterface.i
 set(dotnet_sources
     dotnet_quests/dotnet_quest_interface.h
     dotnet_quests/dotnet_quest_interface.cpp
@@ -349,6 +349,14 @@ add_custom_target(dotnet_types_build
   COMMENT "Building DotNetTypes .NET project..."
 )
 
+add_custom_target(dotnet_compiler
+  COMMAND dotnet restore
+  COMMAND dotnet publish "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynCompiler" -c Debug --output "${BUILD_DIR}"
+  WORKING_DIRECTORY  "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynCompiler"
+  COMMENT "Building RoslynCompiler .NET project..."
+)
+
+
 add_custom_target(dotnet_build
   COMMAND dotnet restore
   COMMAND dotnet publish "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynBridge" -c Debug --output "${BUILD_DIR}"
@@ -365,14 +373,6 @@ if (MSVC)
     string(REPLACE "/LTCG" "" CMAKE_STATIC_LINKER_FLAGS_RELEASE ${CMAKE_STATIC_LINKER_FLAGS_RELEASE})
     string(REPLACE "/LTCG" "" CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO ${CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO})
 endif()
-
-
-# add_custom_command(OUTPUT "${BUILD_DIR}/RoslynBridge.dll"
-#     COMMAND dotnet build "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/quest_interface/RoslynBridge" --output "${BUILD_DIR}"
-#     DEPENDS "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/quest_interface/RoslynBridge/RoslynBridge.csproj"
-#     WORKING_DIRECTORY  "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/quest_interface/RoslynBridge"
-#     COMMENT "Building .NET Roslyn Bridge"
-# )
 
 # NODEJS
 

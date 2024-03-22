@@ -22,6 +22,9 @@
 #include <coreclr_delegates.h>
 #include <hostfxr.h>
 
+#include "../../common/item_instance.h"
+#include "../questmgr.h"
+
 #ifdef WINDOWS
 #include <Windows.h>
 
@@ -53,6 +56,7 @@
 #endif
 
 using string_t = std::basic_string<char_t>;
+using namespace EQ;
 
 namespace
 {
@@ -75,11 +79,15 @@ struct lib_args
 };
 
 load_assembly_and_get_function_pointer_fn load_assembly_and_get_function_pointer = nullptr;
+get_function_pointer_fn runtime_function = nullptr;
 
 struct init_payload
 {
     Zone *zone;
     EntityList *entity_list;
+    WorldServer *worldserver;
+    QuestManager *questmanager;
+    EQEmuLogSys *logsys;
 };
 
 struct event_payload
@@ -88,6 +96,12 @@ struct event_payload
     NPC *npc;
     Mob *mob;
     const char_t *data;
+    uint32 extra_data;
+    std::vector<ItemInstance *> *item_array;
+    std::vector<Mob *> *mob_array;
+    std::vector<EQApplicationPacket *> *packet_array;
+    std::vector<std::string> *string_array;
+    bool player_event;
 };
 
 typedef void(CORECLR_DELEGATE_CALLTYPE *init_fn)(init_payload args);
@@ -103,7 +117,6 @@ const string_t dotnetlib_path = STR("RoslynBridge.dll");
 const char_t *dotnet_type = STR("DotNetQuest, RoslynBridge");
 
 bool initialized = false;
-
 
 namespace
 {
@@ -138,22 +151,97 @@ namespace
 
 }
 
+std::tuple<std::vector<ItemInstance *>, std::vector<Mob *>, std::vector<EQApplicationPacket *>, std::vector<std::string>> to_vectors(std::vector<std::any> *anyVec)
+{
+    std::vector<ItemInstance *> itemVec;
+    std::vector<Mob *> mobVec;
+    std::vector<EQApplicationPacket *> packetVec;
+    std::vector<std::string> stringVec;
+    if (anyVec == nullptr) {
+        return std::tie(itemVec, mobVec, packetVec, stringVec);
+    }
+    for (auto element : *anyVec)
+    {
+        try
+        {
+            stringVec.push_back(std::any_cast<std::string>(element));
+            continue;
+        }
+        catch (const std::bad_any_cast &e)
+        {
+        }
+
+        try
+        {
+            stringVec.push_back(std::any_cast<std::basic_string<char>>(element));
+            continue;
+        }
+        catch (const std::bad_any_cast &e)
+        {
+        }
+
+        if (element.type() == typeid(EQApplicationPacket *))
+        {
+            try
+            {
+                packetVec.push_back(std::any_cast<EQApplicationPacket *>(element));
+                continue;
+            }
+            catch (const std::bad_any_cast &e)
+            {
+            }
+        }
+
+        if (element.type() == typeid(ItemInstance *))
+        {
+            try
+            {
+                itemVec.push_back(std::any_cast<ItemInstance *>(element));
+                continue;
+            }
+            catch (const std::bad_any_cast &e)
+            {
+            }
+        }
+
+        if (element.type() == typeid(Mob *))
+        {
+            try
+            {
+                mobVec.push_back(std::any_cast<Mob *>(element));
+                continue;
+            }
+            catch (const std::bad_any_cast &e)
+            {
+            }
+        }
+        std::cerr << "Error: One of the elements could not be cast to string: " << element.type().name() << '\n';
+    }
+    return std::tie(itemVec, mobVec, packetVec, stringVec);
+}
+
 #if defined(WINDOWS)
-int __cdecl npc_event(QuestEventID event, NPC *npc, Mob *init, std::string data)
+int __cdecl event(QuestEventID event, NPC *npc, Mob *init, std::string data, uint32 extra_data, std::vector<std::any> *extra_pointers, bool player_event)
 #else
-int npc_event(QuestEventID event, NPC *npc, Mob *init, std::string data)
+int event(QuestEventID event, NPC *npc, Mob *init, std::string data, uint32 extra_data, std::vector<std::any> *extra_pointers, bool player_event)
 #endif
 {
     if (!initialized)
     {
         return;
     }
-
+    auto [item_array, mob_array, packet_array, string_array] = to_vectors(extra_pointers);
     event_payload p{
         (int)event,
         npc,
         init,
         data.c_str(),
+        extra_data,
+        &item_array,
+        &mob_array,
+        &packet_array,
+        &string_array,
+        player_event
     };
 
     if (npc_event_callback != nullptr)
@@ -162,11 +250,11 @@ int npc_event(QuestEventID event, NPC *npc, Mob *init, std::string data)
         return;
     }
 
-    auto rc = load_assembly_and_get_function_pointer(
-        dotnetlib_path.c_str(),
+    auto rc = runtime_function(
         dotnet_type,
         STR("NpcEvent") /*method_name*/,
         STR("DotNetQuest+NpcEventDelegate, RoslynBridge") /*delegate_type_name*/,
+        nullptr,
         nullptr,
         (void **)&npc_event_callback);
     if (rc != 0)
@@ -192,11 +280,11 @@ int reload_quests()
         return;
     }
 
-    auto rc = load_assembly_and_get_function_pointer(
-        dotnetlib_path.c_str(),
+    auto rc = runtime_function(
         dotnet_type,
         STR("Reload") /*method_name*/,
         STR("DotNetQuest+ReloadDelegate, RoslynBridge") /*delegate_type_name*/,
+        nullptr,
         nullptr,
         (void **)&reload_callback);
     if (rc != 0)
@@ -207,9 +295,9 @@ int reload_quests()
 }
 
 #if defined(WINDOWS)
-int __cdecl initialize(Zone *zone, EntityList *entity_list)
+int __cdecl initialize(Zone *zone, EntityList *entity_list, WorldServer *worldserver, EQEmuLogSys *logsys)
 #else
-int initialize(Zone *zone, EntityList *entity_list)
+int initialize(Zone *zone, EntityList *entity_list, WorldServer *worldserver, EQEmuLogSys *logsys)
 #endif
 {
     if (initialized)
@@ -222,7 +310,7 @@ int initialize(Zone *zone, EntityList *entity_list)
     //
     // STEP 1: Load HostFxr and get exported hosting functions
     //
-    if (!load_hostfxr(nullptr))
+    if (!load_hostfxr(dotnetlib_path.c_str()))
     {
         assert(false && "Failure: load_hostfxr()");
         return EXIT_FAILURE;
@@ -232,19 +320,21 @@ int initialize(Zone *zone, EntityList *entity_list)
     // STEP 2: Initialize and start the .NET Core runtime
     //
     const string_t config_path = root_path + STR("RoslynBridge.runtimeconfig.json");
-    load_assembly_and_get_function_pointer = get_dotnet_load_assembly(config_path.c_str());
+    load_assembly_and_get_function_pointer = get_dotnet_load_assembly(dotnetlib_path.c_str());
     assert(load_assembly_and_get_function_pointer != nullptr && "Failure: get_dotnet_load_assembly()");
 
     init_payload p{
         zone,
         entity_list,
-    };
+        worldserver,
+        &quest_manager,
+        logsys};
 
-    auto rc = load_assembly_and_get_function_pointer(
-        dotnetlib_path.c_str(),
+    auto rc = runtime_function(
         dotnet_type,
         STR("Initialize") /*method_name*/,
         STR("DotNetQuest+InitializeDelegate, RoslynBridge") /*delegate_type_name*/,
+        nullptr,
         nullptr,
         (void **)&init);
     if (rc != 0)
@@ -256,7 +346,6 @@ int initialize(Zone *zone, EntityList *entity_list)
 
     return EXIT_SUCCESS;
 }
-
 
 /********************************************************************************************
  * Function used to load and activate .NET Core
@@ -327,7 +416,8 @@ namespace
         // Load .NET Core
         void *load_assembly_and_get_function_pointer = nullptr;
         hostfxr_handle cxt = nullptr;
-        int rc = init_for_config_fptr(config_path, nullptr, &cxt);
+        std::vector<const char_t *> args{config_path, STR("app_arg_1"), STR("app_arg_2")};
+        int rc = init_for_cmd_line_fptr(args.size(), args.data(), nullptr, &cxt);
         if (rc != 0 || cxt == nullptr)
         {
             std::cerr << "Init failed: " << std::hex << std::showbase << rc << std::endl;
@@ -342,9 +432,15 @@ namespace
             &load_assembly_and_get_function_pointer);
         if (rc != 0 || load_assembly_and_get_function_pointer == nullptr)
             std::cerr << "Get delegate failed: " << std::hex << std::showbase << rc << std::endl;
-
+        void *fn_ptr = nullptr;
+        get_delegate_fptr(
+            cxt,
+            hdt_get_function_pointer,
+            &fn_ptr);
+        runtime_function = (get_function_pointer_fn)(fn_ptr);
         close_fptr(cxt);
         return (load_assembly_and_get_function_pointer_fn)load_assembly_and_get_function_pointer;
     }
+
     // </SnippetInitialize>
 }

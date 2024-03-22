@@ -349,24 +349,39 @@ template <typename T> T SwigValueInit() {
 #endif
 
 
+    namespace custom_glm {
+        struct vec4 {
+            public:
+            float x, y, z, w;
+            vec4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+        };
+        struct vec3 {
+            public:
+            float x, y, z;
+            vec3(float x, float y, float z) : x(x), y(y), z(z) {}
+        };
+    }
+
+
+
 #include <string>
 #include <list>
 #include <any>
 #include <set>
 #include <vector>
 #include <memory>
-#undef EMBPERL
-#undef LUA_EQEMU
-#undef USE_PERL_SWITCH_LOCALE_CONTEXT
+
 #include "../../../common/ruletypes.h"
+#include "../../../common/eq_packet.h"
 #include "../../../common/expedition_lockout_timer.h"
-#include "../../../common/timer.h"
+#include "../../../common/eqemu_logsys_log_aliases.h"
 #include "../../../common/linked_list.h"
-//#include "../../../common/emu_constants.h"
+
 
 #include "../../common.h"
 #include "../../entity.h"
 #include "../../mob.h"
+#include "../../merc.h"
 #include "../../event_codes.h"
 #include "../../npc.h"
 #include "../../encounter.h"
@@ -382,7 +397,19 @@ template <typename T> T SwigValueInit() {
 #include "../../spawn2.h"
 #include "../../spawngroup.h"
 #include "../../zonedb.h"
+#include "../../worldserver.h"
+#include "../../questmgr.h"
 
+
+#include "../../../common/item_instance.h"
+#include "../../../common/item_data.h"
+
+#include "../../../common/eqemu_logsys.h"
+
+using namespace EQ;
+using namespace Logs;
+using namespace glm;
+using namespace custom_glm;
 
 
 #include <typeinfo>
@@ -399,9 +426,15 @@ template <typename T> T SwigValueInit() {
 #include <stdexcept>
 
 
+#include <string>
+
+
 #include <unordered_map>
 #include <algorithm>
 #include <stdexcept>
+
+
+#include <stdint.h>		// Use the C99 official header
 
 
 #include <string.h>
@@ -409,74 +442,71 @@ template <typename T> T SwigValueInit() {
 
 #include <memory>
 
-
-#include <stdint.h>		// Use the C99 official header
-
 SWIGINTERN NewSpawn_Struct *ListElement_Sl_NewSpawn_Struct_Sm__Sg__GetObject(ListElement< NewSpawn_Struct * > *self){
         return self->GetData();
     }
 SWIGINTERN Spawn2 *ListElement_Sl_Spawn2_Sm__Sg__GetObject(ListElement< Spawn2 * > *self){
         return self->GetData();
     }
-SWIGINTERN std::vector< int > *new_std_vector_Sl_int_Sg___SWIG_2(int capacity){
-        std::vector< int >* pv = 0;
+SWIGINTERN std::vector< std::any > *new_std_vector_Sl_std_any_Sg___SWIG_2(int capacity){
+        std::vector< std::any >* pv = 0;
         if (capacity >= 0) {
-          pv = new std::vector< int >();
+          pv = new std::vector< std::any >();
           pv->reserve(capacity);
        } else {
           throw std::out_of_range("capacity");
        }
        return pv;
       }
-SWIGINTERN int std_vector_Sl_int_Sg__getitemcopy(std::vector< int > *self,int index){
+SWIGINTERN std::any std_vector_Sl_std_any_Sg__getitemcopy(std::vector< std::any > *self,int index){
         if (index>=0 && index<(int)self->size())
           return (*self)[index];
         else
           throw std::out_of_range("index");
       }
-SWIGINTERN std::vector< int >::value_type const &std_vector_Sl_int_Sg__getitem(std::vector< int > *self,int index){
+SWIGINTERN std::vector< std::any >::value_type const &std_vector_Sl_std_any_Sg__getitem(std::vector< std::any > *self,int index){
         if (index>=0 && index<(int)self->size())
           return (*self)[index];
         else
           throw std::out_of_range("index");
       }
-SWIGINTERN void std_vector_Sl_int_Sg__setitem(std::vector< int > *self,int index,int const &val){
+SWIGINTERN void std_vector_Sl_std_any_Sg__setitem(std::vector< std::any > *self,int index,std::any const &val){
         if (index>=0 && index<(int)self->size())
           (*self)[index] = val;
         else
           throw std::out_of_range("index");
       }
-SWIGINTERN void std_vector_Sl_int_Sg__AddRange(std::vector< int > *self,std::vector< int > const &values){
+SWIGINTERN void std_vector_Sl_std_any_Sg__AddRange(std::vector< std::any > *self,std::vector< std::any > const &values){
         self->insert(self->end(), values.begin(), values.end());
       }
-SWIGINTERN std::vector< int > *std_vector_Sl_int_Sg__GetRange(std::vector< int > *self,int index,int count){
+SWIGINTERN std::vector< std::any > *std_vector_Sl_std_any_Sg__GetRange(std::vector< std::any > *self,int index,int count){
         if (index < 0)
           throw std::out_of_range("index");
         if (count < 0)
           throw std::out_of_range("count");
         if (index >= (int)self->size()+1 || index+count > (int)self->size())
           throw std::invalid_argument("invalid range");
-        return new std::vector< int >(self->begin()+index, self->begin()+index+count);
+        return new std::vector< std::any >(self->begin()+index, self->begin()+index+count);
       }
-SWIGINTERN void std_vector_Sl_int_Sg__Insert(std::vector< int > *self,int index,int const &x){
+SWIGINTERN void std_vector_Sl_std_any_Sg__Insert(std::vector< std::any > *self,int index,std::any const &x){
         if (index>=0 && index<(int)self->size()+1)
           self->insert(self->begin()+index, x);
         else
           throw std::out_of_range("index");
       }
-SWIGINTERN void std_vector_Sl_int_Sg__InsertRange(std::vector< int > *self,int index,std::vector< int > const &values){
+SWIGINTERN void std_vector_Sl_std_any_Sg__InsertRange(std::vector< std::any > *self,int index,std::vector< std::any > const &values){
         if (index>=0 && index<(int)self->size()+1)
           self->insert(self->begin()+index, values.begin(), values.end());
         else
           throw std::out_of_range("index");
       }
-SWIGINTERN void std_vector_Sl_int_Sg__RemoveAt(std::vector< int > *self,int index){
+SWIGINTERN void std_vector_Sl_std_any_Sg__RemoveAt(std::vector< std::any > *self,int index){
         if (index>=0 && index<(int)self->size())
           self->erase(self->begin() + index);
         else
           throw std::out_of_range("index");
       }
-SWIGINTERN void std_vector_Sl_int_Sg__RemoveRange(std::vector< int > *self,int index,int count){
+SWIGINTERN void std_vector_Sl_std_any_Sg__RemoveRange(std::vector< std::any > *self,int index,int count){
         if (index < 0)
           throw std::out_of_range("index");
         if (count < 0)
@@ -485,15 +515,15 @@ SWIGINTERN void std_vector_Sl_int_Sg__RemoveRange(std::vector< int > *self,int i
           throw std::invalid_argument("invalid range");
         self->erase(self->begin()+index, self->begin()+index+count);
       }
-SWIGINTERN std::vector< int > *std_vector_Sl_int_Sg__Repeat(int const &value,int count){
+SWIGINTERN std::vector< std::any > *std_vector_Sl_std_any_Sg__Repeat(std::any const &value,int count){
         if (count < 0)
           throw std::out_of_range("count");
-        return new std::vector< int >(count, value);
+        return new std::vector< std::any >(count, value);
       }
-SWIGINTERN void std_vector_Sl_int_Sg__Reverse__SWIG_0(std::vector< int > *self){
+SWIGINTERN void std_vector_Sl_std_any_Sg__Reverse__SWIG_0(std::vector< std::any > *self){
         std::reverse(self->begin(), self->end());
       }
-SWIGINTERN void std_vector_Sl_int_Sg__Reverse__SWIG_1(std::vector< int > *self,int index,int count){
+SWIGINTERN void std_vector_Sl_std_any_Sg__Reverse__SWIG_1(std::vector< std::any > *self,int index,int count){
         if (index < 0)
           throw std::out_of_range("index");
         if (count < 0)
@@ -502,97 +532,72 @@ SWIGINTERN void std_vector_Sl_int_Sg__Reverse__SWIG_1(std::vector< int > *self,i
           throw std::invalid_argument("invalid range");
         std::reverse(self->begin()+index, self->begin()+index+count);
       }
-SWIGINTERN void std_vector_Sl_int_Sg__SetRange(std::vector< int > *self,int index,std::vector< int > const &values){
+SWIGINTERN void std_vector_Sl_std_any_Sg__SetRange(std::vector< std::any > *self,int index,std::vector< std::any > const &values){
         if (index < 0)
           throw std::out_of_range("index");
         if (index+values.size() > self->size())
           throw std::out_of_range("index");
         std::copy(values.begin(), values.end(), self->begin()+index);
       }
-SWIGINTERN bool std_vector_Sl_int_Sg__Contains(std::vector< int > *self,int const &value){
-        return std::find(self->begin(), self->end(), value) != self->end();
-      }
-SWIGINTERN int std_vector_Sl_int_Sg__IndexOf(std::vector< int > *self,int const &value){
-        int index = -1;
-        std::vector< int >::iterator it = std::find(self->begin(), self->end(), value);
-        if (it != self->end())
-          index = (int)(it - self->begin());
-        return index;
-      }
-SWIGINTERN int std_vector_Sl_int_Sg__LastIndexOf(std::vector< int > *self,int const &value){
-        int index = -1;
-        std::vector< int >::reverse_iterator rit = std::find(self->rbegin(), self->rend(), value);
-        if (rit != self->rend())
-          index = (int)(self->rend() - 1 - rit);
-        return index;
-      }
-SWIGINTERN bool std_vector_Sl_int_Sg__Remove(std::vector< int > *self,int const &value){
-        std::vector< int >::iterator it = std::find(self->begin(), self->end(), value);
-        if (it != self->end()) {
-          self->erase(it);
-          return true;
-        }
-        return false;
-      }
-SWIGINTERN std::vector< double > *new_std_vector_Sl_double_Sg___SWIG_2(int capacity){
-        std::vector< double >* pv = 0;
+SWIGINTERN std::vector< std::string > *new_std_vector_Sl_std_string_Sg___SWIG_2(int capacity){
+        std::vector< std::string >* pv = 0;
         if (capacity >= 0) {
-          pv = new std::vector< double >();
+          pv = new std::vector< std::string >();
           pv->reserve(capacity);
        } else {
           throw std::out_of_range("capacity");
        }
        return pv;
       }
-SWIGINTERN double std_vector_Sl_double_Sg__getitemcopy(std::vector< double > *self,int index){
+SWIGINTERN std::string std_vector_Sl_std_string_Sg__getitemcopy(std::vector< std::string > *self,int index){
         if (index>=0 && index<(int)self->size())
           return (*self)[index];
         else
           throw std::out_of_range("index");
       }
-SWIGINTERN std::vector< double >::value_type const &std_vector_Sl_double_Sg__getitem(std::vector< double > *self,int index){
+SWIGINTERN std::vector< std::string >::value_type const &std_vector_Sl_std_string_Sg__getitem(std::vector< std::string > *self,int index){
         if (index>=0 && index<(int)self->size())
           return (*self)[index];
         else
           throw std::out_of_range("index");
       }
-SWIGINTERN void std_vector_Sl_double_Sg__setitem(std::vector< double > *self,int index,double const &val){
+SWIGINTERN void std_vector_Sl_std_string_Sg__setitem(std::vector< std::string > *self,int index,std::string const &val){
         if (index>=0 && index<(int)self->size())
           (*self)[index] = val;
         else
           throw std::out_of_range("index");
       }
-SWIGINTERN void std_vector_Sl_double_Sg__AddRange(std::vector< double > *self,std::vector< double > const &values){
+SWIGINTERN void std_vector_Sl_std_string_Sg__AddRange(std::vector< std::string > *self,std::vector< std::string > const &values){
         self->insert(self->end(), values.begin(), values.end());
       }
-SWIGINTERN std::vector< double > *std_vector_Sl_double_Sg__GetRange(std::vector< double > *self,int index,int count){
+SWIGINTERN std::vector< std::string > *std_vector_Sl_std_string_Sg__GetRange(std::vector< std::string > *self,int index,int count){
         if (index < 0)
           throw std::out_of_range("index");
         if (count < 0)
           throw std::out_of_range("count");
         if (index >= (int)self->size()+1 || index+count > (int)self->size())
           throw std::invalid_argument("invalid range");
-        return new std::vector< double >(self->begin()+index, self->begin()+index+count);
+        return new std::vector< std::string >(self->begin()+index, self->begin()+index+count);
       }
-SWIGINTERN void std_vector_Sl_double_Sg__Insert(std::vector< double > *self,int index,double const &x){
+SWIGINTERN void std_vector_Sl_std_string_Sg__Insert(std::vector< std::string > *self,int index,std::string const &x){
         if (index>=0 && index<(int)self->size()+1)
           self->insert(self->begin()+index, x);
         else
           throw std::out_of_range("index");
       }
-SWIGINTERN void std_vector_Sl_double_Sg__InsertRange(std::vector< double > *self,int index,std::vector< double > const &values){
+SWIGINTERN void std_vector_Sl_std_string_Sg__InsertRange(std::vector< std::string > *self,int index,std::vector< std::string > const &values){
         if (index>=0 && index<(int)self->size()+1)
           self->insert(self->begin()+index, values.begin(), values.end());
         else
           throw std::out_of_range("index");
       }
-SWIGINTERN void std_vector_Sl_double_Sg__RemoveAt(std::vector< double > *self,int index){
+SWIGINTERN void std_vector_Sl_std_string_Sg__RemoveAt(std::vector< std::string > *self,int index){
         if (index>=0 && index<(int)self->size())
           self->erase(self->begin() + index);
         else
           throw std::out_of_range("index");
       }
-SWIGINTERN void std_vector_Sl_double_Sg__RemoveRange(std::vector< double > *self,int index,int count){
+SWIGINTERN void std_vector_Sl_std_string_Sg__RemoveRange(std::vector< std::string > *self,int index,int count){
         if (index < 0)
           throw std::out_of_range("index");
         if (count < 0)
@@ -601,15 +606,15 @@ SWIGINTERN void std_vector_Sl_double_Sg__RemoveRange(std::vector< double > *self
           throw std::invalid_argument("invalid range");
         self->erase(self->begin()+index, self->begin()+index+count);
       }
-SWIGINTERN std::vector< double > *std_vector_Sl_double_Sg__Repeat(double const &value,int count){
+SWIGINTERN std::vector< std::string > *std_vector_Sl_std_string_Sg__Repeat(std::string const &value,int count){
         if (count < 0)
           throw std::out_of_range("count");
-        return new std::vector< double >(count, value);
+        return new std::vector< std::string >(count, value);
       }
-SWIGINTERN void std_vector_Sl_double_Sg__Reverse__SWIG_0(std::vector< double > *self){
+SWIGINTERN void std_vector_Sl_std_string_Sg__Reverse__SWIG_0(std::vector< std::string > *self){
         std::reverse(self->begin(), self->end());
       }
-SWIGINTERN void std_vector_Sl_double_Sg__Reverse__SWIG_1(std::vector< double > *self,int index,int count){
+SWIGINTERN void std_vector_Sl_std_string_Sg__Reverse__SWIG_1(std::vector< std::string > *self,int index,int count){
         if (index < 0)
           throw std::out_of_range("index");
         if (count < 0)
@@ -618,172 +623,386 @@ SWIGINTERN void std_vector_Sl_double_Sg__Reverse__SWIG_1(std::vector< double > *
           throw std::invalid_argument("invalid range");
         std::reverse(self->begin()+index, self->begin()+index+count);
       }
-SWIGINTERN void std_vector_Sl_double_Sg__SetRange(std::vector< double > *self,int index,std::vector< double > const &values){
+SWIGINTERN void std_vector_Sl_std_string_Sg__SetRange(std::vector< std::string > *self,int index,std::vector< std::string > const &values){
         if (index < 0)
           throw std::out_of_range("index");
         if (index+values.size() > self->size())
           throw std::out_of_range("index");
         std::copy(values.begin(), values.end(), self->begin()+index);
       }
-SWIGINTERN bool std_vector_Sl_double_Sg__Contains(std::vector< double > *self,double const &value){
+SWIGINTERN bool std_vector_Sl_std_string_Sg__Contains(std::vector< std::string > *self,std::string const &value){
         return std::find(self->begin(), self->end(), value) != self->end();
       }
-SWIGINTERN int std_vector_Sl_double_Sg__IndexOf(std::vector< double > *self,double const &value){
+SWIGINTERN int std_vector_Sl_std_string_Sg__IndexOf(std::vector< std::string > *self,std::string const &value){
         int index = -1;
-        std::vector< double >::iterator it = std::find(self->begin(), self->end(), value);
+        std::vector< std::string >::iterator it = std::find(self->begin(), self->end(), value);
         if (it != self->end())
           index = (int)(it - self->begin());
         return index;
       }
-SWIGINTERN int std_vector_Sl_double_Sg__LastIndexOf(std::vector< double > *self,double const &value){
+SWIGINTERN int std_vector_Sl_std_string_Sg__LastIndexOf(std::vector< std::string > *self,std::string const &value){
         int index = -1;
-        std::vector< double >::reverse_iterator rit = std::find(self->rbegin(), self->rend(), value);
+        std::vector< std::string >::reverse_iterator rit = std::find(self->rbegin(), self->rend(), value);
         if (rit != self->rend())
           index = (int)(self->rend() - 1 - rit);
         return index;
       }
-SWIGINTERN bool std_vector_Sl_double_Sg__Remove(std::vector< double > *self,double const &value){
-        std::vector< double >::iterator it = std::find(self->begin(), self->end(), value);
+SWIGINTERN bool std_vector_Sl_std_string_Sg__Remove(std::vector< std::string > *self,std::string const &value){
+        std::vector< std::string >::iterator it = std::find(self->begin(), self->end(), value);
         if (it != self->end()) {
           self->erase(it);
           return true;
         }
         return false;
       }
-SWIGINTERN std::list< int >::const_reference std_list_Sl_int_Sg__getItem(std::list< int > *self,std::list< int >::iterator *iter){
-      return **iter;
-    }
-SWIGINTERN void std_list_Sl_int_Sg__setItem(std::list< int > *self,std::list< int >::iterator *iter,int const &val){
-      *(*iter) = val;
-    }
-SWIGINTERN std::list< int >::iterator *std_list_Sl_int_Sg__getFirstIter(std::list< int > *self){
-      if (self->size() == 0)
-        return NULL;
-      return new std::list< int >::iterator(self->begin());
-    }
-SWIGINTERN std::list< int >::iterator *std_list_Sl_int_Sg__getLastIter(std::list< int > *self){
-      if (self->size() == 0)
-        return NULL;
-      return new std::list< int >::iterator(--self->end());
-    }
-SWIGINTERN std::list< int >::iterator *std_list_Sl_int_Sg__getNextIter(std::list< int > *self,std::list< int >::iterator *iter){
-      std::list< int >::iterator it = *iter;
-      if (std::distance(it, --self->end()) != 0) {
-        std::list< int >::iterator* itnext = new std::list< int >::iterator(++it);
-        return itnext;
+SWIGINTERN std::vector< EQ::ItemInstance * > *new_std_vector_Sl_EQ_ItemInstance_Sm__Sg___SWIG_2(int capacity){
+        std::vector< EQ::ItemInstance * >* pv = 0;
+        if (capacity >= 0) {
+          pv = new std::vector< EQ::ItemInstance * >();
+          pv->reserve(capacity);
+       } else {
+          throw std::out_of_range("capacity");
+       }
+       return pv;
       }
-      return NULL;
-    }
-SWIGINTERN std::list< int >::iterator *std_list_Sl_int_Sg__getPrevIter(std::list< int > *self,std::list< int >::iterator *iter){
-      std::list< int >::iterator it = *iter;
-      if (std::distance(self->begin(), it) != 0) {
-        std::list< int >::iterator* itprev = new std::list< int >::iterator(--it);
-        return itprev;
+SWIGINTERN EQ::ItemInstance *std_vector_Sl_EQ_ItemInstance_Sm__Sg__getitemcopy(std::vector< EQ::ItemInstance * > *self,int index){
+        if (index>=0 && index<(int)self->size())
+          return (*self)[index];
+        else
+          throw std::out_of_range("index");
       }
-      return NULL;
-    }
-SWIGINTERN std::list< int >::iterator *std_list_Sl_int_Sg__insertNode(std::list< int > *self,std::list< int >::iterator *iter,int const &value){
-      std::list< int >::iterator it = self->insert(*iter, value);
-      return new std::list< int >::iterator(it);
-    }
-SWIGINTERN void std_list_Sl_int_Sg__eraseIter(std::list< int > *self,std::list< int >::iterator *iter){
-      std::list< int >::iterator it = *iter;
-      self->erase(it);
-    }
-SWIGINTERN void std_list_Sl_int_Sg__deleteIter(std::list< int > *self,std::list< int >::iterator *iter){
-      delete iter;
-    }
-SWIGINTERN bool std_list_Sl_int_Sg__equals(std::list< int > *self,std::list< int >::iterator *iter1,std::list< int >::iterator *iter2){
-      if (iter1 == NULL && iter2 == NULL)
-        return true;
-      std::list< int >::iterator it1 = *iter1;
-      std::list< int >::iterator it2 = *iter2;
-      return it1 == it2;
-    }
-SWIGINTERN bool std_list_Sl_int_Sg__Contains(std::list< int > *self,int const &value){
-      return std::find(self->begin(), self->end(), value) != self->end();
-    }
-SWIGINTERN bool std_list_Sl_int_Sg__Remove(std::list< int > *self,int const &value){
-      std::list< int >::iterator it = std::find(self->begin(), self->end(), value);
-      if (it != self->end()) {
-        self->erase(it);
-        return true;
+SWIGINTERN std::vector< EQ::ItemInstance * >::value_type const &std_vector_Sl_EQ_ItemInstance_Sm__Sg__getitem(std::vector< EQ::ItemInstance * > *self,int index){
+        if (index>=0 && index<(int)self->size())
+          return (*self)[index];
+        else
+          throw std::out_of_range("index");
       }
-      return false;
-    }
-SWIGINTERN std::list< int >::iterator *std_list_Sl_int_Sg__find(std::list< int > *self,int const &value){
-      if (std::find(self->begin(), self->end(), value) != self->end()) {
-        return new std::list< int >::iterator(std::find(self->begin(), self->end(), value));
+SWIGINTERN void std_vector_Sl_EQ_ItemInstance_Sm__Sg__setitem(std::vector< EQ::ItemInstance * > *self,int index,EQ::ItemInstance *const &val){
+        if (index>=0 && index<(int)self->size())
+          (*self)[index] = val;
+        else
+          throw std::out_of_range("index");
       }
-      return NULL;
-    }
-SWIGINTERN std::list< double >::const_reference std_list_Sl_double_Sg__getItem(std::list< double > *self,std::list< double >::iterator *iter){
-      return **iter;
-    }
-SWIGINTERN void std_list_Sl_double_Sg__setItem(std::list< double > *self,std::list< double >::iterator *iter,double const &val){
-      *(*iter) = val;
-    }
-SWIGINTERN std::list< double >::iterator *std_list_Sl_double_Sg__getFirstIter(std::list< double > *self){
-      if (self->size() == 0)
-        return NULL;
-      return new std::list< double >::iterator(self->begin());
-    }
-SWIGINTERN std::list< double >::iterator *std_list_Sl_double_Sg__getLastIter(std::list< double > *self){
-      if (self->size() == 0)
-        return NULL;
-      return new std::list< double >::iterator(--self->end());
-    }
-SWIGINTERN std::list< double >::iterator *std_list_Sl_double_Sg__getNextIter(std::list< double > *self,std::list< double >::iterator *iter){
-      std::list< double >::iterator it = *iter;
-      if (std::distance(it, --self->end()) != 0) {
-        std::list< double >::iterator* itnext = new std::list< double >::iterator(++it);
-        return itnext;
+SWIGINTERN void std_vector_Sl_EQ_ItemInstance_Sm__Sg__AddRange(std::vector< EQ::ItemInstance * > *self,std::vector< EQ::ItemInstance * > const &values){
+        self->insert(self->end(), values.begin(), values.end());
       }
-      return NULL;
-    }
-SWIGINTERN std::list< double >::iterator *std_list_Sl_double_Sg__getPrevIter(std::list< double > *self,std::list< double >::iterator *iter){
-      std::list< double >::iterator it = *iter;
-      if (std::distance(self->begin(), it) != 0) {
-        std::list< double >::iterator* itprev = new std::list< double >::iterator(--it);
-        return itprev;
+SWIGINTERN std::vector< EQ::ItemInstance * > *std_vector_Sl_EQ_ItemInstance_Sm__Sg__GetRange(std::vector< EQ::ItemInstance * > *self,int index,int count){
+        if (index < 0)
+          throw std::out_of_range("index");
+        if (count < 0)
+          throw std::out_of_range("count");
+        if (index >= (int)self->size()+1 || index+count > (int)self->size())
+          throw std::invalid_argument("invalid range");
+        return new std::vector< EQ::ItemInstance * >(self->begin()+index, self->begin()+index+count);
       }
-      return NULL;
-    }
-SWIGINTERN std::list< double >::iterator *std_list_Sl_double_Sg__insertNode(std::list< double > *self,std::list< double >::iterator *iter,double const &value){
-      std::list< double >::iterator it = self->insert(*iter, value);
-      return new std::list< double >::iterator(it);
-    }
-SWIGINTERN void std_list_Sl_double_Sg__eraseIter(std::list< double > *self,std::list< double >::iterator *iter){
-      std::list< double >::iterator it = *iter;
-      self->erase(it);
-    }
-SWIGINTERN void std_list_Sl_double_Sg__deleteIter(std::list< double > *self,std::list< double >::iterator *iter){
-      delete iter;
-    }
-SWIGINTERN bool std_list_Sl_double_Sg__equals(std::list< double > *self,std::list< double >::iterator *iter1,std::list< double >::iterator *iter2){
-      if (iter1 == NULL && iter2 == NULL)
-        return true;
-      std::list< double >::iterator it1 = *iter1;
-      std::list< double >::iterator it2 = *iter2;
-      return it1 == it2;
-    }
-SWIGINTERN bool std_list_Sl_double_Sg__Contains(std::list< double > *self,double const &value){
-      return std::find(self->begin(), self->end(), value) != self->end();
-    }
-SWIGINTERN bool std_list_Sl_double_Sg__Remove(std::list< double > *self,double const &value){
-      std::list< double >::iterator it = std::find(self->begin(), self->end(), value);
-      if (it != self->end()) {
-        self->erase(it);
-        return true;
+SWIGINTERN void std_vector_Sl_EQ_ItemInstance_Sm__Sg__Insert(std::vector< EQ::ItemInstance * > *self,int index,EQ::ItemInstance *const &x){
+        if (index>=0 && index<(int)self->size()+1)
+          self->insert(self->begin()+index, x);
+        else
+          throw std::out_of_range("index");
       }
-      return false;
-    }
-SWIGINTERN std::list< double >::iterator *std_list_Sl_double_Sg__find(std::list< double > *self,double const &value){
-      if (std::find(self->begin(), self->end(), value) != self->end()) {
-        return new std::list< double >::iterator(std::find(self->begin(), self->end(), value));
+SWIGINTERN void std_vector_Sl_EQ_ItemInstance_Sm__Sg__InsertRange(std::vector< EQ::ItemInstance * > *self,int index,std::vector< EQ::ItemInstance * > const &values){
+        if (index>=0 && index<(int)self->size()+1)
+          self->insert(self->begin()+index, values.begin(), values.end());
+        else
+          throw std::out_of_range("index");
       }
-      return NULL;
-    }
+SWIGINTERN void std_vector_Sl_EQ_ItemInstance_Sm__Sg__RemoveAt(std::vector< EQ::ItemInstance * > *self,int index){
+        if (index>=0 && index<(int)self->size())
+          self->erase(self->begin() + index);
+        else
+          throw std::out_of_range("index");
+      }
+SWIGINTERN void std_vector_Sl_EQ_ItemInstance_Sm__Sg__RemoveRange(std::vector< EQ::ItemInstance * > *self,int index,int count){
+        if (index < 0)
+          throw std::out_of_range("index");
+        if (count < 0)
+          throw std::out_of_range("count");
+        if (index >= (int)self->size()+1 || index+count > (int)self->size())
+          throw std::invalid_argument("invalid range");
+        self->erase(self->begin()+index, self->begin()+index+count);
+      }
+SWIGINTERN std::vector< EQ::ItemInstance * > *std_vector_Sl_EQ_ItemInstance_Sm__Sg__Repeat(EQ::ItemInstance *const &value,int count){
+        if (count < 0)
+          throw std::out_of_range("count");
+        return new std::vector< EQ::ItemInstance * >(count, value);
+      }
+SWIGINTERN void std_vector_Sl_EQ_ItemInstance_Sm__Sg__Reverse__SWIG_0(std::vector< EQ::ItemInstance * > *self){
+        std::reverse(self->begin(), self->end());
+      }
+SWIGINTERN void std_vector_Sl_EQ_ItemInstance_Sm__Sg__Reverse__SWIG_1(std::vector< EQ::ItemInstance * > *self,int index,int count){
+        if (index < 0)
+          throw std::out_of_range("index");
+        if (count < 0)
+          throw std::out_of_range("count");
+        if (index >= (int)self->size()+1 || index+count > (int)self->size())
+          throw std::invalid_argument("invalid range");
+        std::reverse(self->begin()+index, self->begin()+index+count);
+      }
+SWIGINTERN void std_vector_Sl_EQ_ItemInstance_Sm__Sg__SetRange(std::vector< EQ::ItemInstance * > *self,int index,std::vector< EQ::ItemInstance * > const &values){
+        if (index < 0)
+          throw std::out_of_range("index");
+        if (index+values.size() > self->size())
+          throw std::out_of_range("index");
+        std::copy(values.begin(), values.end(), self->begin()+index);
+      }
+SWIGINTERN bool std_vector_Sl_EQ_ItemInstance_Sm__Sg__Contains(std::vector< EQ::ItemInstance * > *self,EQ::ItemInstance *const &value){
+        return std::find(self->begin(), self->end(), value) != self->end();
+      }
+SWIGINTERN int std_vector_Sl_EQ_ItemInstance_Sm__Sg__IndexOf(std::vector< EQ::ItemInstance * > *self,EQ::ItemInstance *const &value){
+        int index = -1;
+        std::vector< EQ::ItemInstance * >::iterator it = std::find(self->begin(), self->end(), value);
+        if (it != self->end())
+          index = (int)(it - self->begin());
+        return index;
+      }
+SWIGINTERN int std_vector_Sl_EQ_ItemInstance_Sm__Sg__LastIndexOf(std::vector< EQ::ItemInstance * > *self,EQ::ItemInstance *const &value){
+        int index = -1;
+        std::vector< EQ::ItemInstance * >::reverse_iterator rit = std::find(self->rbegin(), self->rend(), value);
+        if (rit != self->rend())
+          index = (int)(self->rend() - 1 - rit);
+        return index;
+      }
+SWIGINTERN bool std_vector_Sl_EQ_ItemInstance_Sm__Sg__Remove(std::vector< EQ::ItemInstance * > *self,EQ::ItemInstance *const &value){
+        std::vector< EQ::ItemInstance * >::iterator it = std::find(self->begin(), self->end(), value);
+        if (it != self->end()) {
+          self->erase(it);
+          return true;
+        }
+        return false;
+      }
+SWIGINTERN std::vector< Mob * > *new_std_vector_Sl_Mob_Sm__Sg___SWIG_2(int capacity){
+        std::vector< Mob * >* pv = 0;
+        if (capacity >= 0) {
+          pv = new std::vector< Mob * >();
+          pv->reserve(capacity);
+       } else {
+          throw std::out_of_range("capacity");
+       }
+       return pv;
+      }
+SWIGINTERN Mob *std_vector_Sl_Mob_Sm__Sg__getitemcopy(std::vector< Mob * > *self,int index){
+        if (index>=0 && index<(int)self->size())
+          return (*self)[index];
+        else
+          throw std::out_of_range("index");
+      }
+SWIGINTERN std::vector< Mob * >::value_type const &std_vector_Sl_Mob_Sm__Sg__getitem(std::vector< Mob * > *self,int index){
+        if (index>=0 && index<(int)self->size())
+          return (*self)[index];
+        else
+          throw std::out_of_range("index");
+      }
+SWIGINTERN void std_vector_Sl_Mob_Sm__Sg__setitem(std::vector< Mob * > *self,int index,Mob *const &val){
+        if (index>=0 && index<(int)self->size())
+          (*self)[index] = val;
+        else
+          throw std::out_of_range("index");
+      }
+SWIGINTERN void std_vector_Sl_Mob_Sm__Sg__AddRange(std::vector< Mob * > *self,std::vector< Mob * > const &values){
+        self->insert(self->end(), values.begin(), values.end());
+      }
+SWIGINTERN std::vector< Mob * > *std_vector_Sl_Mob_Sm__Sg__GetRange(std::vector< Mob * > *self,int index,int count){
+        if (index < 0)
+          throw std::out_of_range("index");
+        if (count < 0)
+          throw std::out_of_range("count");
+        if (index >= (int)self->size()+1 || index+count > (int)self->size())
+          throw std::invalid_argument("invalid range");
+        return new std::vector< Mob * >(self->begin()+index, self->begin()+index+count);
+      }
+SWIGINTERN void std_vector_Sl_Mob_Sm__Sg__Insert(std::vector< Mob * > *self,int index,Mob *const &x){
+        if (index>=0 && index<(int)self->size()+1)
+          self->insert(self->begin()+index, x);
+        else
+          throw std::out_of_range("index");
+      }
+SWIGINTERN void std_vector_Sl_Mob_Sm__Sg__InsertRange(std::vector< Mob * > *self,int index,std::vector< Mob * > const &values){
+        if (index>=0 && index<(int)self->size()+1)
+          self->insert(self->begin()+index, values.begin(), values.end());
+        else
+          throw std::out_of_range("index");
+      }
+SWIGINTERN void std_vector_Sl_Mob_Sm__Sg__RemoveAt(std::vector< Mob * > *self,int index){
+        if (index>=0 && index<(int)self->size())
+          self->erase(self->begin() + index);
+        else
+          throw std::out_of_range("index");
+      }
+SWIGINTERN void std_vector_Sl_Mob_Sm__Sg__RemoveRange(std::vector< Mob * > *self,int index,int count){
+        if (index < 0)
+          throw std::out_of_range("index");
+        if (count < 0)
+          throw std::out_of_range("count");
+        if (index >= (int)self->size()+1 || index+count > (int)self->size())
+          throw std::invalid_argument("invalid range");
+        self->erase(self->begin()+index, self->begin()+index+count);
+      }
+SWIGINTERN std::vector< Mob * > *std_vector_Sl_Mob_Sm__Sg__Repeat(Mob *const &value,int count){
+        if (count < 0)
+          throw std::out_of_range("count");
+        return new std::vector< Mob * >(count, value);
+      }
+SWIGINTERN void std_vector_Sl_Mob_Sm__Sg__Reverse__SWIG_0(std::vector< Mob * > *self){
+        std::reverse(self->begin(), self->end());
+      }
+SWIGINTERN void std_vector_Sl_Mob_Sm__Sg__Reverse__SWIG_1(std::vector< Mob * > *self,int index,int count){
+        if (index < 0)
+          throw std::out_of_range("index");
+        if (count < 0)
+          throw std::out_of_range("count");
+        if (index >= (int)self->size()+1 || index+count > (int)self->size())
+          throw std::invalid_argument("invalid range");
+        std::reverse(self->begin()+index, self->begin()+index+count);
+      }
+SWIGINTERN void std_vector_Sl_Mob_Sm__Sg__SetRange(std::vector< Mob * > *self,int index,std::vector< Mob * > const &values){
+        if (index < 0)
+          throw std::out_of_range("index");
+        if (index+values.size() > self->size())
+          throw std::out_of_range("index");
+        std::copy(values.begin(), values.end(), self->begin()+index);
+      }
+SWIGINTERN bool std_vector_Sl_Mob_Sm__Sg__Contains(std::vector< Mob * > *self,Mob *const &value){
+        return std::find(self->begin(), self->end(), value) != self->end();
+      }
+SWIGINTERN int std_vector_Sl_Mob_Sm__Sg__IndexOf(std::vector< Mob * > *self,Mob *const &value){
+        int index = -1;
+        std::vector< Mob * >::iterator it = std::find(self->begin(), self->end(), value);
+        if (it != self->end())
+          index = (int)(it - self->begin());
+        return index;
+      }
+SWIGINTERN int std_vector_Sl_Mob_Sm__Sg__LastIndexOf(std::vector< Mob * > *self,Mob *const &value){
+        int index = -1;
+        std::vector< Mob * >::reverse_iterator rit = std::find(self->rbegin(), self->rend(), value);
+        if (rit != self->rend())
+          index = (int)(self->rend() - 1 - rit);
+        return index;
+      }
+SWIGINTERN bool std_vector_Sl_Mob_Sm__Sg__Remove(std::vector< Mob * > *self,Mob *const &value){
+        std::vector< Mob * >::iterator it = std::find(self->begin(), self->end(), value);
+        if (it != self->end()) {
+          self->erase(it);
+          return true;
+        }
+        return false;
+      }
+SWIGINTERN std::vector< EQApplicationPacket * > *new_std_vector_Sl_EQApplicationPacket_Sm__Sg___SWIG_2(int capacity){
+        std::vector< EQApplicationPacket * >* pv = 0;
+        if (capacity >= 0) {
+          pv = new std::vector< EQApplicationPacket * >();
+          pv->reserve(capacity);
+       } else {
+          throw std::out_of_range("capacity");
+       }
+       return pv;
+      }
+SWIGINTERN EQApplicationPacket *std_vector_Sl_EQApplicationPacket_Sm__Sg__getitemcopy(std::vector< EQApplicationPacket * > *self,int index){
+        if (index>=0 && index<(int)self->size())
+          return (*self)[index];
+        else
+          throw std::out_of_range("index");
+      }
+SWIGINTERN std::vector< EQApplicationPacket * >::value_type const &std_vector_Sl_EQApplicationPacket_Sm__Sg__getitem(std::vector< EQApplicationPacket * > *self,int index){
+        if (index>=0 && index<(int)self->size())
+          return (*self)[index];
+        else
+          throw std::out_of_range("index");
+      }
+SWIGINTERN void std_vector_Sl_EQApplicationPacket_Sm__Sg__setitem(std::vector< EQApplicationPacket * > *self,int index,EQApplicationPacket *const &val){
+        if (index>=0 && index<(int)self->size())
+          (*self)[index] = val;
+        else
+          throw std::out_of_range("index");
+      }
+SWIGINTERN void std_vector_Sl_EQApplicationPacket_Sm__Sg__AddRange(std::vector< EQApplicationPacket * > *self,std::vector< EQApplicationPacket * > const &values){
+        self->insert(self->end(), values.begin(), values.end());
+      }
+SWIGINTERN std::vector< EQApplicationPacket * > *std_vector_Sl_EQApplicationPacket_Sm__Sg__GetRange(std::vector< EQApplicationPacket * > *self,int index,int count){
+        if (index < 0)
+          throw std::out_of_range("index");
+        if (count < 0)
+          throw std::out_of_range("count");
+        if (index >= (int)self->size()+1 || index+count > (int)self->size())
+          throw std::invalid_argument("invalid range");
+        return new std::vector< EQApplicationPacket * >(self->begin()+index, self->begin()+index+count);
+      }
+SWIGINTERN void std_vector_Sl_EQApplicationPacket_Sm__Sg__Insert(std::vector< EQApplicationPacket * > *self,int index,EQApplicationPacket *const &x){
+        if (index>=0 && index<(int)self->size()+1)
+          self->insert(self->begin()+index, x);
+        else
+          throw std::out_of_range("index");
+      }
+SWIGINTERN void std_vector_Sl_EQApplicationPacket_Sm__Sg__InsertRange(std::vector< EQApplicationPacket * > *self,int index,std::vector< EQApplicationPacket * > const &values){
+        if (index>=0 && index<(int)self->size()+1)
+          self->insert(self->begin()+index, values.begin(), values.end());
+        else
+          throw std::out_of_range("index");
+      }
+SWIGINTERN void std_vector_Sl_EQApplicationPacket_Sm__Sg__RemoveAt(std::vector< EQApplicationPacket * > *self,int index){
+        if (index>=0 && index<(int)self->size())
+          self->erase(self->begin() + index);
+        else
+          throw std::out_of_range("index");
+      }
+SWIGINTERN void std_vector_Sl_EQApplicationPacket_Sm__Sg__RemoveRange(std::vector< EQApplicationPacket * > *self,int index,int count){
+        if (index < 0)
+          throw std::out_of_range("index");
+        if (count < 0)
+          throw std::out_of_range("count");
+        if (index >= (int)self->size()+1 || index+count > (int)self->size())
+          throw std::invalid_argument("invalid range");
+        self->erase(self->begin()+index, self->begin()+index+count);
+      }
+SWIGINTERN std::vector< EQApplicationPacket * > *std_vector_Sl_EQApplicationPacket_Sm__Sg__Repeat(EQApplicationPacket *const &value,int count){
+        if (count < 0)
+          throw std::out_of_range("count");
+        return new std::vector< EQApplicationPacket * >(count, value);
+      }
+SWIGINTERN void std_vector_Sl_EQApplicationPacket_Sm__Sg__Reverse__SWIG_0(std::vector< EQApplicationPacket * > *self){
+        std::reverse(self->begin(), self->end());
+      }
+SWIGINTERN void std_vector_Sl_EQApplicationPacket_Sm__Sg__Reverse__SWIG_1(std::vector< EQApplicationPacket * > *self,int index,int count){
+        if (index < 0)
+          throw std::out_of_range("index");
+        if (count < 0)
+          throw std::out_of_range("count");
+        if (index >= (int)self->size()+1 || index+count > (int)self->size())
+          throw std::invalid_argument("invalid range");
+        std::reverse(self->begin()+index, self->begin()+index+count);
+      }
+SWIGINTERN void std_vector_Sl_EQApplicationPacket_Sm__Sg__SetRange(std::vector< EQApplicationPacket * > *self,int index,std::vector< EQApplicationPacket * > const &values){
+        if (index < 0)
+          throw std::out_of_range("index");
+        if (index+values.size() > self->size())
+          throw std::out_of_range("index");
+        std::copy(values.begin(), values.end(), self->begin()+index);
+      }
+SWIGINTERN bool std_vector_Sl_EQApplicationPacket_Sm__Sg__Contains(std::vector< EQApplicationPacket * > *self,EQApplicationPacket *const &value){
+        return std::find(self->begin(), self->end(), value) != self->end();
+      }
+SWIGINTERN int std_vector_Sl_EQApplicationPacket_Sm__Sg__IndexOf(std::vector< EQApplicationPacket * > *self,EQApplicationPacket *const &value){
+        int index = -1;
+        std::vector< EQApplicationPacket * >::iterator it = std::find(self->begin(), self->end(), value);
+        if (it != self->end())
+          index = (int)(it - self->begin());
+        return index;
+      }
+SWIGINTERN int std_vector_Sl_EQApplicationPacket_Sm__Sg__LastIndexOf(std::vector< EQApplicationPacket * > *self,EQApplicationPacket *const &value){
+        int index = -1;
+        std::vector< EQApplicationPacket * >::reverse_iterator rit = std::find(self->rbegin(), self->rend(), value);
+        if (rit != self->rend())
+          index = (int)(self->rend() - 1 - rit);
+        return index;
+      }
+SWIGINTERN bool std_vector_Sl_EQApplicationPacket_Sm__Sg__Remove(std::vector< EQApplicationPacket * > *self,EQApplicationPacket *const &value){
+        std::vector< EQApplicationPacket * >::iterator it = std::find(self->begin(), self->end(), value);
+        if (it != self->end()) {
+          self->erase(it);
+          return true;
+        }
+        return false;
+      }
 SWIGINTERN std::list< AltCurrencyDefinition_Struct >::const_reference std_list_Sl_AltCurrencyDefinition_Struct_Sg__getItem(std::list< AltCurrencyDefinition_Struct > *self,std::list< AltCurrencyDefinition_Struct >::iterator *iter){
       return **iter;
     }
@@ -1714,6 +1933,998 @@ SWIGINTERN bool std_list_Sl_Area_Sg__equals(std::list< Area > *self,std::list< A
 extern "C" {
 #endif
 
+SWIGEXPORT void SWIGSTDCALL CSharp_vec4_x_set(void * jarg1, float jarg2) {
+  custom_glm::vec4 *arg1 = (custom_glm::vec4 *) 0 ;
+  float arg2 ;
+  
+  arg1 = (custom_glm::vec4 *)jarg1; 
+  arg2 = (float)jarg2; 
+  if (arg1) (arg1)->x = arg2;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_vec4_x_get(void * jarg1) {
+  float jresult ;
+  custom_glm::vec4 *arg1 = (custom_glm::vec4 *) 0 ;
+  float result;
+  
+  arg1 = (custom_glm::vec4 *)jarg1; 
+  result = (float) ((arg1)->x);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_vec4_y_set(void * jarg1, float jarg2) {
+  custom_glm::vec4 *arg1 = (custom_glm::vec4 *) 0 ;
+  float arg2 ;
+  
+  arg1 = (custom_glm::vec4 *)jarg1; 
+  arg2 = (float)jarg2; 
+  if (arg1) (arg1)->y = arg2;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_vec4_y_get(void * jarg1) {
+  float jresult ;
+  custom_glm::vec4 *arg1 = (custom_glm::vec4 *) 0 ;
+  float result;
+  
+  arg1 = (custom_glm::vec4 *)jarg1; 
+  result = (float) ((arg1)->y);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_vec4_z_set(void * jarg1, float jarg2) {
+  custom_glm::vec4 *arg1 = (custom_glm::vec4 *) 0 ;
+  float arg2 ;
+  
+  arg1 = (custom_glm::vec4 *)jarg1; 
+  arg2 = (float)jarg2; 
+  if (arg1) (arg1)->z = arg2;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_vec4_z_get(void * jarg1) {
+  float jresult ;
+  custom_glm::vec4 *arg1 = (custom_glm::vec4 *) 0 ;
+  float result;
+  
+  arg1 = (custom_glm::vec4 *)jarg1; 
+  result = (float) ((arg1)->z);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_vec4_w_set(void * jarg1, float jarg2) {
+  custom_glm::vec4 *arg1 = (custom_glm::vec4 *) 0 ;
+  float arg2 ;
+  
+  arg1 = (custom_glm::vec4 *)jarg1; 
+  arg2 = (float)jarg2; 
+  if (arg1) (arg1)->w = arg2;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_vec4_w_get(void * jarg1) {
+  float jresult ;
+  custom_glm::vec4 *arg1 = (custom_glm::vec4 *) 0 ;
+  float result;
+  
+  arg1 = (custom_glm::vec4 *)jarg1; 
+  result = (float) ((arg1)->w);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec4(float jarg1, float jarg2, float jarg3, float jarg4) {
+  void * jresult ;
+  float arg1 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  custom_glm::vec4 *result = 0 ;
+  
+  arg1 = (float)jarg1; 
+  arg2 = (float)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  result = (custom_glm::vec4 *)new custom_glm::vec4(arg1,arg2,arg3,arg4);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_vec4(void * jarg1) {
+  custom_glm::vec4 *arg1 = (custom_glm::vec4 *) 0 ;
+  
+  arg1 = (custom_glm::vec4 *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_vec3_x_set(void * jarg1, float jarg2) {
+  custom_glm::vec3 *arg1 = (custom_glm::vec3 *) 0 ;
+  float arg2 ;
+  
+  arg1 = (custom_glm::vec3 *)jarg1; 
+  arg2 = (float)jarg2; 
+  if (arg1) (arg1)->x = arg2;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_vec3_x_get(void * jarg1) {
+  float jresult ;
+  custom_glm::vec3 *arg1 = (custom_glm::vec3 *) 0 ;
+  float result;
+  
+  arg1 = (custom_glm::vec3 *)jarg1; 
+  result = (float) ((arg1)->x);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_vec3_y_set(void * jarg1, float jarg2) {
+  custom_glm::vec3 *arg1 = (custom_glm::vec3 *) 0 ;
+  float arg2 ;
+  
+  arg1 = (custom_glm::vec3 *)jarg1; 
+  arg2 = (float)jarg2; 
+  if (arg1) (arg1)->y = arg2;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_vec3_y_get(void * jarg1) {
+  float jresult ;
+  custom_glm::vec3 *arg1 = (custom_glm::vec3 *) 0 ;
+  float result;
+  
+  arg1 = (custom_glm::vec3 *)jarg1; 
+  result = (float) ((arg1)->y);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_vec3_z_set(void * jarg1, float jarg2) {
+  custom_glm::vec3 *arg1 = (custom_glm::vec3 *) 0 ;
+  float arg2 ;
+  
+  arg1 = (custom_glm::vec3 *)jarg1; 
+  arg2 = (float)jarg2; 
+  if (arg1) (arg1)->z = arg2;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_vec3_z_get(void * jarg1) {
+  float jresult ;
+  custom_glm::vec3 *arg1 = (custom_glm::vec3 *) 0 ;
+  float result;
+  
+  arg1 = (custom_glm::vec3 *)jarg1; 
+  result = (float) ((arg1)->z);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec3(float jarg1, float jarg2, float jarg3) {
+  void * jresult ;
+  float arg1 ;
+  float arg2 ;
+  float arg3 ;
+  custom_glm::vec3 *result = 0 ;
+  
+  arg1 = (float)jarg1; 
+  arg2 = (float)jarg2; 
+  arg3 = (float)jarg3; 
+  result = (custom_glm::vec3 *)new custom_glm::vec3(arg1,arg2,arg3);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_vec3(void * jarg1) {
+  custom_glm::vec3 *arg1 = (custom_glm::vec3 *) 0 ;
+  
+  arg1 = (custom_glm::vec3 *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_EQPacket(void * jarg1) {
+  EQPacket *arg1 = (EQPacket *) 0 ;
+  
+  arg1 = (EQPacket *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EQPacket_Size(void * jarg1) {
+  unsigned int jresult ;
+  EQPacket *arg1 = (EQPacket *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQPacket *)jarg1; 
+  result = (uint32)((EQPacket const *)arg1)->Size();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQPacket_build_raw_header_dump__SWIG_0(void * jarg1, char * jarg2, unsigned short jarg3) {
+  EQPacket *arg1 = (EQPacket *) 0 ;
+  char *arg2 = (char *) 0 ;
+  uint16 arg3 ;
+  
+  arg1 = (EQPacket *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (uint16)jarg3; 
+  ((EQPacket const *)arg1)->build_raw_header_dump(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQPacket_build_raw_header_dump__SWIG_1(void * jarg1, char * jarg2) {
+  EQPacket *arg1 = (EQPacket *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (EQPacket *)jarg1; 
+  arg2 = (char *)jarg2; 
+  ((EQPacket const *)arg1)->build_raw_header_dump(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQPacket_build_header_dump(void * jarg1, char * jarg2) {
+  EQPacket *arg1 = (EQPacket *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (EQPacket *)jarg1; 
+  arg2 = (char *)jarg2; 
+  ((EQPacket const *)arg1)->build_header_dump(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQPacket_DumpRawHeader__SWIG_0(void * jarg1, unsigned short jarg2, void * jarg3) {
+  EQPacket *arg1 = (EQPacket *) 0 ;
+  uint16 arg2 ;
+  FILE *arg3 = (FILE *) 0 ;
+  
+  arg1 = (EQPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (FILE *)jarg3; 
+  ((EQPacket const *)arg1)->DumpRawHeader(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQPacket_DumpRawHeader__SWIG_1(void * jarg1, unsigned short jarg2) {
+  EQPacket *arg1 = (EQPacket *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (EQPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  ((EQPacket const *)arg1)->DumpRawHeader(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQPacket_DumpRawHeader__SWIG_2(void * jarg1) {
+  EQPacket *arg1 = (EQPacket *) 0 ;
+  
+  arg1 = (EQPacket *)jarg1; 
+  ((EQPacket const *)arg1)->DumpRawHeader();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQPacket_DumpRawHeaderNoTime__SWIG_0(void * jarg1, unsigned short jarg2, void * jarg3) {
+  EQPacket *arg1 = (EQPacket *) 0 ;
+  uint16 arg2 ;
+  FILE *arg3 = (FILE *) 0 ;
+  
+  arg1 = (EQPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (FILE *)jarg3; 
+  ((EQPacket const *)arg1)->DumpRawHeaderNoTime(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQPacket_DumpRawHeaderNoTime__SWIG_1(void * jarg1, unsigned short jarg2) {
+  EQPacket *arg1 = (EQPacket *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (EQPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  ((EQPacket const *)arg1)->DumpRawHeaderNoTime(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQPacket_DumpRawHeaderNoTime__SWIG_2(void * jarg1) {
+  EQPacket *arg1 = (EQPacket *) 0 ;
+  
+  arg1 = (EQPacket *)jarg1; 
+  ((EQPacket const *)arg1)->DumpRawHeaderNoTime();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQPacket_SetOpcode(void * jarg1, void * jarg2) {
+  EQPacket *arg1 = (EQPacket *) 0 ;
+  EmuOpcode arg2 ;
+  EmuOpcode *argp2 ;
+  
+  arg1 = (EQPacket *)jarg1; 
+  argp2 = (EmuOpcode *)jarg2; 
+  if (!argp2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EmuOpcode", 0);
+    return ;
+  }
+  arg2 = *argp2; 
+  (arg1)->SetOpcode(arg2);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQPacket_GetOpcode(void * jarg1) {
+  void * jresult ;
+  EQPacket *arg1 = (EQPacket *) 0 ;
+  EmuOpcode result;
+  
+  arg1 = (EQPacket *)jarg1; 
+  result = ((EQPacket const *)arg1)->GetOpcode();
+  jresult = new EmuOpcode(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EQProtocolPacket(unsigned short jarg1, void * jarg2, unsigned int jarg3) {
+  void * jresult ;
+  uint16 arg1 ;
+  unsigned char *arg2 = (unsigned char *) 0 ;
+  uint32 arg3 ;
+  EQProtocolPacket *result = 0 ;
+  
+  arg1 = (uint16)jarg1; 
+  arg2 = (unsigned char *)jarg2; 
+  arg3 = (uint32)jarg3; 
+  result = (EQProtocolPacket *)new EQProtocolPacket(arg1,(unsigned char const *)arg2,arg3);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EQProtocolPacket_combine(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  EQProtocolPacket *arg1 = (EQProtocolPacket *) 0 ;
+  EQProtocolPacket *arg2 = (EQProtocolPacket *) 0 ;
+  bool result;
+  
+  arg1 = (EQProtocolPacket *)jarg1; 
+  arg2 = (EQProtocolPacket *)jarg2; 
+  result = (bool)(arg1)->combine((EQProtocolPacket const *)arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EQProtocolPacket_serialize(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  EQProtocolPacket *arg1 = (EQProtocolPacket *) 0 ;
+  unsigned char *arg2 = (unsigned char *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQProtocolPacket *)jarg1; 
+  arg2 = (unsigned char *)jarg2; 
+  result = (uint32)((EQProtocolPacket const *)arg1)->serialize(arg2);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQProtocolPacket_Copy(void * jarg1) {
+  void * jresult ;
+  EQProtocolPacket *arg1 = (EQProtocolPacket *) 0 ;
+  EQProtocolPacket *result = 0 ;
+  
+  arg1 = (EQProtocolPacket *)jarg1; 
+  result = (EQProtocolPacket *)(arg1)->Copy();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQProtocolPacket_MakeAppPacket(void * jarg1) {
+  void * jresult ;
+  EQProtocolPacket *arg1 = (EQProtocolPacket *) 0 ;
+  EQRawApplicationPacket *result = 0 ;
+  
+  arg1 = (EQProtocolPacket *)jarg1; 
+  result = (EQRawApplicationPacket *)((EQProtocolPacket const *)arg1)->MakeAppPacket();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQProtocolPacket_acked_set(void * jarg1, unsigned int jarg2) {
+  EQProtocolPacket *arg1 = (EQProtocolPacket *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQProtocolPacket *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->acked = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EQProtocolPacket_acked_get(void * jarg1) {
+  unsigned int jresult ;
+  EQProtocolPacket *arg1 = (EQProtocolPacket *) 0 ;
+  bool result;
+  
+  arg1 = (EQProtocolPacket *)jarg1; 
+  result = (bool) ((arg1)->acked);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQProtocolPacket_sent_time_set(void * jarg1, unsigned int jarg2) {
+  EQProtocolPacket *arg1 = (EQProtocolPacket *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQProtocolPacket *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->sent_time = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EQProtocolPacket_sent_time_get(void * jarg1) {
+  unsigned int jresult ;
+  EQProtocolPacket *arg1 = (EQProtocolPacket *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQProtocolPacket *)jarg1; 
+  result = (uint32) ((arg1)->sent_time);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQProtocolPacket_build_raw_header_dump__SWIG_0(void * jarg1, char * jarg2, unsigned short jarg3) {
+  EQProtocolPacket *arg1 = (EQProtocolPacket *) 0 ;
+  char *arg2 = (char *) 0 ;
+  uint16 arg3 ;
+  
+  arg1 = (EQProtocolPacket *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (uint16)jarg3; 
+  ((EQProtocolPacket const *)arg1)->build_raw_header_dump(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQProtocolPacket_build_raw_header_dump__SWIG_1(void * jarg1, char * jarg2) {
+  EQProtocolPacket *arg1 = (EQProtocolPacket *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (EQProtocolPacket *)jarg1; 
+  arg2 = (char *)jarg2; 
+  ((EQProtocolPacket const *)arg1)->build_raw_header_dump(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQProtocolPacket_build_header_dump(void * jarg1, char * jarg2) {
+  EQProtocolPacket *arg1 = (EQProtocolPacket *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (EQProtocolPacket *)jarg1; 
+  arg2 = (char *)jarg2; 
+  ((EQProtocolPacket const *)arg1)->build_header_dump(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQProtocolPacket_DumpRawHeader__SWIG_0(void * jarg1, unsigned short jarg2, void * jarg3) {
+  EQProtocolPacket *arg1 = (EQProtocolPacket *) 0 ;
+  uint16 arg2 ;
+  FILE *arg3 = (FILE *) 0 ;
+  
+  arg1 = (EQProtocolPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (FILE *)jarg3; 
+  ((EQProtocolPacket const *)arg1)->DumpRawHeader(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQProtocolPacket_DumpRawHeader__SWIG_1(void * jarg1, unsigned short jarg2) {
+  EQProtocolPacket *arg1 = (EQProtocolPacket *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (EQProtocolPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  ((EQProtocolPacket const *)arg1)->DumpRawHeader(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQProtocolPacket_DumpRawHeader__SWIG_2(void * jarg1) {
+  EQProtocolPacket *arg1 = (EQProtocolPacket *) 0 ;
+  
+  arg1 = (EQProtocolPacket *)jarg1; 
+  ((EQProtocolPacket const *)arg1)->DumpRawHeader();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQProtocolPacket_DumpRawHeaderNoTime__SWIG_0(void * jarg1, unsigned short jarg2, void * jarg3) {
+  EQProtocolPacket *arg1 = (EQProtocolPacket *) 0 ;
+  uint16 arg2 ;
+  FILE *arg3 = (FILE *) 0 ;
+  
+  arg1 = (EQProtocolPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (FILE *)jarg3; 
+  ((EQProtocolPacket const *)arg1)->DumpRawHeaderNoTime(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQProtocolPacket_DumpRawHeaderNoTime__SWIG_1(void * jarg1, unsigned short jarg2) {
+  EQProtocolPacket *arg1 = (EQProtocolPacket *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (EQProtocolPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  ((EQProtocolPacket const *)arg1)->DumpRawHeaderNoTime(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQProtocolPacket_DumpRawHeaderNoTime__SWIG_2(void * jarg1) {
+  EQProtocolPacket *arg1 = (EQProtocolPacket *) 0 ;
+  
+  arg1 = (EQProtocolPacket *)jarg1; 
+  ((EQProtocolPacket const *)arg1)->DumpRawHeaderNoTime();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_EQProtocolPacket(void * jarg1) {
+  EQProtocolPacket *arg1 = (EQProtocolPacket *) 0 ;
+  
+  arg1 = (EQProtocolPacket *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EQApplicationPacket__SWIG_0() {
+  void * jresult ;
+  EQApplicationPacket *result = 0 ;
+  
+  result = (EQApplicationPacket *)new EQApplicationPacket();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EQApplicationPacket__SWIG_1(void * jarg1) {
+  void * jresult ;
+  EmuOpcode arg1 ;
+  EmuOpcode const *argp1 ;
+  EQApplicationPacket *result = 0 ;
+  
+  argp1 = (EmuOpcode *)jarg1; 
+  if (!argp1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EmuOpcode const", 0);
+    return 0;
+  }
+  arg1 = *argp1; 
+  result = (EQApplicationPacket *)new EQApplicationPacket(arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EQApplicationPacket__SWIG_2(void * jarg1, unsigned int jarg2) {
+  void * jresult ;
+  EmuOpcode arg1 ;
+  uint32 arg2 ;
+  EmuOpcode const *argp1 ;
+  EQApplicationPacket *result = 0 ;
+  
+  argp1 = (EmuOpcode *)jarg1; 
+  if (!argp1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EmuOpcode const", 0);
+    return 0;
+  }
+  arg1 = *argp1; 
+  arg2 = (uint32)jarg2; 
+  result = (EQApplicationPacket *)new EQApplicationPacket(arg1,arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EQApplicationPacket__SWIG_3(void * jarg1, void * jarg2, unsigned int jarg3) {
+  void * jresult ;
+  EmuOpcode arg1 ;
+  unsigned char *arg2 = (unsigned char *) 0 ;
+  uint32 arg3 ;
+  EmuOpcode const *argp1 ;
+  EQApplicationPacket *result = 0 ;
+  
+  argp1 = (EmuOpcode *)jarg1; 
+  if (!argp1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EmuOpcode const", 0);
+    return 0;
+  }
+  arg1 = *argp1; 
+  arg2 = (unsigned char *)jarg2; 
+  arg3 = (uint32)jarg3; 
+  result = (EQApplicationPacket *)new EQApplicationPacket(arg1,(unsigned char const *)arg2,arg3);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EQApplicationPacket__SWIG_4(void * jarg1, void * jarg2) {
+  void * jresult ;
+  EmuOpcode arg1 ;
+  SerializeBuffer *arg2 = 0 ;
+  EmuOpcode const *argp1 ;
+  EQApplicationPacket *result = 0 ;
+  
+  argp1 = (EmuOpcode *)jarg1; 
+  if (!argp1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EmuOpcode const", 0);
+    return 0;
+  }
+  arg1 = *argp1; 
+  arg2 = (SerializeBuffer *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "SerializeBuffer & is null", 0);
+    return 0;
+  } 
+  result = (EQApplicationPacket *)new EQApplicationPacket(arg1,*arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EQApplicationPacket_serialize(void * jarg1, unsigned short jarg2, void * jarg3) {
+  unsigned int jresult ;
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  uint16 arg2 ;
+  unsigned char *arg3 = (unsigned char *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (unsigned char *)jarg3; 
+  result = (uint32)((EQApplicationPacket const *)arg1)->serialize(arg2,arg3);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EQApplicationPacket_Size(void * jarg1) {
+  unsigned int jresult ;
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  result = (uint32)((EQApplicationPacket const *)arg1)->Size();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQApplicationPacket_Copy(void * jarg1) {
+  void * jresult ;
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  EQApplicationPacket *result = 0 ;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  result = (EQApplicationPacket *)((EQApplicationPacket const *)arg1)->Copy();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQApplicationPacket_build_raw_header_dump__SWIG_0(void * jarg1, char * jarg2, unsigned short jarg3) {
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  char *arg2 = (char *) 0 ;
+  uint16 arg3 ;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (uint16)jarg3; 
+  ((EQApplicationPacket const *)arg1)->build_raw_header_dump(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQApplicationPacket_build_raw_header_dump__SWIG_1(void * jarg1, char * jarg2) {
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  arg2 = (char *)jarg2; 
+  ((EQApplicationPacket const *)arg1)->build_raw_header_dump(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQApplicationPacket_build_header_dump(void * jarg1, char * jarg2) {
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  arg2 = (char *)jarg2; 
+  ((EQApplicationPacket const *)arg1)->build_header_dump(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQApplicationPacket_DumpRawHeader__SWIG_0(void * jarg1, unsigned short jarg2, void * jarg3) {
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  uint16 arg2 ;
+  FILE *arg3 = (FILE *) 0 ;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (FILE *)jarg3; 
+  ((EQApplicationPacket const *)arg1)->DumpRawHeader(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQApplicationPacket_DumpRawHeader__SWIG_1(void * jarg1, unsigned short jarg2) {
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  ((EQApplicationPacket const *)arg1)->DumpRawHeader(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQApplicationPacket_DumpRawHeader__SWIG_2(void * jarg1) {
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  ((EQApplicationPacket const *)arg1)->DumpRawHeader();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQApplicationPacket_DumpRawHeaderNoTime__SWIG_0(void * jarg1, unsigned short jarg2, void * jarg3) {
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  uint16 arg2 ;
+  FILE *arg3 = (FILE *) 0 ;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (FILE *)jarg3; 
+  ((EQApplicationPacket const *)arg1)->DumpRawHeaderNoTime(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQApplicationPacket_DumpRawHeaderNoTime__SWIG_1(void * jarg1, unsigned short jarg2) {
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  ((EQApplicationPacket const *)arg1)->DumpRawHeaderNoTime(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQApplicationPacket_DumpRawHeaderNoTime__SWIG_2(void * jarg1) {
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  ((EQApplicationPacket const *)arg1)->DumpRawHeaderNoTime();
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EQApplicationPacket_GetOpcodeBypass(void * jarg1) {
+  unsigned short jresult ;
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  uint16 result;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  result = (uint16)((EQApplicationPacket const *)arg1)->GetOpcodeBypass();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQApplicationPacket_SetOpcodeBypass(void * jarg1, unsigned short jarg2) {
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  (arg1)->SetOpcodeBypass(arg2);
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EQApplicationPacket_GetProtocolOpcode(void * jarg1) {
+  unsigned short jresult ;
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  uint16 result;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  result = (uint16)((EQApplicationPacket const *)arg1)->GetProtocolOpcode();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQApplicationPacket_SetProtocolOpcode(void * jarg1, unsigned short jarg2) {
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  (arg1)->SetProtocolOpcode(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_EQApplicationPacket(void * jarg1) {
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EQRawApplicationPacket(unsigned short jarg1, void * jarg2, unsigned int jarg3) {
+  void * jresult ;
+  uint16 arg1 ;
+  unsigned char *arg2 = (unsigned char *) 0 ;
+  uint32 arg3 ;
+  EQRawApplicationPacket *result = 0 ;
+  
+  arg1 = (uint16)jarg1; 
+  arg2 = (unsigned char *)jarg2; 
+  arg3 = (uint32)jarg3; 
+  result = (EQRawApplicationPacket *)new EQRawApplicationPacket(arg1,(unsigned char const *)arg2,arg3);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EQRawApplicationPacket_GetRawOpcode(void * jarg1) {
+  unsigned short jresult ;
+  EQRawApplicationPacket *arg1 = (EQRawApplicationPacket *) 0 ;
+  uint16 result;
+  
+  arg1 = (EQRawApplicationPacket *)jarg1; 
+  result = (uint16)((EQRawApplicationPacket const *)arg1)->GetRawOpcode();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQRawApplicationPacket_build_raw_header_dump__SWIG_0(void * jarg1, char * jarg2, unsigned short jarg3) {
+  EQRawApplicationPacket *arg1 = (EQRawApplicationPacket *) 0 ;
+  char *arg2 = (char *) 0 ;
+  uint16 arg3 ;
+  
+  arg1 = (EQRawApplicationPacket *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (uint16)jarg3; 
+  ((EQRawApplicationPacket const *)arg1)->build_raw_header_dump(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQRawApplicationPacket_build_raw_header_dump__SWIG_1(void * jarg1, char * jarg2) {
+  EQRawApplicationPacket *arg1 = (EQRawApplicationPacket *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (EQRawApplicationPacket *)jarg1; 
+  arg2 = (char *)jarg2; 
+  ((EQRawApplicationPacket const *)arg1)->build_raw_header_dump(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQRawApplicationPacket_build_header_dump(void * jarg1, char * jarg2) {
+  EQRawApplicationPacket *arg1 = (EQRawApplicationPacket *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (EQRawApplicationPacket *)jarg1; 
+  arg2 = (char *)jarg2; 
+  ((EQRawApplicationPacket const *)arg1)->build_header_dump(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQRawApplicationPacket_DumpRawHeader__SWIG_0(void * jarg1, unsigned short jarg2, void * jarg3) {
+  EQRawApplicationPacket *arg1 = (EQRawApplicationPacket *) 0 ;
+  uint16 arg2 ;
+  FILE *arg3 = (FILE *) 0 ;
+  
+  arg1 = (EQRawApplicationPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (FILE *)jarg3; 
+  ((EQRawApplicationPacket const *)arg1)->DumpRawHeader(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQRawApplicationPacket_DumpRawHeader__SWIG_1(void * jarg1, unsigned short jarg2) {
+  EQRawApplicationPacket *arg1 = (EQRawApplicationPacket *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (EQRawApplicationPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  ((EQRawApplicationPacket const *)arg1)->DumpRawHeader(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQRawApplicationPacket_DumpRawHeader__SWIG_2(void * jarg1) {
+  EQRawApplicationPacket *arg1 = (EQRawApplicationPacket *) 0 ;
+  
+  arg1 = (EQRawApplicationPacket *)jarg1; 
+  ((EQRawApplicationPacket const *)arg1)->DumpRawHeader();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQRawApplicationPacket_DumpRawHeaderNoTime__SWIG_0(void * jarg1, unsigned short jarg2, void * jarg3) {
+  EQRawApplicationPacket *arg1 = (EQRawApplicationPacket *) 0 ;
+  uint16 arg2 ;
+  FILE *arg3 = (FILE *) 0 ;
+  
+  arg1 = (EQRawApplicationPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (FILE *)jarg3; 
+  ((EQRawApplicationPacket const *)arg1)->DumpRawHeaderNoTime(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQRawApplicationPacket_DumpRawHeaderNoTime__SWIG_1(void * jarg1, unsigned short jarg2) {
+  EQRawApplicationPacket *arg1 = (EQRawApplicationPacket *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (EQRawApplicationPacket *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  ((EQRawApplicationPacket const *)arg1)->DumpRawHeaderNoTime(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQRawApplicationPacket_DumpRawHeaderNoTime__SWIG_2(void * jarg1) {
+  EQRawApplicationPacket *arg1 = (EQRawApplicationPacket *) 0 ;
+  
+  arg1 = (EQRawApplicationPacket *)jarg1; 
+  ((EQRawApplicationPacket const *)arg1)->DumpRawHeaderNoTime();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_EQRawApplicationPacket(void * jarg1) {
+  EQRawApplicationPacket *arg1 = (EQRawApplicationPacket *) 0 ;
+  
+  arg1 = (EQRawApplicationPacket *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DumpPacket__SWIG_0(void * jarg1, unsigned int jarg2) {
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  DumpPacket((EQApplicationPacket const *)arg1,arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DumpPacket__SWIG_1(void * jarg1) {
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  DumpPacket((EQApplicationPacket const *)arg1);
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_DumpPacketToString(void * jarg1) {
+  const char * jresult ;
+  EQApplicationPacket *arg1 = (EQApplicationPacket *) 0 ;
+  std::string result;
+  
+  arg1 = (EQApplicationPacket *)jarg1; 
+  result = DumpPacketToString((EQApplicationPacket const *)arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
 SWIGEXPORT char * SWIGSTDCALL CSharp_DZ_REPLAY_TIMER_NAME_get() {
   char * jresult ;
   char *result = 0 ;
@@ -1734,36 +2945,30 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_new_ExpeditionLockoutTimer__SWIG_0() {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_new_ExpeditionLockoutTimer__SWIG_1(void * jarg1, void * jarg2, void * jarg3, unsigned long long jarg4, unsigned int jarg5) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_ExpeditionLockoutTimer__SWIG_1(const char * jarg1, const char * jarg2, const char * jarg3, unsigned long long jarg4, unsigned int jarg5) {
   void * jresult ;
   std::string arg1 ;
   std::string arg2 ;
   std::string arg3 ;
   uint64_t arg4 ;
   uint32_t arg5 ;
-  std::string *argp1 ;
-  std::string *argp2 ;
-  std::string *argp3 ;
   ExpeditionLockoutTimer *result = 0 ;
   
-  argp1 = (std::string *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg1 = *argp1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  (&arg1)->assign(jarg1); 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  (&arg2)->assign(jarg2); 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   arg4 = (uint64_t)jarg4; 
   arg5 = (uint32_t)jarg5; 
   result = (ExpeditionLockoutTimer *)new ExpeditionLockoutTimer(arg1,arg2,arg3,arg4,arg5);
@@ -1772,55 +2977,57 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_new_ExpeditionLockoutTimer__SWIG_1(void * j
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_ExpeditionLockoutTimer_CreateLockout__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_ExpeditionLockoutTimer_CreateLockout__SWIG_0(const char * jarg1, const char * jarg2, unsigned int jarg3, const char * jarg4) {
   void * jresult ;
   std::string *arg1 = 0 ;
   std::string *arg2 = 0 ;
   uint32_t arg3 ;
   std::string arg4 ;
-  std::string *argp4 ;
   ExpeditionLockoutTimer result;
   
-  arg1 = (std::string *)jarg1;
-  if (!arg1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
-    return 0;
-  } 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
-    return 0;
-  } 
-  arg3 = (uint32_t)jarg3; 
-  argp4 = (std::string *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg4 = *argp4; 
+  std::string arg1_str(jarg1);
+  arg1 = &arg1_str; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (uint32_t)jarg3; 
+  if (!jarg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  (&arg4)->assign(jarg4); 
   result = ExpeditionLockoutTimer::CreateLockout((std::string const &)*arg1,(std::string const &)*arg2,arg3,SWIG_STD_MOVE(arg4));
   jresult = new ExpeditionLockoutTimer(result); 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_ExpeditionLockoutTimer_CreateLockout__SWIG_1(void * jarg1, void * jarg2, unsigned int jarg3) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_ExpeditionLockoutTimer_CreateLockout__SWIG_1(const char * jarg1, const char * jarg2, unsigned int jarg3) {
   void * jresult ;
   std::string *arg1 = 0 ;
   std::string *arg2 = 0 ;
   uint32_t arg3 ;
   ExpeditionLockoutTimer result;
   
-  arg1 = (std::string *)jarg1;
-  if (!arg1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg1_str(jarg1);
+  arg1 = &arg1_str; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (uint32_t)jarg3; 
   result = ExpeditionLockoutTimer::CreateLockout((std::string const &)*arg1,(std::string const &)*arg2,arg3);
   jresult = new ExpeditionLockoutTimer(result); 
@@ -1828,86 +3035,83 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_ExpeditionLockoutTimer_CreateLockout__SWIG_
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_ExpeditionLockoutTimer_DaysHoursMinutes_days_set(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_ExpeditionLockoutTimer_DaysHoursMinutes_days_set(void * jarg1, const char * jarg2) {
   ExpeditionLockoutTimer::DaysHoursMinutes *arg1 = (ExpeditionLockoutTimer::DaysHoursMinutes *) 0 ;
-  std::string arg2 ;
-  std::string *argp2 ;
+  std::string *arg2 = 0 ;
   
   arg1 = (ExpeditionLockoutTimer::DaysHoursMinutes *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->days = arg2;
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->days = *arg2;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_ExpeditionLockoutTimer_DaysHoursMinutes_days_get(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_ExpeditionLockoutTimer_DaysHoursMinutes_days_get(void * jarg1) {
+  const char * jresult ;
   ExpeditionLockoutTimer::DaysHoursMinutes *arg1 = (ExpeditionLockoutTimer::DaysHoursMinutes *) 0 ;
-  std::string result;
+  std::string *result = 0 ;
   
   arg1 = (ExpeditionLockoutTimer::DaysHoursMinutes *)jarg1; 
-  result =  ((arg1)->days);
-  jresult = new std::string(result); 
+  result = (std::string *) & ((arg1)->days);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_ExpeditionLockoutTimer_DaysHoursMinutes_hours_set(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_ExpeditionLockoutTimer_DaysHoursMinutes_hours_set(void * jarg1, const char * jarg2) {
   ExpeditionLockoutTimer::DaysHoursMinutes *arg1 = (ExpeditionLockoutTimer::DaysHoursMinutes *) 0 ;
-  std::string arg2 ;
-  std::string *argp2 ;
+  std::string *arg2 = 0 ;
   
   arg1 = (ExpeditionLockoutTimer::DaysHoursMinutes *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->hours = arg2;
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->hours = *arg2;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_ExpeditionLockoutTimer_DaysHoursMinutes_hours_get(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_ExpeditionLockoutTimer_DaysHoursMinutes_hours_get(void * jarg1) {
+  const char * jresult ;
   ExpeditionLockoutTimer::DaysHoursMinutes *arg1 = (ExpeditionLockoutTimer::DaysHoursMinutes *) 0 ;
-  std::string result;
+  std::string *result = 0 ;
   
   arg1 = (ExpeditionLockoutTimer::DaysHoursMinutes *)jarg1; 
-  result =  ((arg1)->hours);
-  jresult = new std::string(result); 
+  result = (std::string *) & ((arg1)->hours);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_ExpeditionLockoutTimer_DaysHoursMinutes_mins_set(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_ExpeditionLockoutTimer_DaysHoursMinutes_mins_set(void * jarg1, const char * jarg2) {
   ExpeditionLockoutTimer::DaysHoursMinutes *arg1 = (ExpeditionLockoutTimer::DaysHoursMinutes *) 0 ;
-  std::string arg2 ;
-  std::string *argp2 ;
+  std::string *arg2 = 0 ;
   
   arg1 = (ExpeditionLockoutTimer::DaysHoursMinutes *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->mins = arg2;
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->mins = *arg2;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_ExpeditionLockoutTimer_DaysHoursMinutes_mins_get(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_ExpeditionLockoutTimer_DaysHoursMinutes_mins_get(void * jarg1) {
+  const char * jresult ;
   ExpeditionLockoutTimer::DaysHoursMinutes *arg1 = (ExpeditionLockoutTimer::DaysHoursMinutes *) 0 ;
-  std::string result;
+  std::string *result = 0 ;
   
   arg1 = (ExpeditionLockoutTimer::DaysHoursMinutes *)jarg1; 
-  result =  ((arg1)->mins);
-  jresult = new std::string(result); 
+  result = (std::string *) & ((arg1)->mins);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
@@ -2000,38 +3204,38 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_ExpeditionLockoutTimer_GetDaysHoursMinutesR
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_ExpeditionLockoutTimer_GetExpeditionName(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_ExpeditionLockoutTimer_GetExpeditionName(void * jarg1) {
+  const char * jresult ;
   ExpeditionLockoutTimer *arg1 = (ExpeditionLockoutTimer *) 0 ;
   std::string *result = 0 ;
   
   arg1 = (ExpeditionLockoutTimer *)jarg1; 
   result = (std::string *) &((ExpeditionLockoutTimer const *)arg1)->GetExpeditionName();
-  jresult = (void *)result; 
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_ExpeditionLockoutTimer_GetExpeditionUUID(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_ExpeditionLockoutTimer_GetExpeditionUUID(void * jarg1) {
+  const char * jresult ;
   ExpeditionLockoutTimer *arg1 = (ExpeditionLockoutTimer *) 0 ;
   std::string *result = 0 ;
   
   arg1 = (ExpeditionLockoutTimer *)jarg1; 
   result = (std::string *) &((ExpeditionLockoutTimer const *)arg1)->GetExpeditionUUID();
-  jresult = (void *)result; 
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_ExpeditionLockoutTimer_GetEventName(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_ExpeditionLockoutTimer_GetEventName(void * jarg1) {
+  const char * jresult ;
   ExpeditionLockoutTimer *arg1 = (ExpeditionLockoutTimer *) 0 ;
   std::string *result = 0 ;
   
   arg1 = (ExpeditionLockoutTimer *)jarg1; 
   result = (std::string *) &((ExpeditionLockoutTimer const *)arg1)->GetEventName();
-  jresult = (void *)result; 
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
@@ -2048,18 +3252,19 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ExpeditionLockoutTimer_IsExpired(void
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ExpeditionLockoutTimer_IsFromExpedition(void * jarg1, void * jarg2) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ExpeditionLockoutTimer_IsFromExpedition(void * jarg1, const char * jarg2) {
   unsigned int jresult ;
   ExpeditionLockoutTimer *arg1 = (ExpeditionLockoutTimer *) 0 ;
   std::string *arg2 = 0 ;
   bool result;
   
   arg1 = (ExpeditionLockoutTimer *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   result = (bool)((ExpeditionLockoutTimer const *)arg1)->IsFromExpedition((std::string const &)*arg2);
   jresult = result; 
   return jresult;
@@ -2096,7 +3301,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ExpeditionLockoutTimer_IsSameLockout_
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ExpeditionLockoutTimer_IsSameLockout__SWIG_1(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ExpeditionLockoutTimer_IsSameLockout__SWIG_1(void * jarg1, const char * jarg2, const char * jarg3) {
   unsigned int jresult ;
   ExpeditionLockoutTimer *arg1 = (ExpeditionLockoutTimer *) 0 ;
   std::string *arg2 = 0 ;
@@ -2104,16 +3309,18 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ExpeditionLockoutTimer_IsSameLockout_
   bool result;
   
   arg1 = (ExpeditionLockoutTimer *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   result = (bool)((ExpeditionLockoutTimer const *)arg1)->IsSameLockout((std::string const &)*arg2,(std::string const &)*arg3);
   jresult = result; 
   return jresult;
@@ -2148,16 +3355,17 @@ SWIGEXPORT void SWIGSTDCALL CSharp_ExpeditionLockoutTimer_SetExpireTime(void * j
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_ExpeditionLockoutTimer_SetUUID(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_ExpeditionLockoutTimer_SetUUID(void * jarg1, const char * jarg2) {
   ExpeditionLockoutTimer *arg1 = (ExpeditionLockoutTimer *) 0 ;
   std::string *arg2 = 0 ;
   
   arg1 = (ExpeditionLockoutTimer *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   (arg1)->SetUUID((std::string const &)*arg2);
 }
 
@@ -13047,58 +14255,56 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ExpeditionInvite_expedition_id_get(vo
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_ExpeditionInvite_inviter_name_set(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_ExpeditionInvite_inviter_name_set(void * jarg1, const char * jarg2) {
   ExpeditionInvite *arg1 = (ExpeditionInvite *) 0 ;
-  std::string arg2 ;
-  std::string *argp2 ;
+  std::string *arg2 = 0 ;
   
   arg1 = (ExpeditionInvite *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->inviter_name = arg2;
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->inviter_name = *arg2;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_ExpeditionInvite_inviter_name_get(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_ExpeditionInvite_inviter_name_get(void * jarg1) {
+  const char * jresult ;
   ExpeditionInvite *arg1 = (ExpeditionInvite *) 0 ;
-  std::string result;
+  std::string *result = 0 ;
   
   arg1 = (ExpeditionInvite *)jarg1; 
-  result =  ((arg1)->inviter_name);
-  jresult = new std::string(result); 
+  result = (std::string *) & ((arg1)->inviter_name);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_ExpeditionInvite_swap_remove_name_set(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_ExpeditionInvite_swap_remove_name_set(void * jarg1, const char * jarg2) {
   ExpeditionInvite *arg1 = (ExpeditionInvite *) 0 ;
-  std::string arg2 ;
-  std::string *argp2 ;
+  std::string *arg2 = 0 ;
   
   arg1 = (ExpeditionInvite *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->swap_remove_name = arg2;
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->swap_remove_name = *arg2;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_ExpeditionInvite_swap_remove_name_get(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_ExpeditionInvite_swap_remove_name_get(void * jarg1) {
+  const char * jresult ;
   ExpeditionInvite *arg1 = (ExpeditionInvite *) 0 ;
-  std::string result;
+  std::string *result = 0 ;
   
   arg1 = (ExpeditionInvite *)jarg1; 
-  result =  ((arg1)->swap_remove_name);
-  jresult = new std::string(result); 
+  result = (std::string *) & ((arg1)->swap_remove_name);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
@@ -13143,58 +14349,56 @@ SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DataBucketCache_bucket_id_get(v
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DataBucketCache_bucket_key_set(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_DataBucketCache_bucket_key_set(void * jarg1, const char * jarg2) {
   DataBucketCache *arg1 = (DataBucketCache *) 0 ;
-  std::string arg2 ;
-  std::string *argp2 ;
+  std::string *arg2 = 0 ;
   
   arg1 = (DataBucketCache *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->bucket_key = arg2;
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->bucket_key = *arg2;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_DataBucketCache_bucket_key_get(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_DataBucketCache_bucket_key_get(void * jarg1) {
+  const char * jresult ;
   DataBucketCache *arg1 = (DataBucketCache *) 0 ;
-  std::string result;
+  std::string *result = 0 ;
   
   arg1 = (DataBucketCache *)jarg1; 
-  result =  ((arg1)->bucket_key);
-  jresult = new std::string(result); 
+  result = (std::string *) & ((arg1)->bucket_key);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DataBucketCache_bucket_value_set(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_DataBucketCache_bucket_value_set(void * jarg1, const char * jarg2) {
   DataBucketCache *arg1 = (DataBucketCache *) 0 ;
-  std::string arg2 ;
-  std::string *argp2 ;
+  std::string *arg2 = 0 ;
   
   arg1 = (DataBucketCache *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->bucket_value = arg2;
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->bucket_value = *arg2;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_DataBucketCache_bucket_value_get(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_DataBucketCache_bucket_value_get(void * jarg1) {
+  const char * jresult ;
   DataBucketCache *arg1 = (DataBucketCache *) 0 ;
-  std::string result;
+  std::string *result = 0 ;
   
   arg1 = (DataBucketCache *)jarg1; 
-  result =  ((arg1)->bucket_value);
-  jresult = new std::string(result); 
+  result = (std::string *) & ((arg1)->bucket_value);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
@@ -14921,7 +16125,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildMembersList(void * jarg1,
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildMemberAdd(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, void * jarg8) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildMemberAdd(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, const char * jarg8) {
   EntityList *arg1 = (EntityList *) 0 ;
   uint32 arg2 ;
   uint32 arg3 ;
@@ -14930,7 +16134,6 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildMemberAdd(void * jarg1, u
   uint32 arg6 ;
   uint32 arg7 ;
   std::string arg8 ;
-  std::string *argp8 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (uint32)jarg2; 
@@ -14939,166 +16142,147 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildMemberAdd(void * jarg1, u
   arg5 = (uint32)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (uint32)jarg7; 
-  argp8 = (std::string *)jarg8; 
-  if (!argp8) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg8) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg8 = *argp8; 
+  (&arg8)->assign(jarg8); 
   (arg1)->SendGuildMemberAdd(arg2,arg3,arg4,arg5,arg6,arg7,arg8);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildMemberRename(void * jarg1, unsigned int jarg2, void * jarg3, void * jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildMemberRename(void * jarg1, unsigned int jarg2, const char * jarg3, const char * jarg4) {
   EntityList *arg1 = (EntityList *) 0 ;
   uint32 arg2 ;
   std::string arg3 ;
   std::string arg4 ;
-  std::string *argp3 ;
-  std::string *argp4 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (uint32)jarg2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
-  argp4 = (std::string *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  (&arg3)->assign(jarg3); 
+  if (!jarg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg4 = *argp4; 
+  (&arg4)->assign(jarg4); 
   (arg1)->SendGuildMemberRename(arg2,arg3,arg4);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildMemberRemove(void * jarg1, unsigned int jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildMemberRemove(void * jarg1, unsigned int jarg2, const char * jarg3) {
   EntityList *arg1 = (EntityList *) 0 ;
   uint32 arg2 ;
   std::string arg3 ;
-  std::string *argp3 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (uint32)jarg2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   (arg1)->SendGuildMemberRemove(arg2,arg3);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildMemberLevel(void * jarg1, unsigned int jarg2, unsigned int jarg3, void * jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildMemberLevel(void * jarg1, unsigned int jarg2, unsigned int jarg3, const char * jarg4) {
   EntityList *arg1 = (EntityList *) 0 ;
   uint32 arg2 ;
   uint32 arg3 ;
   std::string arg4 ;
-  std::string *argp4 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (uint32)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (std::string *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg4 = *argp4; 
+  (&arg4)->assign(jarg4); 
   (arg1)->SendGuildMemberLevel(arg2,arg3,arg4);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildMemberRankAltBanker(void * jarg1, unsigned int jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, unsigned int jarg6) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildMemberRankAltBanker(void * jarg1, unsigned int jarg2, unsigned int jarg3, const char * jarg4, unsigned int jarg5, unsigned int jarg6) {
   EntityList *arg1 = (EntityList *) 0 ;
   uint32 arg2 ;
   uint32 arg3 ;
   std::string arg4 ;
   bool arg5 ;
   bool arg6 ;
-  std::string *argp4 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (uint32)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (std::string *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg4 = *argp4; 
+  (&arg4)->assign(jarg4); 
   arg5 = jarg5 ? true : false; 
   arg6 = jarg6 ? true : false; 
   (arg1)->SendGuildMemberRankAltBanker(arg2,arg3,arg4,arg5,arg6);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildMemberPublicNote(void * jarg1, unsigned int jarg2, void * jarg3, void * jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildMemberPublicNote(void * jarg1, unsigned int jarg2, const char * jarg3, const char * jarg4) {
   EntityList *arg1 = (EntityList *) 0 ;
   uint32 arg2 ;
   std::string arg3 ;
   std::string arg4 ;
-  std::string *argp3 ;
-  std::string *argp4 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (uint32)jarg2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
-  argp4 = (std::string *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  (&arg3)->assign(jarg3); 
+  if (!jarg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg4 = *argp4; 
+  (&arg4)->assign(jarg4); 
   (arg1)->SendGuildMemberPublicNote(arg2,arg3,arg4);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildMemberDetails(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4, void * jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildMemberDetails(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4, const char * jarg5) {
   EntityList *arg1 = (EntityList *) 0 ;
   uint32 arg2 ;
   uint32 arg3 ;
   uint32 arg4 ;
   std::string arg5 ;
-  std::string *argp5 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (uint32)jarg2; 
   arg3 = (uint32)jarg3; 
   arg4 = (uint32)jarg4; 
-  argp5 = (std::string *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg5 = *argp5; 
+  (&arg5)->assign(jarg5); 
   (arg1)->SendGuildMemberDetails(arg2,arg3,arg4,arg5);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildRenameGuild(void * jarg1, unsigned int jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SendGuildRenameGuild(void * jarg1, unsigned int jarg2, const char * jarg3) {
   EntityList *arg1 = (EntityList *) 0 ;
   uint32 arg2 ;
   std::string arg3 ;
-  std::string *argp3 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (uint32)jarg2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   (arg1)->SendGuildRenameGuild(arg2,arg3);
 }
 
@@ -16162,7 +17346,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_EntityList_GetFilteredEntityList__SWIG_0(vo
   uint32 arg3 ;
   EntityFilterType arg4 ;
   EntityFilterType *argp4 ;
-  SwigValueWrapper< std::vector< Mob * > > result;
+  std::vector< Mob * > result;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
@@ -16184,7 +17368,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_EntityList_GetFilteredEntityList__SWIG_1(vo
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
-  SwigValueWrapper< std::vector< Mob * > > result;
+  std::vector< Mob * > result;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
@@ -16199,7 +17383,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_EntityList_GetFilteredEntityList__SWIG_2(vo
   void * jresult ;
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
-  SwigValueWrapper< std::vector< Mob * > > result;
+  std::vector< Mob * > result;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
@@ -16281,45 +17465,41 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_DamageArea__SWIG_3(void * jarg1, v
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_Marquee__SWIG_0(void * jarg1, unsigned int jarg2, void * jarg3, unsigned int jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_Marquee__SWIG_0(void * jarg1, unsigned int jarg2, const char * jarg3, unsigned int jarg4) {
   EntityList *arg1 = (EntityList *) 0 ;
   uint32 arg2 ;
   std::string arg3 ;
   uint32 arg4 ;
-  std::string *argp3 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (uint32)jarg2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   arg4 = (uint32)jarg4; 
   (arg1)->Marquee(arg2,arg3,arg4);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_Marquee__SWIG_1(void * jarg1, unsigned int jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_Marquee__SWIG_1(void * jarg1, unsigned int jarg2, const char * jarg3) {
   EntityList *arg1 = (EntityList *) 0 ;
   uint32 arg2 ;
   std::string arg3 ;
-  std::string *argp3 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (uint32)jarg2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   (arg1)->Marquee(arg2,arg3);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_Marquee__SWIG_2(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, void * jarg7) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_Marquee__SWIG_2(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, const char * jarg7) {
   EntityList *arg1 = (EntityList *) 0 ;
   uint32 arg2 ;
   uint32 arg3 ;
@@ -16327,7 +17507,6 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_Marquee__SWIG_2(void * jarg1, unsi
   uint32 arg5 ;
   uint32 arg6 ;
   std::string arg7 ;
-  std::string *argp7 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (uint32)jarg2; 
@@ -16335,12 +17514,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_Marquee__SWIG_2(void * jarg1, unsi
   arg4 = (uint32)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (uint32)jarg6; 
-  argp7 = (std::string *)jarg7; 
-  if (!argp7) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg7) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg7 = *argp7; 
+  (&arg7)->assign(jarg7); 
   (arg1)->Marquee(arg2,arg3,arg4,arg5,arg6,arg7);
 }
 
@@ -19628,21 +20806,19 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_UpdateQGlobal(void * jarg1, unsign
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_DeleteQGlobal(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_DeleteQGlobal(void * jarg1, const char * jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5) {
   EntityList *arg1 = (EntityList *) 0 ;
   std::string arg2 ;
   uint32 arg3 ;
   uint32 arg4 ;
   uint32 arg5 ;
-  std::string *argp2 ;
   
   arg1 = (EntityList *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   arg3 = (uint32)jarg3; 
   arg4 = (uint32)jarg4; 
   arg5 = (uint32)jarg5; 
@@ -19824,7 +21000,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_EntityList_GetTargetsForVirusEffect(void * 
   int arg4 ;
   int arg5 ;
   int32 arg6 ;
-  SwigValueWrapper< std::vector< Mob * > > result;
+  std::vector< Mob * > result;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
@@ -19928,21 +21104,19 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_EntityList_GetBotListByCharacterID__SWIG_1(
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_EntityList_GetBotListByClientName__SWIG_0(void * jarg1, void * jarg2, unsigned char jarg3) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_EntityList_GetBotListByClientName__SWIG_0(void * jarg1, const char * jarg2, unsigned char jarg3) {
   void * jresult ;
   EntityList *arg1 = (EntityList *) 0 ;
   std::string arg2 ;
   uint8 arg3 ;
-  std::string *argp2 ;
   SwigValueWrapper< std::vector< Bot * > > result;
   
   arg1 = (EntityList *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   arg3 = (uint8)jarg3; 
   result = (arg1)->GetBotListByClientName(arg2,arg3);
   jresult = new std::vector< Bot * >(result); 
@@ -19950,20 +21124,18 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_EntityList_GetBotListByClientName__SWIG_0(v
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_EntityList_GetBotListByClientName__SWIG_1(void * jarg1, void * jarg2) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_EntityList_GetBotListByClientName__SWIG_1(void * jarg1, const char * jarg2) {
   void * jresult ;
   EntityList *arg1 = (EntityList *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   SwigValueWrapper< std::vector< Bot * > > result;
   
   arg1 = (EntityList *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   result = (arg1)->GetBotListByClientName(arg2);
   jresult = new std::vector< Bot * >(result); 
   return jresult;
@@ -19982,19 +21154,17 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SignalAllBotsByOwnerCharacterID(vo
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SignalAllBotsByOwnerName(void * jarg1, void * jarg2, int jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SignalAllBotsByOwnerName(void * jarg1, const char * jarg2, int jarg3) {
   EntityList *arg1 = (EntityList *) 0 ;
   std::string arg2 ;
   int arg3 ;
-  std::string *argp2 ;
   
   arg1 = (EntityList *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   arg3 = (int)jarg3; 
   (arg1)->SignalAllBotsByOwnerName(arg2,arg3);
 }
@@ -20012,19 +21182,17 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SignalBotByBotID(void * jarg1, uns
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SignalBotByBotName(void * jarg1, void * jarg2, int jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_SignalBotByBotName(void * jarg1, const char * jarg2, int jarg3) {
   EntityList *arg1 = (EntityList *) 0 ;
   std::string arg2 ;
   int arg3 ;
-  std::string *argp2 ;
   
   arg1 = (EntityList *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   arg3 = (int)jarg3; 
   (arg1)->SignalBotByBotName(arg2,arg3);
 }
@@ -21340,28 +22508,6 @@ SWIGEXPORT int SWIGSTDCALL CSharp_Mob_SpecialAbility_level_get(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_SpecialAbility_timer_set(void * jarg1, void * jarg2) {
-  Mob::SpecialAbility *arg1 = (Mob::SpecialAbility *) 0 ;
-  Timer *arg2 = (Timer *) 0 ;
-  
-  arg1 = (Mob::SpecialAbility *)jarg1; 
-  arg2 = (Timer *)jarg2; 
-  if (arg1) (arg1)->timer = arg2;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_SpecialAbility_timer_get(void * jarg1) {
-  void * jresult ;
-  Mob::SpecialAbility *arg1 = (Mob::SpecialAbility *) 0 ;
-  Timer *result = 0 ;
-  
-  arg1 = (Mob::SpecialAbility *)jarg1; 
-  result = (Timer *) ((arg1)->timer);
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
 SWIGEXPORT void SWIGSTDCALL CSharp_Mob_SpecialAbility_params__set(void * jarg1, void * jarg2) {
   Mob::SpecialAbility *arg1 = (Mob::SpecialAbility *) 0 ;
   int *arg2 = (int *) (int *)0 ;
@@ -21457,28 +22603,6 @@ SWIGEXPORT int SWIGSTDCALL CSharp_Mob_AuraInfo_icon_get(void * jarg1) {
   arg1 = (Mob::AuraInfo *)jarg1; 
   result = (int) ((arg1)->icon);
   jresult = result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_AuraInfo_aura_set(void * jarg1, void * jarg2) {
-  Mob::AuraInfo *arg1 = (Mob::AuraInfo *) 0 ;
-  Aura *arg2 = (Aura *) 0 ;
-  
-  arg1 = (Mob::AuraInfo *)jarg1; 
-  arg2 = (Aura *)jarg2; 
-  if (arg1) (arg1)->aura = arg2;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_AuraInfo_aura_get(void * jarg1) {
-  void * jresult ;
-  Mob::AuraInfo *arg1 = (Mob::AuraInfo *) 0 ;
-  Aura *result = 0 ;
-  
-  arg1 = (Mob::AuraInfo *)jarg1; 
-  result = (Aura *) ((arg1)->aura);
-  jresult = (void *)result; 
   return jresult;
 }
 
@@ -21627,62 +22751,6 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_close_mobs_get(void * jarg1) {
   arg1 = (Mob *)jarg1; 
   result = (std::unordered_map< uint16,Mob *,std::hash< uint16 > > *)& ((arg1)->close_mobs);
   jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_mob_close_scan_timer_set(void * jarg1, void * jarg2) {
-  Mob *arg1 = (Mob *) 0 ;
-  Timer arg2 ;
-  Timer *argp2 ;
-  
-  arg1 = (Mob *)jarg1; 
-  argp2 = (Timer *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null Timer", 0);
-    return ;
-  }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->mob_close_scan_timer = arg2;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_mob_close_scan_timer_get(void * jarg1) {
-  void * jresult ;
-  Mob *arg1 = (Mob *) 0 ;
-  Timer result;
-  
-  arg1 = (Mob *)jarg1; 
-  result =  ((arg1)->mob_close_scan_timer);
-  jresult = new Timer(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_mob_check_moving_timer_set(void * jarg1, void * jarg2) {
-  Mob *arg1 = (Mob *) 0 ;
-  Timer arg2 ;
-  Timer *argp2 ;
-  
-  arg1 = (Mob *)jarg1; 
-  argp2 = (Timer *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null Timer", 0);
-    return ;
-  }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->mob_check_moving_timer = arg2;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_mob_check_moving_timer_get(void * jarg1) {
-  void * jresult ;
-  Mob *arg1 = (Mob *) 0 ;
-  Timer result;
-  
-  arg1 = (Mob *)jarg1; 
-  result =  ((arg1)->mob_check_moving_timer);
-  jresult = new Timer(result); 
   return jresult;
 }
 
@@ -28287,18 +29355,6 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_RemoveAllNimbusEffects(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetTargetRingLocation(void * jarg1) {
-  void * jresult ;
-  Mob *arg1 = (Mob *) 0 ;
-  glm::vec3 *result = 0 ;
-  
-  arg1 = (Mob *)jarg1; 
-  result = (glm::vec3 *) &((Mob const *)arg1)->GetTargetRingLocation();
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
 SWIGEXPORT float SWIGSTDCALL CSharp_Mob_GetTargetRingX(void * jarg1) {
   float jresult ;
   Mob *arg1 = (Mob *) 0 ;
@@ -29669,8 +30725,8 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetTarget(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetTargetDescription__SWIG_0(void * jarg1, void * jarg2, unsigned char jarg3, unsigned short jarg4) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Mob_GetTargetDescription__SWIG_0(void * jarg1, void * jarg2, unsigned char jarg3, unsigned short jarg4) {
+  const char * jresult ;
   Mob *arg1 = (Mob *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint8 arg3 ;
@@ -29682,13 +30738,13 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetTargetDescription__SWIG_0(void * jar
   arg3 = (uint8)jarg3; 
   arg4 = (uint16)jarg4; 
   result = (arg1)->GetTargetDescription(arg2,arg3,arg4);
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetTargetDescription__SWIG_1(void * jarg1, void * jarg2, unsigned char jarg3) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Mob_GetTargetDescription__SWIG_1(void * jarg1, void * jarg2, unsigned char jarg3) {
+  const char * jresult ;
   Mob *arg1 = (Mob *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint8 arg3 ;
@@ -29698,13 +30754,13 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetTargetDescription__SWIG_1(void * jar
   arg2 = (Mob *)jarg2; 
   arg3 = (uint8)jarg3; 
   result = (arg1)->GetTargetDescription(arg2,arg3);
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetTargetDescription__SWIG_2(void * jarg1, void * jarg2) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Mob_GetTargetDescription__SWIG_2(void * jarg1, void * jarg2) {
+  const char * jresult ;
   Mob *arg1 = (Mob *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   std::string result;
@@ -29712,7 +30768,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetTargetDescription__SWIG_2(void * jar
   arg1 = (Mob *)jarg1; 
   arg2 = (Mob *)jarg2; 
   result = (arg1)->GetTargetDescription(arg2);
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
@@ -30553,18 +31609,6 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_SetNPCTypeID(void * jarg1, unsigned int j
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetPosition(void * jarg1) {
-  void * jresult ;
-  Mob *arg1 = (Mob *) 0 ;
-  glm::vec4 *result = 0 ;
-  
-  arg1 = (Mob *)jarg1; 
-  result = (glm::vec4 *) &((Mob const *)arg1)->GetPosition();
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
 SWIGEXPORT void SWIGSTDCALL CSharp_Mob_SetPosition(void * jarg1, float jarg2, float jarg3, float jarg4) {
   Mob *arg1 = (Mob *) 0 ;
   float arg2 ;
@@ -30623,18 +31667,6 @@ SWIGEXPORT float SWIGSTDCALL CSharp_Mob_GetHeading(void * jarg1) {
   arg1 = (Mob *)jarg1; 
   result = (float)((Mob const *)arg1)->GetHeading();
   jresult = result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetRelativePosition(void * jarg1) {
-  void * jresult ;
-  Mob *arg1 = (Mob *) 0 ;
-  glm::vec4 *result = 0 ;
-  
-  arg1 = (Mob *)jarg1; 
-  result = (glm::vec4 *) &((Mob const *)arg1)->GetRelativePosition();
-  jresult = (void *)result; 
   return jresult;
 }
 
@@ -32277,14 +33309,14 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CheckLastLosState(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetMobDescription(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Mob_GetMobDescription(void * jarg1) {
+  const char * jresult ;
   Mob *arg1 = (Mob *) 0 ;
   std::string result;
   
   arg1 = (Mob *)jarg1; 
   result = (arg1)->GetMobDescription();
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
@@ -33008,38 +34040,6 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_HasFreeTrapSlots(void * jarg1) {
   result = (bool)(arg1)->HasFreeTrapSlots();
   jresult = result; 
   return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_AddAura(void * jarg1, void * jarg2, void * jarg3) {
-  Mob *arg1 = (Mob *) 0 ;
-  Aura *arg2 = (Aura *) 0 ;
-  AuraRecord *arg3 = 0 ;
-  
-  arg1 = (Mob *)jarg1; 
-  arg2 = (Aura *)jarg2; 
-  arg3 = (AuraRecord *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "AuraRecord & is null", 0);
-    return ;
-  } 
-  (arg1)->AddAura(arg2,*arg3);
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_AddTrap(void * jarg1, void * jarg2, void * jarg3) {
-  Mob *arg1 = (Mob *) 0 ;
-  Aura *arg2 = (Aura *) 0 ;
-  AuraRecord *arg3 = 0 ;
-  
-  arg1 = (Mob *)jarg1; 
-  arg2 = (Aura *)jarg2; 
-  arg3 = (AuraRecord *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "AuraRecord & is null", 0);
-    return ;
-  } 
-  (arg1)->AddTrap(arg2,*arg3);
 }
 
 
@@ -34969,22 +35969,20 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_QuestJournalledSay(void * jarg1, void * j
 }
 
 
-SWIGEXPORT int SWIGSTDCALL CSharp_Mob_GetItemStat(void * jarg1, unsigned int jarg2, void * jarg3) {
+SWIGEXPORT int SWIGSTDCALL CSharp_Mob_GetItemStat(void * jarg1, unsigned int jarg2, const char * jarg3) {
   int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint32 arg2 ;
   std::string arg3 ;
-  std::string *argp3 ;
   int result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint32)jarg2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   result = (int)(arg1)->GetItemStat(arg2,arg3);
   jresult = result; 
   return jresult;
@@ -39057,42 +40055,38 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_ClearEntityVariables(void * jarg1
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DeleteEntityVariable(void * jarg1, void * jarg2) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DeleteEntityVariable(void * jarg1, const char * jarg2) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   result = (bool)(arg1)->DeleteEntityVariable(arg2);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetEntityVariable(void * jarg1, void * jarg2) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Mob_GetEntityVariable(void * jarg1, const char * jarg2) {
+  const char * jresult ;
   Mob *arg1 = (Mob *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   std::string result;
   
   arg1 = (Mob *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   result = (arg1)->GetEntityVariable(arg2);
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
@@ -39109,44 +40103,38 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetEntityVariables(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_SetEntityVariable(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_SetEntityVariable(void * jarg1, const char * jarg2, const char * jarg3) {
   Mob *arg1 = (Mob *) 0 ;
   std::string arg2 ;
   std::string arg3 ;
-  std::string *argp2 ;
-  std::string *argp3 ;
   
   arg1 = (Mob *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  (&arg2)->assign(jarg2); 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   (arg1)->SetEntityVariable(arg2,arg3);
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_EntityVariableExists(void * jarg1, void * jarg2) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_EntityVariableExists(void * jarg1, const char * jarg2) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   result = (bool)(arg1)->EntityVariableExists(arg2);
   jresult = result; 
   return jresult;
@@ -40807,20 +41795,6 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_StopSpecialAbilityTimer(void * jarg1, int
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetSpecialAbilityTimer(void * jarg1, int jarg2) {
-  void * jresult ;
-  Mob *arg1 = (Mob *) 0 ;
-  int arg2 ;
-  Timer *result = 0 ;
-  
-  arg1 = (Mob *)jarg1; 
-  arg2 = (int)jarg2; 
-  result = (Timer *)(arg1)->GetSpecialAbilityTimer(arg2);
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
 SWIGEXPORT void SWIGSTDCALL CSharp_Mob_ClearSpecialAbilities(void * jarg1) {
   Mob *arg1 = (Mob *) 0 ;
   
@@ -40829,16 +41803,17 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_ClearSpecialAbilities(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_ProcessSpecialAbilities(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_ProcessSpecialAbilities(void * jarg1, const char * jarg2) {
   Mob *arg1 = (Mob *) 0 ;
   std::string *arg2 = 0 ;
   
   arg1 = (Mob *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   (arg1)->ProcessSpecialAbilities((std::string const &)*arg2);
 }
 
@@ -41301,54 +42276,6 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_IsTrackable(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetAIThinkTimer(void * jarg1) {
-  void * jresult ;
-  Mob *arg1 = (Mob *) 0 ;
-  Timer *result = 0 ;
-  
-  arg1 = (Mob *)jarg1; 
-  result = (Timer *)(arg1)->GetAIThinkTimer();
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetAIMovementTimer(void * jarg1) {
-  void * jresult ;
-  Mob *arg1 = (Mob *) 0 ;
-  Timer *result = 0 ;
-  
-  arg1 = (Mob *)jarg1; 
-  result = (Timer *)(arg1)->GetAIMovementTimer();
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetAttackTimer(void * jarg1) {
-  void * jresult ;
-  Mob *arg1 = (Mob *) 0 ;
-  Timer result;
-  
-  arg1 = (Mob *)jarg1; 
-  result = (arg1)->GetAttackTimer();
-  jresult = new Timer(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetAttackDWTimer(void * jarg1) {
-  void * jresult ;
-  Mob *arg1 = (Mob *) 0 ;
-  Timer result;
-  
-  arg1 = (Mob *)jarg1; 
-  result = (arg1)->GetAttackDWTimer();
-  jresult = new Timer(result); 
-  return jresult;
-}
-
-
 SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_IsFindable(void * jarg1) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
@@ -41413,8 +42340,8 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_IsBlockedPetBuff(void * jarg1, in
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetGlobal(void * jarg1, char * jarg2) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Mob_GetGlobal(void * jarg1, char * jarg2) {
+  const char * jresult ;
   Mob *arg1 = (Mob *) 0 ;
   char *arg2 = (char *) 0 ;
   std::string result;
@@ -41422,7 +42349,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetGlobal(void * jarg1, char * jarg2) {
   arg1 = (Mob *)jarg1; 
   arg2 = (char *)jarg2; 
   result = (arg1)->GetGlobal((char const *)arg2);
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
@@ -41527,26 +42454,26 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_HasSpellEffect(void * jarg1, int 
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetRacePlural(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Mob_GetRacePlural(void * jarg1) {
+  const char * jresult ;
   Mob *arg1 = (Mob *) 0 ;
   std::string result;
   
   arg1 = (Mob *)jarg1; 
   result = (arg1)->GetRacePlural();
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetClassPlural(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Mob_GetClassPlural(void * jarg1) {
+  const char * jresult ;
   Mob *arg1 = (Mob *) 0 ;
   std::string result;
   
   arg1 = (Mob *)jarg1; 
   result = (arg1)->GetClassPlural();
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
@@ -44259,134 +45186,116 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_GetFeigned(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DeleteBucket(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DeleteBucket(void * jarg1, const char * jarg2) {
   Mob *arg1 = (Mob *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   
   arg1 = (Mob *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   (arg1)->DeleteBucket(arg2);
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetBucket(void * jarg1, void * jarg2) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Mob_GetBucket(void * jarg1, const char * jarg2) {
+  const char * jresult ;
   Mob *arg1 = (Mob *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   std::string result;
   
   arg1 = (Mob *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   result = (arg1)->GetBucket(arg2);
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetBucketExpires(void * jarg1, void * jarg2) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Mob_GetBucketExpires(void * jarg1, const char * jarg2) {
+  const char * jresult ;
   Mob *arg1 = (Mob *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   std::string result;
   
   arg1 = (Mob *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   result = (arg1)->GetBucketExpires(arg2);
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetBucketRemaining(void * jarg1, void * jarg2) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Mob_GetBucketRemaining(void * jarg1, const char * jarg2) {
+  const char * jresult ;
   Mob *arg1 = (Mob *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   std::string result;
   
   arg1 = (Mob *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   result = (arg1)->GetBucketRemaining(arg2);
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_SetBucket__SWIG_0(void * jarg1, void * jarg2, void * jarg3, void * jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_SetBucket__SWIG_0(void * jarg1, const char * jarg2, const char * jarg3, const char * jarg4) {
   Mob *arg1 = (Mob *) 0 ;
   std::string arg2 ;
   std::string arg3 ;
   std::string arg4 ;
-  std::string *argp2 ;
-  std::string *argp3 ;
-  std::string *argp4 ;
   
   arg1 = (Mob *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  (&arg2)->assign(jarg2); 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
-  argp4 = (std::string *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  (&arg3)->assign(jarg3); 
+  if (!jarg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg4 = *argp4; 
+  (&arg4)->assign(jarg4); 
   (arg1)->SetBucket(arg2,arg3,arg4);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_SetBucket__SWIG_1(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_SetBucket__SWIG_1(void * jarg1, const char * jarg2, const char * jarg3) {
   Mob *arg1 = (Mob *) 0 ;
   std::string arg2 ;
   std::string arg3 ;
-  std::string *argp2 ;
-  std::string *argp3 ;
   
   arg1 = (Mob *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  (&arg2)->assign(jarg2); 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   (arg1)->SetBucket(arg2,arg3);
 }
 
@@ -44403,27 +45312,25 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_GetMobTypeIdentifier(void * jarg1
 }
 
 
-SWIGEXPORT float SWIGSTDCALL CSharp_Mob_CheckHeroicBonusesDataBuckets(void * jarg1, void * jarg2) {
+SWIGEXPORT float SWIGSTDCALL CSharp_Mob_CheckHeroicBonusesDataBuckets(void * jarg1, const char * jarg2) {
   float jresult ;
   Mob *arg1 = (Mob *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   float result;
   
   arg1 = (Mob *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   result = (float)(arg1)->CheckHeroicBonusesDataBuckets(arg2);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT int SWIGSTDCALL CSharp_Mob_DispatchZoneControllerEvent(void * jarg1, int jarg2, void * jarg3, void * jarg4, unsigned int jarg5, void * jarg6) {
+SWIGEXPORT int SWIGSTDCALL CSharp_Mob_DispatchZoneControllerEvent(void * jarg1, int jarg2, void * jarg3, const char * jarg4, unsigned int jarg5, void * jarg6) {
   int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   QuestEventID arg2 ;
@@ -44436,11 +45343,12 @@ SWIGEXPORT int SWIGSTDCALL CSharp_Mob_DispatchZoneControllerEvent(void * jarg1, 
   arg1 = (Mob *)jarg1; 
   arg2 = (QuestEventID)jarg2; 
   arg3 = (Mob *)jarg3; 
-  arg4 = (std::string *)jarg4;
-  if (!arg4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg4_str(jarg4);
+  arg4 = &arg4_str; 
   arg5 = (uint32)jarg5; 
   arg6 = (std::vector< std::any > *)jarg6; 
   result = (int)(arg1)->DispatchZoneControllerEvent(arg2,arg3,(std::string const &)*arg4,arg5,arg6);
@@ -44569,20 +45477,18 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_GetManualFollow(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DrawDebugCoordinateNode(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DrawDebugCoordinateNode(void * jarg1, const char * jarg2, void * jarg3) {
   Mob *arg1 = (Mob *) 0 ;
   std::string arg2 ;
   glm::vec4 arg3 ;
-  std::string *argp2 ;
   glm::vec4 const *argp3 ;
   
   arg1 = (Mob *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   argp3 = (glm::vec4 *)jarg3; 
   if (!argp3) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null glm::vec4 const", 0);
@@ -44611,18 +45517,6 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetScopedBucketKeys(void * jarg1) {
   arg1 = (Mob *)jarg1; 
   result = (arg1)->GetScopedBucketKeys();
   jresult = new DataBucketKey(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetCombatRecord(void * jarg1) {
-  void * jresult ;
-  Mob *arg1 = (Mob *) 0 ;
-  CombatRecord *result = 0 ;
-  
-  arg1 = (Mob *)jarg1; 
-  result = (CombatRecord *) &((Mob const *)arg1)->GetCombatRecord();
-  jresult = (void *)result; 
   return jresult;
 }
 
@@ -44666,6 +45560,2973 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_turning_get(void * jarg1) {
   
   arg1 = (Mob *)jarg1; 
   result = (bool) ((arg1)->turning);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_MAXMERCS_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_TANK_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_HEALER_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_MELEEDPS_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(9);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_CASTERDPS_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(12);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_NO_MERC_ID_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_MERC_STATE_NORMAL_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(5);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_MERC_STATE_SUSPENDED_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_NOT_SUSPENDED_TIME_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_MercAISpellRange_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(int)MercAISpellRange;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MercSpell_spellid_set(void * jarg1, unsigned short jarg2) {
+  MercSpell *arg1 = (MercSpell *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (MercSpell *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  if (arg1) (arg1)->spellid = arg2;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MercSpell_spellid_get(void * jarg1) {
+  unsigned short jresult ;
+  MercSpell *arg1 = (MercSpell *) 0 ;
+  uint16 result;
+  
+  arg1 = (MercSpell *)jarg1; 
+  result = (uint16) ((arg1)->spellid);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MercSpell_type_set(void * jarg1, unsigned int jarg2) {
+  MercSpell *arg1 = (MercSpell *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (MercSpell *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->type = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_MercSpell_type_get(void * jarg1) {
+  unsigned int jresult ;
+  MercSpell *arg1 = (MercSpell *) 0 ;
+  uint32 result;
+  
+  arg1 = (MercSpell *)jarg1; 
+  result = (uint32) ((arg1)->type);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MercSpell_stance_set(void * jarg1, short jarg2) {
+  MercSpell *arg1 = (MercSpell *) 0 ;
+  int16 arg2 ;
+  
+  arg1 = (MercSpell *)jarg1; 
+  arg2 = (int16)jarg2; 
+  if (arg1) (arg1)->stance = arg2;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_MercSpell_stance_get(void * jarg1) {
+  short jresult ;
+  MercSpell *arg1 = (MercSpell *) 0 ;
+  int16 result;
+  
+  arg1 = (MercSpell *)jarg1; 
+  result = (int16) ((arg1)->stance);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MercSpell_slot_set(void * jarg1, short jarg2) {
+  MercSpell *arg1 = (MercSpell *) 0 ;
+  int16 arg2 ;
+  
+  arg1 = (MercSpell *)jarg1; 
+  arg2 = (int16)jarg2; 
+  if (arg1) (arg1)->slot = arg2;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_MercSpell_slot_get(void * jarg1) {
+  short jresult ;
+  MercSpell *arg1 = (MercSpell *) 0 ;
+  int16 result;
+  
+  arg1 = (MercSpell *)jarg1; 
+  result = (int16) ((arg1)->slot);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MercSpell_proc_chance_set(void * jarg1, unsigned short jarg2) {
+  MercSpell *arg1 = (MercSpell *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (MercSpell *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  if (arg1) (arg1)->proc_chance = arg2;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MercSpell_proc_chance_get(void * jarg1) {
+  unsigned short jresult ;
+  MercSpell *arg1 = (MercSpell *) 0 ;
+  uint16 result;
+  
+  arg1 = (MercSpell *)jarg1; 
+  result = (uint16) ((arg1)->proc_chance);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MercSpell_time_cancast_set(void * jarg1, unsigned int jarg2) {
+  MercSpell *arg1 = (MercSpell *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (MercSpell *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->time_cancast = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_MercSpell_time_cancast_get(void * jarg1) {
+  unsigned int jresult ;
+  MercSpell *arg1 = (MercSpell *) 0 ;
+  uint32 result;
+  
+  arg1 = (MercSpell *)jarg1; 
+  result = (uint32) ((arg1)->time_cancast);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_MercSpell() {
+  void * jresult ;
+  MercSpell *result = 0 ;
+  
+  result = (MercSpell *)new MercSpell();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_MercSpell(void * jarg1) {
+  MercSpell *arg1 = (MercSpell *) 0 ;
+  
+  arg1 = (MercSpell *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MercTimer_timerid_set(void * jarg1, unsigned short jarg2) {
+  MercTimer *arg1 = (MercTimer *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (MercTimer *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  if (arg1) (arg1)->timerid = arg2;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MercTimer_timerid_get(void * jarg1) {
+  unsigned short jresult ;
+  MercTimer *arg1 = (MercTimer *) 0 ;
+  uint16 result;
+  
+  arg1 = (MercTimer *)jarg1; 
+  result = (uint16) ((arg1)->timerid);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MercTimer_timertype_set(void * jarg1, unsigned char jarg2) {
+  MercTimer *arg1 = (MercTimer *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (MercTimer *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->timertype = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_MercTimer_timertype_get(void * jarg1) {
+  unsigned char jresult ;
+  MercTimer *arg1 = (MercTimer *) 0 ;
+  uint8 result;
+  
+  arg1 = (MercTimer *)jarg1; 
+  result = (uint8) ((arg1)->timertype);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MercTimer_spellid_set(void * jarg1, unsigned short jarg2) {
+  MercTimer *arg1 = (MercTimer *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (MercTimer *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  if (arg1) (arg1)->spellid = arg2;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MercTimer_spellid_get(void * jarg1) {
+  unsigned short jresult ;
+  MercTimer *arg1 = (MercTimer *) 0 ;
+  uint16 result;
+  
+  arg1 = (MercTimer *)jarg1; 
+  result = (uint16) ((arg1)->spellid);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MercTimer_time_cancast_set(void * jarg1, unsigned int jarg2) {
+  MercTimer *arg1 = (MercTimer *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (MercTimer *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->time_cancast = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_MercTimer_time_cancast_get(void * jarg1) {
+  unsigned int jresult ;
+  MercTimer *arg1 = (MercTimer *) 0 ;
+  uint32 result;
+  
+  arg1 = (MercTimer *)jarg1; 
+  result = (uint32) ((arg1)->time_cancast);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_MercTimer() {
+  void * jresult ;
+  MercTimer *result = 0 ;
+  
+  result = (MercTimer *)new MercTimer();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_MercTimer(void * jarg1) {
+  MercTimer *arg1 = (MercTimer *) 0 ;
+  
+  arg1 = (MercTimer *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_Merc(void * jarg1, float jarg2, float jarg3, float jarg4, float jarg5) {
+  void * jresult ;
+  NPCType *arg1 = (NPCType *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  Merc *result = 0 ;
+  
+  arg1 = (NPCType *)jarg1; 
+  arg2 = (float)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  arg5 = (float)jarg5; 
+  result = (Merc *)new Merc((NPCType const *)arg1,arg2,arg3,arg4,arg5);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_Merc(void * jarg1) {
+  Merc *arg1 = (Merc *) 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_Death__SWIG_0(void * jarg1, void * jarg2, long long jarg3, unsigned short jarg4, void * jarg5, unsigned char jarg6) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  int64 arg3 ;
+  uint16 arg4 ;
+  EQ::skills::SkillType arg5 ;
+  uint8 arg6 ;
+  EQ::skills::SkillType *argp5 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  arg3 = (int64)jarg3; 
+  arg4 = (uint16)jarg4; 
+  argp5 = (EQ::skills::SkillType *)jarg5; 
+  if (!argp5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::skills::SkillType", 0);
+    return 0;
+  }
+  arg5 = *argp5; 
+  arg6 = (uint8)jarg6; 
+  result = (bool)(arg1)->Death(arg2,arg3,arg4,arg5,arg6);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_Death__SWIG_1(void * jarg1, void * jarg2, long long jarg3, unsigned short jarg4, void * jarg5) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  int64 arg3 ;
+  uint16 arg4 ;
+  EQ::skills::SkillType arg5 ;
+  EQ::skills::SkillType *argp5 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  arg3 = (int64)jarg3; 
+  arg4 = (uint16)jarg4; 
+  argp5 = (EQ::skills::SkillType *)jarg5; 
+  if (!argp5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::skills::SkillType", 0);
+    return 0;
+  }
+  arg5 = *argp5; 
+  result = (bool)(arg1)->Death(arg2,arg3,arg4,arg5);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_Damage__SWIG_0(void * jarg1, void * jarg2, long long jarg3, unsigned short jarg4, void * jarg5, unsigned int jarg6, signed char jarg7, unsigned int jarg8, int jarg9) {
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  int64 arg3 ;
+  uint16 arg4 ;
+  EQ::skills::SkillType arg5 ;
+  bool arg6 ;
+  int8 arg7 ;
+  bool arg8 ;
+  eSpecialAttacks arg9 ;
+  EQ::skills::SkillType *argp5 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  arg3 = (int64)jarg3; 
+  arg4 = (uint16)jarg4; 
+  argp5 = (EQ::skills::SkillType *)jarg5; 
+  if (!argp5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::skills::SkillType", 0);
+    return ;
+  }
+  arg5 = *argp5; 
+  arg6 = jarg6 ? true : false; 
+  arg7 = (int8)jarg7; 
+  arg8 = jarg8 ? true : false; 
+  arg9 = (eSpecialAttacks)jarg9; 
+  (arg1)->Damage(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_Damage__SWIG_1(void * jarg1, void * jarg2, long long jarg3, unsigned short jarg4, void * jarg5, unsigned int jarg6, signed char jarg7, unsigned int jarg8) {
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  int64 arg3 ;
+  uint16 arg4 ;
+  EQ::skills::SkillType arg5 ;
+  bool arg6 ;
+  int8 arg7 ;
+  bool arg8 ;
+  EQ::skills::SkillType *argp5 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  arg3 = (int64)jarg3; 
+  arg4 = (uint16)jarg4; 
+  argp5 = (EQ::skills::SkillType *)jarg5; 
+  if (!argp5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::skills::SkillType", 0);
+    return ;
+  }
+  arg5 = *argp5; 
+  arg6 = jarg6 ? true : false; 
+  arg7 = (int8)jarg7; 
+  arg8 = jarg8 ? true : false; 
+  (arg1)->Damage(arg2,arg3,arg4,arg5,arg6,arg7,arg8);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_Damage__SWIG_2(void * jarg1, void * jarg2, long long jarg3, unsigned short jarg4, void * jarg5, unsigned int jarg6, signed char jarg7) {
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  int64 arg3 ;
+  uint16 arg4 ;
+  EQ::skills::SkillType arg5 ;
+  bool arg6 ;
+  int8 arg7 ;
+  EQ::skills::SkillType *argp5 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  arg3 = (int64)jarg3; 
+  arg4 = (uint16)jarg4; 
+  argp5 = (EQ::skills::SkillType *)jarg5; 
+  if (!argp5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::skills::SkillType", 0);
+    return ;
+  }
+  arg5 = *argp5; 
+  arg6 = jarg6 ? true : false; 
+  arg7 = (int8)jarg7; 
+  (arg1)->Damage(arg2,arg3,arg4,arg5,arg6,arg7);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_Damage__SWIG_3(void * jarg1, void * jarg2, long long jarg3, unsigned short jarg4, void * jarg5, unsigned int jarg6) {
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  int64 arg3 ;
+  uint16 arg4 ;
+  EQ::skills::SkillType arg5 ;
+  bool arg6 ;
+  EQ::skills::SkillType *argp5 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  arg3 = (int64)jarg3; 
+  arg4 = (uint16)jarg4; 
+  argp5 = (EQ::skills::SkillType *)jarg5; 
+  if (!argp5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::skills::SkillType", 0);
+    return ;
+  }
+  arg5 = *argp5; 
+  arg6 = jarg6 ? true : false; 
+  (arg1)->Damage(arg2,arg3,arg4,arg5,arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_Damage__SWIG_4(void * jarg1, void * jarg2, long long jarg3, unsigned short jarg4, void * jarg5) {
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  int64 arg3 ;
+  uint16 arg4 ;
+  EQ::skills::SkillType arg5 ;
+  EQ::skills::SkillType *argp5 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  arg3 = (int64)jarg3; 
+  arg4 = (uint16)jarg4; 
+  argp5 = (EQ::skills::SkillType *)jarg5; 
+  if (!argp5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::skills::SkillType", 0);
+    return ;
+  }
+  arg5 = *argp5; 
+  (arg1)->Damage(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_Attack__SWIG_0(void * jarg1, void * jarg2, int jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, void * jarg7) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  int arg3 ;
+  bool arg4 ;
+  bool arg5 ;
+  bool arg6 ;
+  ExtraAttackOptions *arg7 = (ExtraAttackOptions *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  arg5 = jarg5 ? true : false; 
+  arg6 = jarg6 ? true : false; 
+  arg7 = (ExtraAttackOptions *)jarg7; 
+  result = (bool)(arg1)->Attack(arg2,arg3,arg4,arg5,arg6,arg7);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_Attack__SWIG_1(void * jarg1, void * jarg2, int jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  int arg3 ;
+  bool arg4 ;
+  bool arg5 ;
+  bool arg6 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  arg5 = jarg5 ? true : false; 
+  arg6 = jarg6 ? true : false; 
+  result = (bool)(arg1)->Attack(arg2,arg3,arg4,arg5,arg6);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_Attack__SWIG_2(void * jarg1, void * jarg2, int jarg3, unsigned int jarg4, unsigned int jarg5) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  int arg3 ;
+  bool arg4 ;
+  bool arg5 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  arg5 = jarg5 ? true : false; 
+  result = (bool)(arg1)->Attack(arg2,arg3,arg4,arg5);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_Attack__SWIG_3(void * jarg1, void * jarg2, int jarg3, unsigned int jarg4) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  int arg3 ;
+  bool arg4 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  result = (bool)(arg1)->Attack(arg2,arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_Attack__SWIG_4(void * jarg1, void * jarg2, int jarg3) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  int arg3 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  arg3 = (int)jarg3; 
+  result = (bool)(arg1)->Attack(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_Attack__SWIG_5(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  result = (bool)(arg1)->Attack(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_HasRaid(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->HasRaid();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_HasGroup(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->HasGroup();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetRaid(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Raid *result = 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (Raid *)(arg1)->GetRaid();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetGroup(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Group *result = 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (Group *)(arg1)->GetGroup();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_AI_Start__SWIG_0(void * jarg1, int jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (int32)jarg2; 
+  (arg1)->AI_Start(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_AI_Start__SWIG_1(void * jarg1) {
+  Merc *arg1 = (Merc *) 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  (arg1)->AI_Start();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_AI_Stop(void * jarg1) {
+  Merc *arg1 = (Merc *) 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  (arg1)->AI_Stop();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_AI_Process(void * jarg1) {
+  Merc *arg1 = (Merc *) 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  (arg1)->AI_Process();
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_AICastSpell(void * jarg1, signed char jarg2, unsigned int jarg3) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int8 arg2 ;
+  uint32 arg3 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (int8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  result = (bool)(arg1)->AICastSpell(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_AIDoSpellCast__SWIG_0(void * jarg1, unsigned short jarg2, void * jarg3, int jarg4, void * jarg5) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint16 arg2 ;
+  Mob *arg3 = (Mob *) 0 ;
+  int32 arg4 ;
+  uint32 *arg5 = (uint32 *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (Mob *)jarg3; 
+  arg4 = (int32)jarg4; 
+  arg5 = (uint32 *)jarg5; 
+  result = (bool)(arg1)->AIDoSpellCast(arg2,arg3,arg4,arg5);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_AIDoSpellCast__SWIG_1(void * jarg1, unsigned short jarg2, void * jarg3, int jarg4) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint16 arg2 ;
+  Mob *arg3 = (Mob *) 0 ;
+  int32 arg4 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (Mob *)jarg3; 
+  arg4 = (int32)jarg4; 
+  result = (bool)(arg1)->AIDoSpellCast(arg2,arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_AI_EngagedCastCheck(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->AI_EngagedCastCheck();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_AI_IdleCastCheck(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->AI_IdleCastCheck();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_Process(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->Process();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_AddMercToGroup(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Group *arg2 = (Group *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Group *)jarg2; 
+  result = (bool)Merc::AddMercToGroup(arg1,arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_RemoveMercFromGroup(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Group *arg2 = (Group *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Group *)jarg2; 
+  result = (bool)Merc::RemoveMercFromGroup(arg1,arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_ProcessClientZoneChange(void * jarg1, void * jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  Client *arg2 = (Client *) 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Client *)jarg2; 
+  (arg1)->ProcessClientZoneChange(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_MercGroupSay(void * jarg1, char * jarg2) {
+  Mob *arg1 = (Mob *) 0 ;
+  char *arg2 = (char *) 0 ;
+  void *arg3 = 0 ;
+  
+  arg1 = (Mob *)jarg1; 
+  arg2 = (char *)jarg2; 
+  Merc::MercGroupSay(arg1,(char const *)arg2,arg3);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetGroupMemberCorpse(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Corpse *result = 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (Corpse *)(arg1)->GetGroupMemberCorpse();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_Merc_GetChanceToCastBySpellType(void * jarg1, unsigned int jarg2) {
+  signed char jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint32 arg2 ;
+  int8 result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (int8)(arg1)->GetChanceToCastBySpellType(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetSpellRecastTimer(void * jarg1, unsigned short jarg2, unsigned short jarg3, unsigned int jarg4) {
+  Merc *arg1 = (Merc *) 0 ;
+  uint16 arg2 ;
+  uint16 arg3 ;
+  uint32 arg4 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (uint16)jarg3; 
+  arg4 = (uint32)jarg4; 
+  (arg1)->SetSpellRecastTimer(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetDisciplineRecastTimer(void * jarg1, unsigned short jarg2, unsigned short jarg3, unsigned int jarg4) {
+  Merc *arg1 = (Merc *) 0 ;
+  uint16 arg2 ;
+  uint16 arg3 ;
+  uint32 arg4 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (uint16)jarg3; 
+  arg4 = (uint32)jarg4; 
+  (arg1)->SetDisciplineRecastTimer(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetSpellTimeCanCast(void * jarg1, unsigned short jarg2, unsigned int jarg3) {
+  Merc *arg1 = (Merc *) 0 ;
+  uint16 arg2 ;
+  uint32 arg3 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (uint32)jarg3; 
+  (arg1)->SetSpellTimeCanCast(arg2,arg3);
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetSpellRecastTimer(void * jarg1, unsigned short jarg2) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint16 arg2 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  result = (int32)Merc::GetSpellRecastTimer(arg1,arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_CheckSpellRecastTimers(void * jarg1, unsigned short jarg2) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint16 arg2 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  result = (bool)Merc::CheckSpellRecastTimers(arg1,arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetDisciplineRecastTimer(void * jarg1, unsigned short jarg2) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint16 arg2 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  result = (int32)Merc::GetDisciplineRecastTimer(arg1,arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_CheckDisciplineRecastTimers(void * jarg1, unsigned short jarg2, unsigned short jarg3) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint16 arg2 ;
+  uint16 arg3 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (uint16)jarg3; 
+  result = (bool)Merc::CheckDisciplineRecastTimers(arg1,arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetDisciplineRemainingTime(void * jarg1, unsigned short jarg2) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint16 arg2 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  result = (int32)Merc::GetDisciplineRemainingTime(arg1,arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetMercSpellsForSpellEffect(void * jarg1, int jarg2) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int arg2 ;
+  SwigValueWrapper< std::list< MercSpell > > result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = Merc::GetMercSpellsForSpellEffect(arg1,arg2);
+  jresult = new std::list< MercSpell >(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetMercSpellsForSpellEffectAndTargetType(void * jarg1, int jarg2, void * jarg3) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int arg2 ;
+  SpellTargetType arg3 ;
+  SpellTargetType *argp3 ;
+  SwigValueWrapper< std::list< MercSpell > > result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (int)jarg2; 
+  argp3 = (SpellTargetType *)jarg3; 
+  if (!argp3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null SpellTargetType", 0);
+    return 0;
+  }
+  arg3 = *argp3; 
+  result = Merc::GetMercSpellsForSpellEffectAndTargetType(arg1,arg2,SWIG_STD_MOVE(arg3));
+  jresult = new std::list< MercSpell >(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetMercSpellsBySpellType(void * jarg1, unsigned int jarg2) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint32 arg2 ;
+  SwigValueWrapper< std::list< MercSpell > > result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = Merc::GetMercSpellsBySpellType(arg1,arg2);
+  jresult = new std::list< MercSpell >(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetFirstMercSpellBySpellType(void * jarg1, unsigned int jarg2) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint32 arg2 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = Merc::GetFirstMercSpellBySpellType(arg1,arg2);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetFirstMercSpellForSingleTargetHeal(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = Merc::GetFirstMercSpellForSingleTargetHeal(arg1);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetMercSpellBySpellID(void * jarg1, unsigned short jarg2) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint16 arg2 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  result = Merc::GetMercSpellBySpellID(arg1,arg2);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForVeryFastHeal(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = Merc::GetBestMercSpellForVeryFastHeal(arg1);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForFastHeal(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = Merc::GetBestMercSpellForFastHeal(arg1);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForHealOverTime(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = Merc::GetBestMercSpellForHealOverTime(arg1);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForPercentageHeal(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = Merc::GetBestMercSpellForPercentageHeal(arg1);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForRegularSingleTargetHeal(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = Merc::GetBestMercSpellForRegularSingleTargetHeal(arg1);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForGroupHealOverTime(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = Merc::GetBestMercSpellForGroupHealOverTime(arg1);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForGroupCompleteHeal(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = Merc::GetBestMercSpellForGroupCompleteHeal(arg1);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForGroupHeal(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = Merc::GetBestMercSpellForGroupHeal(arg1);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForAETaunt(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = Merc::GetBestMercSpellForAETaunt(arg1);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForTaunt(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = Merc::GetBestMercSpellForTaunt(arg1);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForHate(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = Merc::GetBestMercSpellForHate(arg1);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForCure(void * jarg1, void * jarg2) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  result = Merc::GetBestMercSpellForCure(arg1,arg2);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForStun(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = Merc::GetBestMercSpellForStun(arg1);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForAENuke(void * jarg1, void * jarg2) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  result = Merc::GetBestMercSpellForAENuke(arg1,arg2);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForTargetedAENuke(void * jarg1, void * jarg2) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  result = Merc::GetBestMercSpellForTargetedAENuke(arg1,arg2);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForPBAENuke(void * jarg1, void * jarg2) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  result = Merc::GetBestMercSpellForPBAENuke(arg1,arg2);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForAERainNuke(void * jarg1, void * jarg2) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  result = Merc::GetBestMercSpellForAERainNuke(arg1,arg2);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForNuke(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = Merc::GetBestMercSpellForNuke(arg1);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetBestMercSpellForNukeByTargetResists(void * jarg1, void * jarg2) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  MercSpell result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  result = Merc::GetBestMercSpellForNukeByTargetResists(arg1,arg2);
+  jresult = new MercSpell(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_CheckAENuke(void * jarg1, void * jarg2, unsigned short jarg3, void * jarg4) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  uint16 arg3 ;
+  uint8 *arg4 = 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  arg3 = (uint16)jarg3; 
+  arg4 = (uint8 *)jarg4;
+  if (!arg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "uint8 & is null", 0);
+    return 0;
+  } 
+  result = (bool)Merc::CheckAENuke(arg1,arg2,arg3,*arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_GetNeedsCured(void * jarg1) {
+  unsigned int jresult ;
+  Mob *arg1 = (Mob *) 0 ;
+  bool result;
+  
+  arg1 = (Mob *)jarg1; 
+  result = (bool)Merc::GetNeedsCured(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_HasOrMayGetAggro(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->HasOrMayGetAggro();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_UseDiscipline(void * jarg1, int jarg2, int jarg3) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 arg2 ;
+  int32 arg3 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (int32)jarg2; 
+  arg3 = (int32)jarg3; 
+  result = (bool)(arg1)->UseDiscipline(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_IsMerc(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)((Merc const *)arg1)->IsMerc();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_IsOfClientBotMerc(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)((Merc const *)arg1)->IsOfClientBotMerc();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_FillSpawnStruct(void * jarg1, void * jarg2, void * jarg3) {
+  Merc *arg1 = (Merc *) 0 ;
+  NewSpawn_Struct *arg2 = (NewSpawn_Struct *) 0 ;
+  Mob *arg3 = (Mob *) 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (NewSpawn_Struct *)jarg2; 
+  arg3 = (Mob *)jarg3; 
+  (arg1)->FillSpawnStruct(arg2,arg3);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_LoadMercenary__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4) {
+  void * jresult ;
+  Client *arg1 = (Client *) 0 ;
+  MercTemplate *arg2 = (MercTemplate *) 0 ;
+  uint32 arg3 ;
+  bool arg4 ;
+  Merc *result = 0 ;
+  
+  arg1 = (Client *)jarg1; 
+  arg2 = (MercTemplate *)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  result = (Merc *)Merc::LoadMercenary(arg1,arg2,arg3,arg4);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_LoadMercenary__SWIG_1(void * jarg1, void * jarg2, unsigned int jarg3) {
+  void * jresult ;
+  Client *arg1 = (Client *) 0 ;
+  MercTemplate *arg2 = (MercTemplate *) 0 ;
+  uint32 arg3 ;
+  Merc *result = 0 ;
+  
+  arg1 = (Client *)jarg1; 
+  arg2 = (MercTemplate *)jarg2; 
+  arg3 = (uint32)jarg3; 
+  result = (Merc *)Merc::LoadMercenary(arg1,arg2,arg3);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_UpdateMercInfo(void * jarg1, void * jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  Client *arg2 = (Client *) 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Client *)jarg2; 
+  (arg1)->UpdateMercInfo(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_UpdateMercStats__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3) {
+  Merc *arg1 = (Merc *) 0 ;
+  Client *arg2 = (Client *) 0 ;
+  bool arg3 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Client *)jarg2; 
+  arg3 = jarg3 ? true : false; 
+  (arg1)->UpdateMercStats(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_UpdateMercStats__SWIG_1(void * jarg1, void * jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  Client *arg2 = (Client *) 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Client *)jarg2; 
+  (arg1)->UpdateMercStats(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_UpdateMercAppearance(void * jarg1) {
+  Merc *arg1 = (Merc *) 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  (arg1)->UpdateMercAppearance();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_UpdateEquipmentLight(void * jarg1) {
+  Merc *arg1 = (Merc *) 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  (arg1)->UpdateEquipmentLight();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_AddItem(void * jarg1, unsigned char jarg2, unsigned int jarg3) {
+  Merc *arg1 = (Merc *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  (arg1)->AddItem(arg2,arg3);
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_Merc_GetRandomName() {
+  char * jresult ;
+  char *result = 0 ;
+  
+  result = (char *)Merc::GetRandomName();
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_Spawn(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Client *arg2 = (Client *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Client *)jarg2; 
+  result = (bool)(arg1)->Spawn(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_Suspend(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->Suspend();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_Unsuspend(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool arg2 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (bool)(arg1)->Unsuspend(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_MercJoinClientGroup(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->MercJoinClientGroup();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_Zone(void * jarg1) {
+  Merc *arg1 = (Merc *) 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  (arg1)->Zone();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_Depop(void * jarg1) {
+  Merc *arg1 = (Merc *) 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  (arg1)->Depop();
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_Save(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->Save();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_GetDepop(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->GetDepop();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_IsDead(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->IsDead();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_IsMedding(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->IsMedding();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_IsSuspended(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->IsSuspended();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_CalcPurchaseCost__SWIG_0(unsigned int jarg1, unsigned char jarg2, unsigned char jarg3) {
+  unsigned int jresult ;
+  uint32 arg1 ;
+  uint8 arg2 ;
+  uint8 arg3 ;
+  uint32 result;
+  
+  arg1 = (uint32)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint8)jarg3; 
+  result = (uint32)Merc::CalcPurchaseCost(arg1,arg2,arg3);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_CalcPurchaseCost__SWIG_1(unsigned int jarg1, unsigned char jarg2) {
+  unsigned int jresult ;
+  uint32 arg1 ;
+  uint8 arg2 ;
+  uint32 result;
+  
+  arg1 = (uint32)jarg1; 
+  arg2 = (uint8)jarg2; 
+  result = (uint32)Merc::CalcPurchaseCost(arg1,arg2);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_CalcUpkeepCost__SWIG_0(unsigned int jarg1, unsigned char jarg2, unsigned char jarg3) {
+  unsigned int jresult ;
+  uint32 arg1 ;
+  uint8 arg2 ;
+  uint8 arg3 ;
+  uint32 result;
+  
+  arg1 = (uint32)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint8)jarg3; 
+  result = (uint32)Merc::CalcUpkeepCost(arg1,arg2,arg3);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_CalcUpkeepCost__SWIG_1(unsigned int jarg1, unsigned char jarg2) {
+  unsigned int jresult ;
+  uint32 arg1 ;
+  uint8 arg2 ;
+  uint32 result;
+  
+  arg1 = (uint32)jarg1; 
+  arg2 = (uint8)jarg2; 
+  result = (uint32)Merc::CalcUpkeepCost(arg1,arg2);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetOwner(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *result = 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (Mob *)(arg1)->GetOwner();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetMercenaryOwner(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Client *result = 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (Client *)(arg1)->GetMercenaryOwner();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetOwnerOrSelf(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *result = 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (Mob *)(arg1)->GetOwnerOrSelf();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_GetMercenaryID(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (uint32)(arg1)->GetMercenaryID();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_GetMercenaryCharacterID(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (uint32)(arg1)->GetMercenaryCharacterID();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_GetMercenaryTemplateID(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (uint32)(arg1)->GetMercenaryTemplateID();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_GetMercenaryType(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (uint32)(arg1)->GetMercenaryType();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_GetMercenarySubType(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (uint32)(arg1)->GetMercenarySubType();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Merc_GetProficiencyID(void * jarg1) {
+  unsigned char jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint8 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (uint8)(arg1)->GetProficiencyID();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Merc_GetTierID(void * jarg1) {
+  unsigned char jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint8 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (uint8)(arg1)->GetTierID();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_GetCostFormula(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (uint32)(arg1)->GetCostFormula();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_GetMercNameType(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (uint32)(arg1)->GetMercNameType();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetStance(void * jarg1) {
+  void * jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  EQ::constants::StanceType result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (arg1)->GetStance();
+  jresult = new EQ::constants::StanceType(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetHatedCount(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int)(arg1)->GetHatedCount();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Merc_GetClientVersion(void * jarg1) {
+  unsigned char jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint8 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (uint8)((Merc const *)arg1)->GetClientVersion();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetTarget(void * jarg1, void * jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  (arg1)->SetTarget(arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_HasSkill(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  EQ::skills::SkillType arg2 ;
+  EQ::skills::SkillType *argp2 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  argp2 = (EQ::skills::SkillType *)jarg2; 
+  if (!argp2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::skills::SkillType", 0);
+    return 0;
+  }
+  arg2 = *argp2; 
+  result = (bool)((Merc const *)arg1)->HasSkill(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_CanHaveSkill(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  EQ::skills::SkillType arg2 ;
+  EQ::skills::SkillType *argp2 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  argp2 = (EQ::skills::SkillType *)jarg2; 
+  if (!argp2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::skills::SkillType", 0);
+    return 0;
+  }
+  arg2 = *argp2; 
+  result = (bool)((Merc const *)arg1)->CanHaveSkill(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Merc_MaxSkill__SWIG_0(void * jarg1, void * jarg2, unsigned short jarg3, unsigned short jarg4) {
+  unsigned short jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  EQ::skills::SkillType arg2 ;
+  uint16 arg3 ;
+  uint16 arg4 ;
+  EQ::skills::SkillType *argp2 ;
+  uint16 result;
+  
+  arg1 = (Merc *)jarg1; 
+  argp2 = (EQ::skills::SkillType *)jarg2; 
+  if (!argp2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::skills::SkillType", 0);
+    return 0;
+  }
+  arg2 = *argp2; 
+  arg3 = (uint16)jarg3; 
+  arg4 = (uint16)jarg4; 
+  result = (uint16)((Merc const *)arg1)->MaxSkill(arg2,arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Merc_MaxSkill__SWIG_1(void * jarg1, void * jarg2) {
+  unsigned short jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  EQ::skills::SkillType arg2 ;
+  EQ::skills::SkillType *argp2 ;
+  uint16 result;
+  
+  arg1 = (Merc *)jarg1; 
+  argp2 = (EQ::skills::SkillType *)jarg2; 
+  if (!argp2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::skills::SkillType", 0);
+    return 0;
+  }
+  arg2 = *argp2; 
+  result = (uint16)((Merc const *)arg1)->MaxSkill(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_DoClassAttacks(void * jarg1, void * jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  (arg1)->DoClassAttacks(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_CheckHateList(void * jarg1) {
+  Merc *arg1 = (Merc *) 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  (arg1)->CheckHateList();
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_CheckTaunt(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->CheckTaunt();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_CheckAETaunt(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->CheckAETaunt();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_CheckConfidence(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->CheckConfidence();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_TryHide(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->TryHide();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_ScaleStats__SWIG_0(void * jarg1, int jarg2, unsigned int jarg3) {
+  Merc *arg1 = (Merc *) 0 ;
+  int arg2 ;
+  bool arg3 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = jarg3 ? true : false; 
+  (arg1)->ScaleStats(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_ScaleStats__SWIG_1(void * jarg1, int jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  int arg2 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->ScaleStats(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_CalcBonuses(void * jarg1) {
+  Merc *arg1 = (Merc *) 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  (arg1)->CalcBonuses();
+}
+
+
+SWIGEXPORT long long SWIGSTDCALL CSharp_Merc_GetEndurance(void * jarg1) {
+  long long jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int64 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int64)((Merc const *)arg1)->GetEndurance();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Merc_GetEndurancePercent(void * jarg1) {
+  unsigned char jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  uint8 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (uint8)(arg1)->GetEndurancePercent();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetATK(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetATK();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetATKBonus(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetATKBonus();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetSTR(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetSTR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetSTA(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetSTA();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetDEX(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetDEX();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetAGI(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetAGI();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetINT(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetINT();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetWIS(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetWIS();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetCHA(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetCHA();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetMR(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetMR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetFR(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetFR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetDR(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetDR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetPR(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetPR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetCR(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetCR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetCorrup(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetCorrup();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetHeroicSTR(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetHeroicSTR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetHeroicSTA(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetHeroicSTA();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetHeroicDEX(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetHeroicDEX();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetHeroicAGI(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetHeroicAGI();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetHeroicINT(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetHeroicINT();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetHeroicWIS(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetHeroicWIS();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetHeroicCHA(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetHeroicCHA();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetHeroicMR(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetHeroicMR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetHeroicFR(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetHeroicFR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetHeroicDR(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetHeroicDR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetHeroicPR(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetHeroicPR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetHeroicCR(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetHeroicCR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetHeroicCorrup(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetHeroicCorrup();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetShielding(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetShielding();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetSpellShield(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetSpellShield();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetDoTShield(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetDoTShield();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetStunResist(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetStunResist();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetStrikeThrough(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetStrikeThrough();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetAvoidance(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetAvoidance();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetAccuracy(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetAccuracy();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetCombatEffects(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetCombatEffects();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetDS(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetDS();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetHealAmt(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetHealAmt();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetSpellDmg(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetSpellDmg();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetClair(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetClair();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetDSMit(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetDSMit();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetSingMod(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetSingMod();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetBrassMod(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetBrassMod();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetPercMod(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetPercMod();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetStringMod(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetStringMod();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetWindMod(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetWindMod();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetDelayDeath(void * jarg1) {
+  int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  int32 result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (int32)((Merc const *)arg1)->GetDelayDeath();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetMercData(void * jarg1, unsigned int jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->SetMercData(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetMercID(void * jarg1, unsigned int jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->SetMercID(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetMercCharacterID(void * jarg1, unsigned int jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->SetMercCharacterID(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetMercTemplateID(void * jarg1, unsigned int jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->SetMercTemplateID(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetMercType(void * jarg1, unsigned int jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->SetMercType(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetMercSubType(void * jarg1, unsigned int jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->SetMercSubType(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetProficiencyID(void * jarg1, unsigned char jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  (arg1)->SetProficiencyID(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetTierID(void * jarg1, unsigned char jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  (arg1)->SetTierID(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetCostFormula(void * jarg1, unsigned char jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  (arg1)->SetCostFormula(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetMercNameType(void * jarg1, unsigned char jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  (arg1)->SetMercNameType(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetClientVersion(void * jarg1, unsigned char jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  (arg1)->SetClientVersion(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetSuspended(void * jarg1, unsigned int jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  (arg1)->SetSuspended(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetStance(void * jarg1, void * jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  EQ::constants::StanceType arg2 ;
+  EQ::constants::StanceType *argp2 ;
+  
+  arg1 = (Merc *)jarg1; 
+  argp2 = (EQ::constants::StanceType *)jarg2; 
+  if (!argp2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::constants::StanceType", 0);
+    return ;
+  }
+  arg2 = *argp2; 
+  (arg1)->SetStance(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetHatedCount(void * jarg1, int jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  int arg2 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->SetHatedCount(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_Sit(void * jarg1) {
+  Merc *arg1 = (Merc *) 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  (arg1)->Sit();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_Stand(void * jarg1) {
+  Merc *arg1 = (Merc *) 0 ;
+  
+  arg1 = (Merc *)jarg1; 
+  (arg1)->Stand();
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_IsSitting(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)((Merc const *)arg1)->IsSitting();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_IsStanding(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->IsStanding();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_IsMercCaster(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->IsMercCaster();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_IsMercCasterCombatRange(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  result = (bool)(arg1)->IsMercCasterCombatRange(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_Merc_GetMaxMeleeRangeToTarget(void * jarg1, void * jarg2) {
+  float jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  float result;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  result = (float)(arg1)->GetMaxMeleeRangeToTarget(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_MercMeditate(void * jarg1, unsigned int jarg2) {
+  Merc *arg1 = (Merc *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (Merc *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  (arg1)->MercMeditate(arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_FindTarget(void * jarg1) {
+  unsigned int jresult ;
+  Merc *arg1 = (Merc *) 0 ;
+  bool result;
+  
+  arg1 = (Merc *)jarg1; 
+  result = (bool)(arg1)->FindTarget();
   jresult = result; 
   return jresult;
 }
@@ -45857,27 +49718,23 @@ SWIGEXPORT void SWIGSTDCALL CSharp_delete_NPC(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_NPC_SpawnNodeNPC(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_NPC_SpawnNodeNPC(const char * jarg1, const char * jarg2, void * jarg3) {
   void * jresult ;
   std::string arg1 ;
   std::string arg2 ;
   glm::vec4 *arg3 = 0 ;
-  std::string *argp1 ;
-  std::string *argp2 ;
   NPC *result = 0 ;
   
-  argp1 = (std::string *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg1 = *argp1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  (&arg1)->assign(jarg1); 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   arg3 = (glm::vec4 *)jarg3;
   if (!arg3) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec4 const & is null", 0);
@@ -45907,19 +49764,17 @@ SWIGEXPORT void SWIGSTDCALL CSharp_NPC_SpawnGridNodeNPC(void * jarg1, int jarg2,
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_NPC_SpawnZonePointNodeNPC(void * jarg1, void * jarg2) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_NPC_SpawnZonePointNodeNPC(const char * jarg1, void * jarg2) {
   void * jresult ;
   std::string arg1 ;
   glm::vec4 *arg2 = 0 ;
-  std::string *argp1 ;
   NPC *result = 0 ;
   
-  argp1 = (std::string *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg1 = *argp1; 
+  (&arg1)->assign(jarg1); 
   arg2 = (glm::vec4 *)jarg2;
   if (!arg2) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec4 const & is null", 0);
@@ -47933,20 +51788,18 @@ SWIGEXPORT void SWIGSTDCALL CSharp_NPC_SignalNPC(void * jarg1, int jarg2) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_NPC_SendPayload__SWIG_0(void * jarg1, int jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_NPC_SendPayload__SWIG_0(void * jarg1, int jarg2, const char * jarg3) {
   NPC *arg1 = (NPC *) 0 ;
   int arg2 ;
   std::string arg3 ;
-  std::string *argp3 ;
   
   arg1 = (NPC *)jarg1; 
   arg2 = (int)jarg2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   (arg1)->SendPayload(arg2,arg3);
 }
 
@@ -48032,34 +51885,6 @@ SWIGEXPORT void SWIGSTDCALL CSharp_NPC_SetNPCFactionID(void * jarg1, int jarg2) 
   arg1 = (NPC *)jarg1; 
   arg2 = (int32)jarg2; 
   (arg1)->SetNPCFactionID(arg2);
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_NPC_m_SpawnPoint_set(void * jarg1, void * jarg2) {
-  NPC *arg1 = (NPC *) 0 ;
-  glm::vec4 arg2 ;
-  glm::vec4 *argp2 ;
-  
-  arg1 = (NPC *)jarg1; 
-  argp2 = (glm::vec4 *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null glm::vec4", 0);
-    return ;
-  }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->m_SpawnPoint = arg2;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_NPC_m_SpawnPoint_get(void * jarg1) {
-  void * jresult ;
-  NPC *arg1 = (NPC *) 0 ;
-  glm::vec4 result;
-  
-  arg1 = (NPC *)jarg1; 
-  result =  ((arg1)->m_SpawnPoint);
-  jresult = new glm::vec4(result); 
-  return jresult;
 }
 
 
@@ -49353,40 +53178,43 @@ SWIGEXPORT int SWIGSTDCALL CSharp_NPC_GetRawAC(void * jarg1) {
 }
 
 
-SWIGEXPORT float SWIGSTDCALL CSharp_NPC_GetNPCStat(void * jarg1, void * jarg2) {
+SWIGEXPORT float SWIGSTDCALL CSharp_NPC_GetNPCStat(void * jarg1, const char * jarg2) {
   float jresult ;
   NPC *arg1 = (NPC *) 0 ;
   std::string *arg2 = 0 ;
   float result;
   
   arg1 = (NPC *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   result = (float)(arg1)->GetNPCStat((std::string const &)*arg2);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_NPC_ModifyNPCStat(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_NPC_ModifyNPCStat(void * jarg1, const char * jarg2, const char * jarg3) {
   NPC *arg1 = (NPC *) 0 ;
   std::string *arg2 = 0 ;
   std::string *arg3 = 0 ;
   
   arg1 = (NPC *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   (arg1)->ModifyNPCStat((std::string const &)*arg2,(std::string const &)*arg3);
 }
 
@@ -49627,18 +53455,16 @@ SWIGEXPORT int SWIGSTDCALL CSharp_NPC_GetKillExpMod(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_NPC_ChangeLastName(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_NPC_ChangeLastName(void * jarg1, const char * jarg2) {
   NPC *arg1 = (NPC *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   
   arg1 = (NPC *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   (arg1)->ChangeLastName(arg2);
 }
 
@@ -49787,18 +53613,6 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_NPC_HasAISpellEffect(void * jarg1, un
   arg2 = (uint16)jarg2; 
   result = (bool)(arg1)->HasAISpellEffect(arg2);
   jresult = result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_NPC_GetRefaceTimer(void * jarg1) {
-  void * jresult ;
-  NPC *arg1 = (NPC *) 0 ;
-  Timer *result = 0 ;
-  
-  arg1 = (NPC *)jarg1; 
-  result = (Timer *)((NPC const *)arg1)->GetRefaceTimer();
-  jresult = (void *)result; 
   return jresult;
 }
 
@@ -51563,14 +55377,14 @@ SWIGEXPORT int SWIGSTDCALL CSharp_memSpellSpellbar_get() {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_GetZoneModeString(int jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_GetZoneModeString(int jarg1) {
+  const char * jresult ;
   ZoneMode arg1 ;
   std::string result;
   
   arg1 = (ZoneMode)jarg1; 
   result = GetZoneModeString(arg1);
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
@@ -51738,30 +55552,29 @@ SWIGEXPORT void SWIGSTDCALL CSharp_delete_XTarget_Struct(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_RespawnOption_name_set(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_RespawnOption_name_set(void * jarg1, const char * jarg2) {
   RespawnOption *arg1 = (RespawnOption *) 0 ;
-  std::string arg2 ;
-  std::string *argp2 ;
+  std::string *arg2 = 0 ;
   
   arg1 = (RespawnOption *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->name = arg2;
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->name = *arg2;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_RespawnOption_name_get(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_RespawnOption_name_get(void * jarg1) {
+  const char * jresult ;
   RespawnOption *arg1 = (RespawnOption *) 0 ;
-  std::string result;
+  std::string *result = 0 ;
   
   arg1 = (RespawnOption *)jarg1; 
-  result =  ((arg1)->name);
-  jresult = new std::string(result); 
+  result = (std::string *) & ((arg1)->name);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
@@ -51916,22 +55729,22 @@ SWIGEXPORT void SWIGSTDCALL CSharp_delete_RespawnOption(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_DIAWIND_RESPONSE_ONE_KEY_get() {
-  void * jresult ;
-  std::string result;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_DIAWIND_RESPONSE_ONE_KEY_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
   
-  result = (std::string)DIAWIND_RESPONSE_ONE_KEY;
-  jresult = new std::string(result); 
+  result = (std::string *) &DIAWIND_RESPONSE_ONE_KEY;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_DIAWIND_RESPONSE_TWO_KEY_get() {
-  void * jresult ;
-  std::string result;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_DIAWIND_RESPONSE_TWO_KEY_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
   
-  result = (std::string)DIAWIND_RESPONSE_TWO_KEY;
-  jresult = new std::string(result); 
+  result = (std::string *) &DIAWIND_RESPONSE_TWO_KEY;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
@@ -52178,56 +55991,56 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendChatLineBreak__SWIG_1(void * jarg1
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_GotoPlayer(void * jarg1, void * jarg2) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_GotoPlayer(void * jarg1, const char * jarg2) {
   unsigned int jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   bool result;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   result = (bool)(arg1)->GotoPlayer(arg2);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_GotoPlayerGroup(void * jarg1, void * jarg2) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_GotoPlayerGroup(void * jarg1, const char * jarg2) {
   unsigned int jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   bool result;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   result = (bool)(arg1)->GotoPlayerGroup((std::string const &)*arg2);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_GotoPlayerRaid(void * jarg1, void * jarg2) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_GotoPlayerRaid(void * jarg1, const char * jarg2) {
   unsigned int jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   bool result;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   result = (bool)(arg1)->GotoPlayerRaid((std::string const &)*arg2);
   jresult = result; 
   return jresult;
@@ -53514,20 +57327,18 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_Tell_StringID(void * jarg1, unsigned i
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendColoredText(void * jarg1, unsigned int jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendColoredText(void * jarg1, unsigned int jarg2, const char * jarg3) {
   Client *arg1 = (Client *) 0 ;
   uint32 arg2 ;
   std::string arg3 ;
-  std::string *argp3 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (uint32)jarg2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   (arg1)->SendColoredText(arg2,arg3);
 }
 
@@ -54223,14 +58034,14 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_GetIP(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetIPString(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Client_GetIPString(void * jarg1) {
+  const char * jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string result;
   
   arg1 = (Client *)jarg1; 
   result = (arg1)->GetIPString();
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
@@ -54451,16 +58262,17 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_IsLD(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_Kick(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_Kick(void * jarg1, const char * jarg2) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   (arg1)->Kick((std::string const &)*arg2);
 }
 
@@ -58151,7 +61963,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendToGuildHall(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendToInstance(void * jarg1, void * jarg2, void * jarg3, unsigned int jarg4, float jarg5, float jarg6, float jarg7, float jarg8, void * jarg9, unsigned int jarg10) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendToInstance(void * jarg1, const char * jarg2, const char * jarg3, unsigned int jarg4, float jarg5, float jarg6, float jarg7, float jarg8, const char * jarg9, unsigned int jarg10) {
   Client *arg1 = (Client *) 0 ;
   std::string arg2 ;
   std::string arg3 ;
@@ -58162,34 +61974,28 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendToInstance(void * jarg1, void * ja
   float arg8 ;
   std::string arg9 ;
   uint32 arg10 ;
-  std::string *argp2 ;
-  std::string *argp3 ;
-  std::string *argp9 ;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  (&arg2)->assign(jarg2); 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   arg4 = (uint32)jarg4; 
   arg5 = (float)jarg5; 
   arg6 = (float)jarg6; 
   arg7 = (float)jarg7; 
   arg8 = (float)jarg8; 
-  argp9 = (std::string *)jarg9; 
-  if (!argp9) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg9) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg9 = *argp9; 
+  (&arg9)->assign(jarg9); 
   arg10 = (uint32)jarg10; 
   (arg1)->SendToInstance(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
 }
@@ -58229,18 +62035,16 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_CheckLoreConflict(void * jarg1
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_ChangeLastName(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_ChangeLastName(void * jarg1, const char * jarg2) {
   Client *arg1 = (Client *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   (arg1)->ChangeLastName(arg2);
 }
 
@@ -59025,7 +62829,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildMembersList(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildMemberAdd(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, void * jarg8) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildMemberAdd(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, const char * jarg8) {
   Client *arg1 = (Client *) 0 ;
   uint32 arg2 ;
   uint32 arg3 ;
@@ -59034,7 +62838,6 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildMemberAdd(void * jarg1, unsig
   uint32 arg6 ;
   uint32 arg7 ;
   std::string arg8 ;
-  std::string *argp8 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (uint32)jarg2; 
@@ -59043,166 +62846,147 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildMemberAdd(void * jarg1, unsig
   arg5 = (uint32)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (uint32)jarg7; 
-  argp8 = (std::string *)jarg8; 
-  if (!argp8) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg8) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg8 = *argp8; 
+  (&arg8)->assign(jarg8); 
   (arg1)->SendGuildMemberAdd(arg2,arg3,arg4,arg5,arg6,arg7,arg8);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildMemberRename(void * jarg1, unsigned int jarg2, void * jarg3, void * jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildMemberRename(void * jarg1, unsigned int jarg2, const char * jarg3, const char * jarg4) {
   Client *arg1 = (Client *) 0 ;
   uint32 arg2 ;
   std::string arg3 ;
   std::string arg4 ;
-  std::string *argp3 ;
-  std::string *argp4 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (uint32)jarg2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
-  argp4 = (std::string *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  (&arg3)->assign(jarg3); 
+  if (!jarg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg4 = *argp4; 
+  (&arg4)->assign(jarg4); 
   (arg1)->SendGuildMemberRename(arg2,arg3,arg4);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildMemberDelete(void * jarg1, unsigned int jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildMemberDelete(void * jarg1, unsigned int jarg2, const char * jarg3) {
   Client *arg1 = (Client *) 0 ;
   uint32 arg2 ;
   std::string arg3 ;
-  std::string *argp3 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (uint32)jarg2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   (arg1)->SendGuildMemberDelete(arg2,arg3);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildMemberLevel(void * jarg1, unsigned int jarg2, unsigned int jarg3, void * jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildMemberLevel(void * jarg1, unsigned int jarg2, unsigned int jarg3, const char * jarg4) {
   Client *arg1 = (Client *) 0 ;
   uint32 arg2 ;
   uint32 arg3 ;
   std::string arg4 ;
-  std::string *argp4 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (uint32)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (std::string *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg4 = *argp4; 
+  (&arg4)->assign(jarg4); 
   (arg1)->SendGuildMemberLevel(arg2,arg3,arg4);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildMemberRankAltBanker(void * jarg1, unsigned int jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, unsigned int jarg6) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildMemberRankAltBanker(void * jarg1, unsigned int jarg2, unsigned int jarg3, const char * jarg4, unsigned int jarg5, unsigned int jarg6) {
   Client *arg1 = (Client *) 0 ;
   uint32 arg2 ;
   uint32 arg3 ;
   std::string arg4 ;
   bool arg5 ;
   bool arg6 ;
-  std::string *argp4 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (uint32)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (std::string *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg4 = *argp4; 
+  (&arg4)->assign(jarg4); 
   arg5 = jarg5 ? true : false; 
   arg6 = jarg6 ? true : false; 
   (arg1)->SendGuildMemberRankAltBanker(arg2,arg3,arg4,arg5,arg6);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildMemberPublicNote(void * jarg1, unsigned int jarg2, void * jarg3, void * jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildMemberPublicNote(void * jarg1, unsigned int jarg2, const char * jarg3, const char * jarg4) {
   Client *arg1 = (Client *) 0 ;
   uint32 arg2 ;
   std::string arg3 ;
   std::string arg4 ;
-  std::string *argp3 ;
-  std::string *argp4 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (uint32)jarg2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
-  argp4 = (std::string *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  (&arg3)->assign(jarg3); 
+  if (!jarg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg4 = *argp4; 
+  (&arg4)->assign(jarg4); 
   (arg1)->SendGuildMemberPublicNote(arg2,arg3,arg4);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildMemberDetails(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4, void * jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildMemberDetails(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4, const char * jarg5) {
   Client *arg1 = (Client *) 0 ;
   uint32 arg2 ;
   uint32 arg3 ;
   uint32 arg4 ;
   std::string arg5 ;
-  std::string *argp5 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (uint32)jarg2; 
   arg3 = (uint32)jarg3; 
   arg4 = (uint32)jarg4; 
-  argp5 = (std::string *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg5 = *argp5; 
+  (&arg5)->assign(jarg5); 
   (arg1)->SendGuildMemberDetails(arg2,arg3,arg4,arg5);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildRenameGuild(void * jarg1, unsigned int jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendGuildRenameGuild(void * jarg1, unsigned int jarg2, const char * jarg3) {
   Client *arg1 = (Client *) 0 ;
   uint32 arg2 ;
   std::string arg3 ;
-  std::string *argp3 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (uint32)jarg2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   (arg1)->SendGuildRenameGuild(arg2,arg3);
 }
 
@@ -59313,19 +63097,17 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_ReadBook(void * jarg1, void * jarg2) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_ReadBookByName(void * jarg1, void * jarg2, unsigned char jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_ReadBookByName(void * jarg1, const char * jarg2, unsigned char jarg3) {
   Client *arg1 = (Client *) 0 ;
   std::string arg2 ;
   uint8 arg3 ;
-  std::string *argp2 ;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   arg3 = (uint8)jarg3; 
   (arg1)->ReadBookByName(arg2,arg3);
 }
@@ -59987,18 +63769,19 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_MaxSkills(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendTradeskillSearchResults(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendTradeskillSearchResults(void * jarg1, const char * jarg2, unsigned int jarg3, unsigned int jarg4) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   unsigned long arg3 ;
   unsigned long arg4 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (unsigned long)jarg3; 
   arg4 = (unsigned long)jarg4; 
   (arg1)->SendTradeskillSearchResults((std::string const &)*arg2,arg3,arg4);
@@ -61511,20 +65294,18 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_HasAlreadyPurchasedRank(void *
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_ListPurchasedAAs__SWIG_0(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_ListPurchasedAAs__SWIG_0(void * jarg1, void * jarg2, const char * jarg3) {
   Client *arg1 = (Client *) 0 ;
   Client *arg2 = (Client *) 0 ;
   std::string arg3 ;
-  std::string *argp3 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (Client *)jarg2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   (arg1)->ListPurchasedAAs(arg2,arg3);
 }
 
@@ -61539,21 +65320,19 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_ListPurchasedAAs__SWIG_1(void * jarg1,
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_SendGMCommand__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_SendGMCommand__SWIG_0(void * jarg1, const char * jarg2, unsigned int jarg3) {
   unsigned int jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string arg2 ;
   bool arg3 ;
-  std::string *argp2 ;
   bool result;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   arg3 = jarg3 ? true : false; 
   result = (bool)(arg1)->SendGMCommand(arg2,arg3);
   jresult = result; 
@@ -61561,20 +65340,18 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_SendGMCommand__SWIG_0(void * j
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_SendGMCommand__SWIG_1(void * jarg1, void * jarg2) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_SendGMCommand__SWIG_1(void * jarg1, const char * jarg2) {
   unsigned int jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   bool result;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   result = (bool)(arg1)->SendGMCommand(arg2);
   jresult = result; 
   return jresult;
@@ -61599,7 +65376,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetApplySpellList(void * jarg1, void
   bool arg4 ;
   bool arg5 ;
   ApplySpellType *argp2 ;
-  SwigValueWrapper< std::vector< Mob * > > result;
+  std::vector< Mob * > result;
   
   arg1 = (Client *)jarg1; 
   argp2 = (ApplySpellType *)jarg2; 
@@ -61953,34 +65730,30 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_GetAAPercent(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetAATitle(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetAATitle(void * jarg1, const char * jarg2) {
   Client *arg1 = (Client *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   (arg1)->SetAATitle(arg2);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetTitleSuffix(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetTitleSuffix(void * jarg1, const char * jarg2) {
   Client *arg1 = (Client *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   (arg1)->SetTitleSuffix(arg2);
 }
 
@@ -64780,30 +68553,29 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_PendingSacrifice_get(void * ja
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SacrificeCaster_set(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SacrificeCaster_set(void * jarg1, const char * jarg2) {
   Client *arg1 = (Client *) 0 ;
-  std::string arg2 ;
-  std::string *argp2 ;
+  std::string *arg2 = 0 ;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->SacrificeCaster = arg2;
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->SacrificeCaster = *arg2;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Client_SacrificeCaster_get(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Client_SacrificeCaster_get(void * jarg1) {
+  const char * jresult ;
   Client *arg1 = (Client *) 0 ;
-  std::string result;
+  std::string *result = 0 ;
   
   arg1 = (Client *)jarg1; 
-  result =  ((arg1)->SacrificeCaster);
-  jresult = new std::string(result); 
+  result = (std::string *) & ((arg1)->SacrificeCaster);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
@@ -66026,7 +69798,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_ClearPendingAdventureData(void * jarg1
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_CanEnterZone__SWIG_0(void * jarg1, void * jarg2, short jarg3) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_CanEnterZone__SWIG_0(void * jarg1, const char * jarg2, short jarg3) {
   unsigned int jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
@@ -66034,11 +69806,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_CanEnterZone__SWIG_0(void * ja
   bool result;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (int16)jarg3; 
   result = (bool)(arg1)->CanEnterZone((std::string const &)*arg2,arg3);
   jresult = result; 
@@ -66046,18 +69819,19 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_CanEnterZone__SWIG_0(void * ja
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_CanEnterZone__SWIG_1(void * jarg1, void * jarg2) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_CanEnterZone__SWIG_1(void * jarg1, const char * jarg2) {
   unsigned int jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   bool result;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   result = (bool)(arg1)->CanEnterZone((std::string const &)*arg2);
   jresult = result; 
   return jresult;
@@ -66360,29 +70134,31 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_MarkSingleCompassLoc__SWIG_1(void * ja
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendCrossZoneMessage(void * jarg1, void * jarg2, unsigned short jarg3, void * jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendCrossZoneMessage(void * jarg1, const char * jarg2, unsigned short jarg3, const char * jarg4) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   uint16_t arg3 ;
   std::string *arg4 = 0 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (uint16_t)jarg3; 
-  arg4 = (std::string *)jarg4;
-  if (!arg4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg4_str(jarg4);
+  arg4 = &arg4_str; 
   Client::SendCrossZoneMessage(arg1,(std::string const &)*arg2,arg3,(std::string const &)*arg4);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendCrossZoneMessageString__SWIG_0(void * jarg1, void * jarg2, unsigned short jarg3, unsigned int jarg4, void * jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendCrossZoneMessageString__SWIG_0(void * jarg1, const char * jarg2, unsigned short jarg3, unsigned int jarg4, void * jarg5) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   uint16_t arg3 ;
@@ -66390,11 +70166,12 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendCrossZoneMessageString__SWIG_0(voi
   std::initializer_list< std::string > *arg5 = 0 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (uint16_t)jarg3; 
   arg4 = (uint32_t)jarg4; 
   arg5 = (std::initializer_list< std::string > *)jarg5;
@@ -66406,18 +70183,19 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendCrossZoneMessageString__SWIG_0(voi
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendCrossZoneMessageString__SWIG_1(void * jarg1, void * jarg2, unsigned short jarg3, unsigned int jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendCrossZoneMessageString__SWIG_1(void * jarg1, const char * jarg2, unsigned short jarg3, unsigned int jarg4) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   uint16_t arg3 ;
   uint32_t arg4 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (uint16_t)jarg3; 
   arg4 = (uint32_t)jarg4; 
   Client::SendCrossZoneMessageString(arg1,(std::string const &)*arg2,arg3,arg4);
@@ -66454,7 +70232,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddExpeditionLockout__SWIG_1(void * ja
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddExpeditionLockoutDuration__SWIG_0(void * jarg1, void * jarg2, void * jarg3, int jarg4, void * jarg5, unsigned int jarg6) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddExpeditionLockoutDuration__SWIG_0(void * jarg1, const char * jarg2, const char * jarg3, int jarg4, const char * jarg5, unsigned int jarg6) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   std::string *arg3 = 0 ;
@@ -66463,28 +70241,31 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddExpeditionLockoutDuration__SWIG_0(v
   bool arg6 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   arg4 = (int)jarg4; 
-  arg5 = (std::string *)jarg5;
-  if (!arg5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg5_str(jarg5);
+  arg5 = &arg5_str; 
   arg6 = jarg6 ? true : false; 
   (arg1)->AddExpeditionLockoutDuration((std::string const &)*arg2,(std::string const &)*arg3,arg4,(std::string const &)*arg5,arg6);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddExpeditionLockoutDuration__SWIG_1(void * jarg1, void * jarg2, void * jarg3, int jarg4, void * jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddExpeditionLockoutDuration__SWIG_1(void * jarg1, const char * jarg2, const char * jarg3, int jarg4, const char * jarg5) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   std::string *arg3 = 0 ;
@@ -66492,95 +70273,102 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddExpeditionLockoutDuration__SWIG_1(v
   std::string *arg5 = 0 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   arg4 = (int)jarg4; 
-  arg5 = (std::string *)jarg5;
-  if (!arg5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg5_str(jarg5);
+  arg5 = &arg5_str; 
   (arg1)->AddExpeditionLockoutDuration((std::string const &)*arg2,(std::string const &)*arg3,arg4,(std::string const &)*arg5);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddExpeditionLockoutDuration__SWIG_2(void * jarg1, void * jarg2, void * jarg3, int jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddExpeditionLockoutDuration__SWIG_2(void * jarg1, const char * jarg2, const char * jarg3, int jarg4) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   std::string *arg3 = 0 ;
   int arg4 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   arg4 = (int)jarg4; 
   (arg1)->AddExpeditionLockoutDuration((std::string const &)*arg2,(std::string const &)*arg3,arg4);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddNewExpeditionLockout__SWIG_0(void * jarg1, void * jarg2, void * jarg3, unsigned int jarg4, void * jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddNewExpeditionLockout__SWIG_0(void * jarg1, const char * jarg2, const char * jarg3, unsigned int jarg4, const char * jarg5) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   std::string *arg3 = 0 ;
   uint32_t arg4 ;
   std::string arg5 ;
-  std::string *argp5 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
-    return ;
-  } 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
-    return ;
-  } 
-  arg4 = (uint32_t)jarg4; 
-  argp5 = (std::string *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg5 = *argp5; 
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
+  arg4 = (uint32_t)jarg4; 
+  if (!jarg5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  (&arg5)->assign(jarg5); 
   (arg1)->AddNewExpeditionLockout((std::string const &)*arg2,(std::string const &)*arg3,arg4,arg5);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddNewExpeditionLockout__SWIG_1(void * jarg1, void * jarg2, void * jarg3, unsigned int jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddNewExpeditionLockout__SWIG_1(void * jarg1, const char * jarg2, const char * jarg3, unsigned int jarg4) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   std::string *arg3 = 0 ;
   uint32_t arg4 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   arg4 = (uint32_t)jarg4; 
   (arg1)->AddNewExpeditionLockout((std::string const &)*arg2,(std::string const &)*arg3,arg4);
 }
@@ -66624,7 +70412,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Client_CreateExpedition__SWIG_1(void * jarg
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Client_CreateExpedition__SWIG_2(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, void * jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_Client_CreateExpedition__SWIG_2(void * jarg1, const char * jarg2, unsigned int jarg3, unsigned int jarg4, const char * jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8) {
   void * jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
@@ -66637,18 +70425,20 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Client_CreateExpedition__SWIG_2(void * jarg
   Expedition *result = 0 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (uint32)jarg3; 
   arg4 = (uint32)jarg4; 
-  arg5 = (std::string *)jarg5;
-  if (!arg5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg5_str(jarg5);
+  arg5 = &arg5_str; 
   arg6 = (uint32)jarg6; 
   arg7 = (uint32)jarg7; 
   arg8 = jarg8 ? true : false; 
@@ -66658,7 +70448,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Client_CreateExpedition__SWIG_2(void * jarg
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Client_CreateExpedition__SWIG_3(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, void * jarg5, unsigned int jarg6, unsigned int jarg7) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_Client_CreateExpedition__SWIG_3(void * jarg1, const char * jarg2, unsigned int jarg3, unsigned int jarg4, const char * jarg5, unsigned int jarg6, unsigned int jarg7) {
   void * jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
@@ -66670,18 +70460,20 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Client_CreateExpedition__SWIG_3(void * jarg
   Expedition *result = 0 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (uint32)jarg3; 
   arg4 = (uint32)jarg4; 
-  arg5 = (std::string *)jarg5;
-  if (!arg5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg5_str(jarg5);
+  arg5 = &arg5_str; 
   arg6 = (uint32)jarg6; 
   arg7 = (uint32)jarg7; 
   result = (Expedition *)(arg1)->CreateExpedition((std::string const &)*arg2,arg3,arg4,(std::string const &)*arg5,arg6,arg7);
@@ -66728,7 +70520,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_GetExpeditionID(void * jarg1) 
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetExpeditionLockout__SWIG_0(void * jarg1, void * jarg2, void * jarg3, unsigned int jarg4) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetExpeditionLockout__SWIG_0(void * jarg1, const char * jarg2, const char * jarg3, unsigned int jarg4) {
   void * jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
@@ -66737,16 +70529,18 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetExpeditionLockout__SWIG_0(void * 
   ExpeditionLockoutTimer *result = 0 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   arg4 = jarg4 ? true : false; 
   result = (ExpeditionLockoutTimer *)((Client const *)arg1)->GetExpeditionLockout((std::string const &)*arg2,(std::string const &)*arg3,arg4);
   jresult = (void *)result; 
@@ -66754,7 +70548,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetExpeditionLockout__SWIG_0(void * 
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetExpeditionLockout__SWIG_1(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetExpeditionLockout__SWIG_1(void * jarg1, const char * jarg2, const char * jarg3) {
   void * jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
@@ -66762,16 +70556,18 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetExpeditionLockout__SWIG_1(void * 
   ExpeditionLockoutTimer *result = 0 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   result = (ExpeditionLockoutTimer *)((Client const *)arg1)->GetExpeditionLockout((std::string const &)*arg2,(std::string const &)*arg3);
   jresult = (void *)result; 
   return jresult;
@@ -66790,7 +70586,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetExpeditionLockouts__SWIG_0(void *
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetExpeditionLockouts__SWIG_1(void * jarg1, void * jarg2, unsigned int jarg3) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetExpeditionLockouts__SWIG_1(void * jarg1, const char * jarg2, unsigned int jarg3) {
   void * jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
@@ -66798,11 +70594,12 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetExpeditionLockouts__SWIG_1(void *
   SwigValueWrapper< std::vector< ExpeditionLockoutTimer > > result;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = jarg3 ? true : false; 
   result = (arg1)->GetExpeditionLockouts((std::string const &)*arg2,arg3);
   jresult = new std::vector< ExpeditionLockoutTimer >(result); 
@@ -66810,18 +70607,19 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetExpeditionLockouts__SWIG_1(void *
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetExpeditionLockouts__SWIG_2(void * jarg1, void * jarg2) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetExpeditionLockouts__SWIG_2(void * jarg1, const char * jarg2) {
   void * jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   SwigValueWrapper< std::vector< ExpeditionLockoutTimer > > result;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   result = (arg1)->GetExpeditionLockouts((std::string const &)*arg2);
   jresult = new std::vector< ExpeditionLockoutTimer >(result); 
   return jresult;
@@ -66840,7 +70638,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_GetPendingExpeditionInviteID(v
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_HasExpeditionLockout__SWIG_0(void * jarg1, void * jarg2, void * jarg3, unsigned int jarg4) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_HasExpeditionLockout__SWIG_0(void * jarg1, const char * jarg2, const char * jarg3, unsigned int jarg4) {
   unsigned int jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
@@ -66849,16 +70647,18 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_HasExpeditionLockout__SWIG_0(v
   bool result;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   arg4 = jarg4 ? true : false; 
   result = (bool)(arg1)->HasExpeditionLockout((std::string const &)*arg2,(std::string const &)*arg3,arg4);
   jresult = result; 
@@ -66866,7 +70666,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_HasExpeditionLockout__SWIG_0(v
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_HasExpeditionLockout__SWIG_1(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_HasExpeditionLockout__SWIG_1(void * jarg1, const char * jarg2, const char * jarg3) {
   unsigned int jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
@@ -66874,16 +70674,18 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_HasExpeditionLockout__SWIG_1(v
   bool result;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   result = (bool)(arg1)->HasExpeditionLockout((std::string const &)*arg2,(std::string const &)*arg3);
   jresult = result; 
   return jresult;
@@ -66902,74 +70704,80 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_IsInExpedition(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_RemoveAllExpeditionLockouts__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_RemoveAllExpeditionLockouts__SWIG_0(void * jarg1, const char * jarg2, unsigned int jarg3) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   bool arg3 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = jarg3 ? true : false; 
   (arg1)->RemoveAllExpeditionLockouts((std::string const &)*arg2,arg3);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_RemoveAllExpeditionLockouts__SWIG_1(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_RemoveAllExpeditionLockouts__SWIG_1(void * jarg1, const char * jarg2) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   (arg1)->RemoveAllExpeditionLockouts((std::string const &)*arg2);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_RemoveExpeditionLockout__SWIG_0(void * jarg1, void * jarg2, void * jarg3, unsigned int jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_RemoveExpeditionLockout__SWIG_0(void * jarg1, const char * jarg2, const char * jarg3, unsigned int jarg4) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   std::string *arg3 = 0 ;
   bool arg4 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   arg4 = jarg4 ? true : false; 
   (arg1)->RemoveExpeditionLockout((std::string const &)*arg2,(std::string const &)*arg3,arg4);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_RemoveExpeditionLockout__SWIG_1(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_RemoveExpeditionLockout__SWIG_1(void * jarg1, const char * jarg2, const char * jarg3) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   std::string *arg3 = 0 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   (arg1)->RemoveExpeditionLockout((std::string const &)*arg2,(std::string const &)*arg3);
 }
 
@@ -67088,50 +70896,53 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_MovePCDynamicZone__SWIG_2(void * jarg1
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_MovePCDynamicZone__SWIG_3(void * jarg1, void * jarg2, int jarg3, unsigned int jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_MovePCDynamicZone__SWIG_3(void * jarg1, const char * jarg2, int jarg3, unsigned int jarg4) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   int arg3 ;
   bool arg4 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (int)jarg3; 
   arg4 = jarg4 ? true : false; 
   (arg1)->MovePCDynamicZone((std::string const &)*arg2,arg3,arg4);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_MovePCDynamicZone__SWIG_4(void * jarg1, void * jarg2, int jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_MovePCDynamicZone__SWIG_4(void * jarg1, const char * jarg2, int jarg3) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   int arg3 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (int)jarg3; 
   (arg1)->MovePCDynamicZone((std::string const &)*arg2,arg3);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_MovePCDynamicZone__SWIG_5(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_MovePCDynamicZone__SWIG_5(void * jarg1, const char * jarg2) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   (arg1)->MovePCDynamicZone((std::string const &)*arg2);
 }
 
@@ -67472,20 +71283,18 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_Signal(void * jarg1, int jarg2) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendPayload__SWIG_0(void * jarg1, int jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendPayload__SWIG_0(void * jarg1, int jarg2, const char * jarg3) {
   Client *arg1 = (Client *) 0 ;
   int arg2 ;
   std::string arg3 ;
-  std::string *argp3 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (int)jarg2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   (arg1)->SendPayload(arg2,arg3);
 }
 
@@ -67790,7 +71599,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Client_respawn_options_get(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddRespawnOption__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, unsigned short jarg4, float jarg5, float jarg6, float jarg7, float jarg8, unsigned int jarg9, signed char jarg10) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddRespawnOption__SWIG_0(void * jarg1, const char * jarg2, unsigned int jarg3, unsigned short jarg4, float jarg5, float jarg6, float jarg7, float jarg8, unsigned int jarg9, signed char jarg10) {
   Client *arg1 = (Client *) 0 ;
   std::string arg2 ;
   uint32 arg3 ;
@@ -67801,15 +71610,13 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddRespawnOption__SWIG_0(void * jarg1,
   float arg8 ;
   bool arg9 ;
   int8 arg10 ;
-  std::string *argp2 ;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   arg3 = (uint32)jarg3; 
   arg4 = (uint16)jarg4; 
   arg5 = (float)jarg5; 
@@ -67822,7 +71629,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddRespawnOption__SWIG_0(void * jarg1,
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddRespawnOption__SWIG_1(void * jarg1, void * jarg2, unsigned int jarg3, unsigned short jarg4, float jarg5, float jarg6, float jarg7, float jarg8, unsigned int jarg9) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddRespawnOption__SWIG_1(void * jarg1, const char * jarg2, unsigned int jarg3, unsigned short jarg4, float jarg5, float jarg6, float jarg7, float jarg8, unsigned int jarg9) {
   Client *arg1 = (Client *) 0 ;
   std::string arg2 ;
   uint32 arg3 ;
@@ -67832,15 +71639,13 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddRespawnOption__SWIG_1(void * jarg1,
   float arg7 ;
   float arg8 ;
   bool arg9 ;
-  std::string *argp2 ;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   arg3 = (uint32)jarg3; 
   arg4 = (uint16)jarg4; 
   arg5 = (float)jarg5; 
@@ -67852,7 +71657,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddRespawnOption__SWIG_1(void * jarg1,
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddRespawnOption__SWIG_2(void * jarg1, void * jarg2, unsigned int jarg3, unsigned short jarg4, float jarg5, float jarg6, float jarg7, float jarg8) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddRespawnOption__SWIG_2(void * jarg1, const char * jarg2, unsigned int jarg3, unsigned short jarg4, float jarg5, float jarg6, float jarg7, float jarg8) {
   Client *arg1 = (Client *) 0 ;
   std::string arg2 ;
   uint32 arg3 ;
@@ -67861,15 +71666,13 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddRespawnOption__SWIG_2(void * jarg1,
   float arg6 ;
   float arg7 ;
   float arg8 ;
-  std::string *argp2 ;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   arg3 = (uint32)jarg3; 
   arg4 = (uint16)jarg4; 
   arg5 = (float)jarg5; 
@@ -67880,7 +71683,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddRespawnOption__SWIG_2(void * jarg1,
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddRespawnOption__SWIG_3(void * jarg1, void * jarg2, unsigned int jarg3, unsigned short jarg4, float jarg5, float jarg6, float jarg7) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddRespawnOption__SWIG_3(void * jarg1, const char * jarg2, unsigned int jarg3, unsigned short jarg4, float jarg5, float jarg6, float jarg7) {
   Client *arg1 = (Client *) 0 ;
   std::string arg2 ;
   uint32 arg3 ;
@@ -67888,15 +71691,13 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddRespawnOption__SWIG_3(void * jarg1,
   float arg5 ;
   float arg6 ;
   float arg7 ;
-  std::string *argp2 ;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   arg3 = (uint32)jarg3; 
   arg4 = (uint16)jarg4; 
   arg5 = (float)jarg5; 
@@ -67906,20 +71707,18 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_AddRespawnOption__SWIG_3(void * jarg1,
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_RemoveRespawnOption__SWIG_0(void * jarg1, void * jarg2) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_RemoveRespawnOption__SWIG_0(void * jarg1, const char * jarg2) {
   unsigned int jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   bool result;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   result = (bool)(arg1)->RemoveRespawnOption(arg2);
   jresult = result; 
   return jresult;
@@ -68054,36 +71853,32 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_ClearDraggedCorpses(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_ConsentCorpses__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_ConsentCorpses__SWIG_0(void * jarg1, const char * jarg2, unsigned int jarg3) {
   Client *arg1 = (Client *) 0 ;
   std::string arg2 ;
   bool arg3 ;
-  std::string *argp2 ;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   arg3 = jarg3 ? true : false; 
   (arg1)->ConsentCorpses(arg2,arg3);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_ConsentCorpses__SWIG_1(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_ConsentCorpses__SWIG_1(void * jarg1, const char * jarg2) {
   Client *arg1 = (Client *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   (arg1)->ConsentCorpses(arg2);
 }
 
@@ -69026,30 +72821,6 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_CheckMercSuspendTimer(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetMercTimer(void * jarg1) {
-  void * jresult ;
-  Client *arg1 = (Client *) 0 ;
-  Timer *result = 0 ;
-  
-  arg1 = (Client *)jarg1; 
-  result = (Timer *)(arg1)->GetMercTimer();
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetPickLockTimer(void * jarg1) {
-  void * jresult ;
-  Client *arg1 = (Client *) 0 ;
-  Timer *result = 0 ;
-  
-  arg1 = (Client *)jarg1; 
-  result = (Timer *)(arg1)->GetPickLockTimer();
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
 SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendWebLink(void * jarg1, char * jarg2) {
   Client *arg1 = (Client *) 0 ;
   char *arg2 = (char *) 0 ;
@@ -69060,45 +72831,41 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendWebLink(void * jarg1, char * jarg2
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendMarqueeMessage__SWIG_0(void * jarg1, unsigned int jarg2, void * jarg3, unsigned int jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendMarqueeMessage__SWIG_0(void * jarg1, unsigned int jarg2, const char * jarg3, unsigned int jarg4) {
   Client *arg1 = (Client *) 0 ;
   uint32 arg2 ;
   std::string arg3 ;
   uint32 arg4 ;
-  std::string *argp3 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (uint32)jarg2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   arg4 = (uint32)jarg4; 
   (arg1)->SendMarqueeMessage(arg2,arg3,arg4);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendMarqueeMessage__SWIG_1(void * jarg1, unsigned int jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendMarqueeMessage__SWIG_1(void * jarg1, unsigned int jarg2, const char * jarg3) {
   Client *arg1 = (Client *) 0 ;
   uint32 arg2 ;
   std::string arg3 ;
-  std::string *argp3 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (uint32)jarg2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   (arg1)->SendMarqueeMessage(arg2,arg3);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendMarqueeMessage__SWIG_2(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, void * jarg7) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendMarqueeMessage__SWIG_2(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, const char * jarg7) {
   Client *arg1 = (Client *) 0 ;
   uint32 arg2 ;
   uint32 arg3 ;
@@ -69106,7 +72873,6 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendMarqueeMessage__SWIG_2(void * jarg
   uint32 arg5 ;
   uint32 arg6 ;
   std::string arg7 ;
-  std::string *argp7 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (uint32)jarg2; 
@@ -69114,12 +72880,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendMarqueeMessage__SWIG_2(void * jarg
   arg4 = (uint32)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (uint32)jarg6; 
-  argp7 = (std::string *)jarg7; 
-  if (!argp7) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg7) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg7 = *argp7; 
+  (&arg7)->assign(jarg7); 
   (arg1)->SendMarqueeMessage(arg2,arg3,arg4,arg5,arg6,arg7);
 }
 
@@ -69278,54 +73043,58 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_LoadAccountFlags(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_ClearAccountFlag(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_ClearAccountFlag(void * jarg1, const char * jarg2) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   (arg1)->ClearAccountFlag((std::string const &)*arg2);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetAccountFlag(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetAccountFlag(void * jarg1, const char * jarg2, const char * jarg3) {
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   std::string *arg3 = 0 ;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   (arg1)->SetAccountFlag((std::string const &)*arg2,(std::string const &)*arg3);
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetAccountFlag(void * jarg1, void * jarg2) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Client_GetAccountFlag(void * jarg1, const char * jarg2) {
+  const char * jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string *arg2 = 0 ;
   std::string result;
   
   arg1 = (Client *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   result = (arg1)->GetAccountFlag((std::string const &)*arg2);
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
@@ -69918,18 +73687,6 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetLastPositionBeforeBulkUpdate(void *
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetLastPositionBeforeBulkUpdate(void * jarg1) {
-  void * jresult ;
-  Client *arg1 = (Client *) 0 ;
-  glm::vec4 *result = 0 ;
-  
-  arg1 = (Client *)jarg1; 
-  result = (glm::vec4 *) &(arg1)->GetLastPositionBeforeBulkUpdate();
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
 SWIGEXPORT void SWIGSTDCALL CSharp_Client_p_raid_instance_set(void * jarg1, void * jarg2) {
   Client *arg1 = (Client *) 0 ;
   Raid *arg2 = (Raid *) 0 ;
@@ -69988,42 +73745,14 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Client_cheat_manager_get(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_m_list_task_timers_rate_limit_set(void * jarg1, void * jarg2) {
-  Client *arg1 = (Client *) 0 ;
-  Timer arg2 ;
-  Timer *argp2 ;
-  
-  arg1 = (Client *)jarg1; 
-  argp2 = (Timer *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null Timer", 0);
-    return ;
-  }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->m_list_task_timers_rate_limit = arg2;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Client_m_list_task_timers_rate_limit_get(void * jarg1) {
-  void * jresult ;
-  Client *arg1 = (Client *) 0 ;
-  Timer result;
-  
-  arg1 = (Client *)jarg1; 
-  result =  ((arg1)->m_list_task_timers_rate_limit);
-  jresult = new Timer(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetGuildPublicNote(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Client_GetGuildPublicNote(void * jarg1) {
+  const char * jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string result;
   
   arg1 = (Client *)jarg1; 
   result = (arg1)->GetGuildPublicNote();
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
@@ -70446,26 +74175,26 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_SpawnRaidBotsOnConnect(void * jarg1, v
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetMailKeyFull(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Client_GetMailKeyFull(void * jarg1) {
+  const char * jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string *result = 0 ;
   
   arg1 = (Client *)jarg1; 
   result = (std::string *) &((Client const *)arg1)->GetMailKeyFull();
-  jresult = (void *)result; 
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetMailKey(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Client_GetMailKey(void * jarg1) {
+  const char * jresult ;
   Client *arg1 = (Client *) 0 ;
   std::string *result = 0 ;
   
   arg1 = (Client *)jarg1; 
   result = (std::string *) &((Client const *)arg1)->GetMailKey();
-  jresult = (void *)result; 
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
@@ -71268,30 +74997,32 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_SetConsentGuildID(void * jarg1, unsign
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_AddConsentName(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_AddConsentName(void * jarg1, const char * jarg2) {
   Corpse *arg1 = (Corpse *) 0 ;
   std::string *arg2 = 0 ;
   
   arg1 = (Corpse *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   (arg1)->AddConsentName((std::string const &)*arg2);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_RemoveConsentName(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_RemoveConsentName(void * jarg1, const char * jarg2) {
   Corpse *arg1 = (Corpse *) 0 ;
   std::string *arg2 = 0 ;
   
   arg1 = (Corpse *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   (arg1)->RemoveConsentName((std::string const &)*arg2);
 }
 
@@ -71472,7 +75203,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_RemoveItemByID__SWIG_1(void * jarg1, u
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_AddItem__SWIG_0(void * jarg1, unsigned int jarg2, unsigned short jarg3, short jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, unsigned int jarg11, void * jarg12, unsigned int jarg13, unsigned int jarg14, unsigned int jarg15) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_AddItem__SWIG_0(void * jarg1, unsigned int jarg2, unsigned short jarg3, short jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, unsigned int jarg11, const char * jarg12, unsigned int jarg13, unsigned int jarg14, unsigned int jarg15) {
   Corpse *arg1 = (Corpse *) 0 ;
   uint32 arg2 ;
   uint16 arg3 ;
@@ -71500,11 +75231,12 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_AddItem__SWIG_0(void * jarg1, unsigned
   arg9 = (uint32)jarg9; 
   arg10 = (uint32)jarg10; 
   arg11 = jarg11 ? true : false; 
-  arg12 = (std::string *)jarg12;
-  if (!arg12) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg12) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg12_str(jarg12);
+  arg12 = &arg12_str; 
   arg13 = (uint32)jarg13; 
   arg14 = (uint32)jarg14; 
   arg15 = (uint32)jarg15; 
@@ -71512,7 +75244,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_AddItem__SWIG_0(void * jarg1, unsigned
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_AddItem__SWIG_1(void * jarg1, unsigned int jarg2, unsigned short jarg3, short jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, unsigned int jarg11, void * jarg12, unsigned int jarg13, unsigned int jarg14) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_AddItem__SWIG_1(void * jarg1, unsigned int jarg2, unsigned short jarg3, short jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, unsigned int jarg11, const char * jarg12, unsigned int jarg13, unsigned int jarg14) {
   Corpse *arg1 = (Corpse *) 0 ;
   uint32 arg2 ;
   uint16 arg3 ;
@@ -71539,18 +75271,19 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_AddItem__SWIG_1(void * jarg1, unsigned
   arg9 = (uint32)jarg9; 
   arg10 = (uint32)jarg10; 
   arg11 = jarg11 ? true : false; 
-  arg12 = (std::string *)jarg12;
-  if (!arg12) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg12) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg12_str(jarg12);
+  arg12 = &arg12_str; 
   arg13 = (uint32)jarg13; 
   arg14 = (uint32)jarg14; 
   (arg1)->AddItem(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,(std::string const &)*arg12,arg13,arg14);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_AddItem__SWIG_2(void * jarg1, unsigned int jarg2, unsigned short jarg3, short jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, unsigned int jarg11, void * jarg12, unsigned int jarg13) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_AddItem__SWIG_2(void * jarg1, unsigned int jarg2, unsigned short jarg3, short jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, unsigned int jarg11, const char * jarg12, unsigned int jarg13) {
   Corpse *arg1 = (Corpse *) 0 ;
   uint32 arg2 ;
   uint16 arg3 ;
@@ -71576,17 +75309,18 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_AddItem__SWIG_2(void * jarg1, unsigned
   arg9 = (uint32)jarg9; 
   arg10 = (uint32)jarg10; 
   arg11 = jarg11 ? true : false; 
-  arg12 = (std::string *)jarg12;
-  if (!arg12) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg12) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg12_str(jarg12);
+  arg12 = &arg12_str; 
   arg13 = (uint32)jarg13; 
   (arg1)->AddItem(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,(std::string const &)*arg12,arg13);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_AddItem__SWIG_3(void * jarg1, unsigned int jarg2, unsigned short jarg3, short jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, unsigned int jarg11, void * jarg12) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_AddItem__SWIG_3(void * jarg1, unsigned int jarg2, unsigned short jarg3, short jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, unsigned int jarg11, const char * jarg12) {
   Corpse *arg1 = (Corpse *) 0 ;
   uint32 arg2 ;
   uint16 arg3 ;
@@ -71611,11 +75345,12 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Corpse_AddItem__SWIG_3(void * jarg1, unsigned
   arg9 = (uint32)jarg9; 
   arg10 = (uint32)jarg10; 
   arg11 = jarg11 ? true : false; 
-  arg12 = (std::string *)jarg12;
-  if (!arg12) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg12) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg12_str(jarg12);
+  arg12 = &arg12_str; 
   (arg1)->AddItem(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,(std::string const &)*arg12);
 }
 
@@ -72543,18 +76278,6 @@ SWIGEXPORT char * SWIGSTDCALL CSharp_Doors_GetDoorName(void * jarg1) {
   arg1 = (Doors *)jarg1; 
   result = (char *)(arg1)->GetDoorName();
   jresult = SWIG_csharp_string_callback((const char *)result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Doors_GetPosition(void * jarg1) {
-  void * jresult ;
-  Doors *arg1 = (Doors *) 0 ;
-  glm::vec4 *result = 0 ;
-  
-  arg1 = (Doors *)jarg1; 
-  result = (glm::vec4 *) &((Doors const *)arg1)->GetPosition();
-  jresult = (void *)result; 
   return jresult;
 }
 
@@ -74973,7 +78696,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Group_GetMentoree(void * jarg1) {
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Group_DoesAnyMemberHaveExpeditionLockout__SWIG_0(void * jarg1, void * jarg2, void * jarg3, int jarg4) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Group_DoesAnyMemberHaveExpeditionLockout__SWIG_0(void * jarg1, const char * jarg2, const char * jarg3, int jarg4) {
   unsigned int jresult ;
   Group *arg1 = (Group *) 0 ;
   std::string *arg2 = 0 ;
@@ -74982,16 +78705,18 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Group_DoesAnyMemberHaveExpeditionLock
   bool result;
   
   arg1 = (Group *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   arg4 = (int)jarg4; 
   result = (bool)(arg1)->DoesAnyMemberHaveExpeditionLockout((std::string const &)*arg2,(std::string const &)*arg3,arg4);
   jresult = result; 
@@ -74999,7 +78724,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Group_DoesAnyMemberHaveExpeditionLock
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Group_DoesAnyMemberHaveExpeditionLockout__SWIG_1(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Group_DoesAnyMemberHaveExpeditionLockout__SWIG_1(void * jarg1, const char * jarg2, const char * jarg3) {
   unsigned int jresult ;
   Group *arg1 = (Group *) 0 ;
   std::string *arg2 = 0 ;
@@ -75007,16 +78732,18 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Group_DoesAnyMemberHaveExpeditionLock
   bool result;
   
   arg1 = (Group *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   result = (bool)(arg1)->DoesAnyMemberHaveExpeditionLockout((std::string const &)*arg2,(std::string const &)*arg3);
   jresult = result; 
   return jresult;
@@ -75223,7 +78950,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_new_Object__SWIG_2(unsigned int jarg1, unsi
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_new_Object__SWIG_3(void * jarg1, void * jarg2, float jarg3, float jarg4, float jarg5, float jarg6, float jarg7, float jarg8, unsigned int jarg9, unsigned int jarg10) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_Object__SWIG_3(void * jarg1, const char * jarg2, float jarg3, float jarg4, float jarg5, float jarg6, float jarg7, float jarg8, unsigned int jarg9, unsigned int jarg10) {
   void * jresult ;
   EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
   std::string *arg2 = 0 ;
@@ -75238,11 +78965,12 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_new_Object__SWIG_3(void * jarg1, void * jar
   Object *result = 0 ;
   
   arg1 = (EQ::ItemInstance *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (float)jarg3; 
   arg4 = (float)jarg4; 
   arg5 = (float)jarg5; 
@@ -75337,7 +79065,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_new_Object__SWIG_7(void * jarg1, float jarg
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_new_Object__SWIG_8(void * jarg1, float jarg2, float jarg3, float jarg4, float jarg5, unsigned char jarg6, unsigned int jarg7) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_Object__SWIG_8(const char * jarg1, float jarg2, float jarg3, float jarg4, float jarg5, unsigned char jarg6, unsigned int jarg7) {
   void * jresult ;
   std::string *arg1 = 0 ;
   float arg2 ;
@@ -75348,11 +79076,12 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_new_Object__SWIG_8(void * jarg1, float jarg
   uint32 arg7 ;
   Object *result = 0 ;
   
-  arg1 = (std::string *)jarg1;
-  if (!arg1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg1_str(jarg1);
+  arg1 = &arg1_str; 
   arg2 = (float)jarg2; 
   arg3 = (float)jarg3; 
   arg4 = (float)jarg4; 
@@ -75365,7 +79094,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_new_Object__SWIG_8(void * jarg1, float jarg
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_new_Object__SWIG_9(void * jarg1, float jarg2, float jarg3, float jarg4, float jarg5, unsigned char jarg6) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_Object__SWIG_9(const char * jarg1, float jarg2, float jarg3, float jarg4, float jarg5, unsigned char jarg6) {
   void * jresult ;
   std::string *arg1 = 0 ;
   float arg2 ;
@@ -75375,11 +79104,12 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_new_Object__SWIG_9(void * jarg1, float jarg
   uint8 arg6 ;
   Object *result = 0 ;
   
-  arg1 = (std::string *)jarg1;
-  if (!arg1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg1_str(jarg1);
+  arg1 = &arg1_str; 
   arg2 = (float)jarg2; 
   arg3 = (float)jarg3; 
   arg4 = (float)jarg4; 
@@ -76037,42 +79767,38 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Object_ClearEntityVariables(void * ja
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Object_DeleteEntityVariable(void * jarg1, void * jarg2) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Object_DeleteEntityVariable(void * jarg1, const char * jarg2) {
   unsigned int jresult ;
   Object *arg1 = (Object *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   bool result;
   
   arg1 = (Object *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   result = (bool)(arg1)->DeleteEntityVariable(arg2);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Object_GetEntityVariable(void * jarg1, void * jarg2) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Object_GetEntityVariable(void * jarg1, const char * jarg2) {
+  const char * jresult ;
   Object *arg1 = (Object *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   std::string result;
   
   arg1 = (Object *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   result = (arg1)->GetEntityVariable(arg2);
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
@@ -76089,44 +79815,38 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Object_GetEntityVariables(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Object_SetEntityVariable(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Object_SetEntityVariable(void * jarg1, const char * jarg2, const char * jarg3) {
   Object *arg1 = (Object *) 0 ;
   std::string arg2 ;
   std::string arg3 ;
-  std::string *argp2 ;
-  std::string *argp3 ;
   
   arg1 = (Object *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  (&arg2)->assign(jarg2); 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   (arg1)->SetEntityVariable(arg2,arg3);
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Object_EntityVariableExists(void * jarg1, void * jarg2) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Object_EntityVariableExists(void * jarg1, const char * jarg2) {
   unsigned int jresult ;
   Object *arg1 = (Object *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   bool result;
   
   arg1 = (Object *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   result = (bool)(arg1)->EntityVariableExists(arg2);
   jresult = result; 
   return jresult;
@@ -76484,30 +80204,29 @@ SWIGEXPORT unsigned char SWIGSTDCALL CSharp_RaidMember_level_get(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_RaidMember_note_set(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_RaidMember_note_set(void * jarg1, const char * jarg2) {
   RaidMember *arg1 = (RaidMember *) 0 ;
-  std::string arg2 ;
-  std::string *argp2 ;
+  std::string *arg2 = 0 ;
   
   arg1 = (RaidMember *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->note = arg2;
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->note = *arg2;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_RaidMember_note_get(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_RaidMember_note_get(void * jarg1) {
+  const char * jresult ;
   RaidMember *arg1 = (RaidMember *) 0 ;
-  std::string result;
+  std::string *result = 0 ;
   
   arg1 = (RaidMember *)jarg1; 
-  result =  ((arg1)->note);
-  jresult = new std::string(result); 
+  result = (std::string *) & ((arg1)->note);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
@@ -76684,30 +80403,29 @@ SWIGEXPORT void SWIGSTDCALL CSharp_delete_RaidMember(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_GroupMentor_name_set(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_GroupMentor_name_set(void * jarg1, const char * jarg2) {
   GroupMentor *arg1 = (GroupMentor *) 0 ;
-  std::string arg2 ;
-  std::string *argp2 ;
+  std::string *arg2 = 0 ;
   
   arg1 = (GroupMentor *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->name = arg2;
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->name = *arg2;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_GroupMentor_name_get(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_GroupMentor_name_get(void * jarg1) {
+  const char * jresult ;
   GroupMentor *arg1 = (GroupMentor *) 0 ;
-  std::string result;
+  std::string *result = 0 ;
   
   arg1 = (GroupMentor *)jarg1; 
-  result =  ((arg1)->name);
-  jresult = new std::string(result); 
+  result = (std::string *) & ((arg1)->name);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
@@ -76828,14 +80546,14 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Raid_GetLeader(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Raid_GetLeaderName(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Raid_GetLeaderName(void * jarg1) {
+  const char * jresult ;
   Raid *arg1 = (Raid *) 0 ;
   std::string result;
   
   arg1 = (Raid *)jarg1; 
   result = (arg1)->GetLeaderName();
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
@@ -77412,16 +81130,17 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Raid_RemoveRaidLooter(void * jarg1, char * ja
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Raid_SetRaidMOTD(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Raid_SetRaidMOTD(void * jarg1, const char * jarg2) {
   Raid *arg1 = (Raid *) 0 ;
   std::string *arg2 = 0 ;
   
   arg1 = (Raid *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   (arg1)->SetRaidMOTD((std::string const &)*arg2);
 }
 
@@ -78154,26 +81873,22 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Raid_RaidGroupSay__SWIG_1(void * jarg1, char 
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Raid_SaveRaidNote(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Raid_SaveRaidNote(void * jarg1, const char * jarg2, const char * jarg3) {
   Raid *arg1 = (Raid *) 0 ;
   std::string arg2 ;
   std::string arg3 ;
-  std::string *argp2 ;
-  std::string *argp3 ;
   
   arg1 = (Raid *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  (&arg2)->assign(jarg2); 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   (arg1)->SaveRaidNote(arg2,arg3);
 }
 
@@ -79014,7 +82729,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Raid_QueueClients__SWIG_4(void * jarg1, void 
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Raid_DoesAnyMemberHaveExpeditionLockout__SWIG_0(void * jarg1, void * jarg2, void * jarg3, int jarg4) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Raid_DoesAnyMemberHaveExpeditionLockout__SWIG_0(void * jarg1, const char * jarg2, const char * jarg3, int jarg4) {
   unsigned int jresult ;
   Raid *arg1 = (Raid *) 0 ;
   std::string *arg2 = 0 ;
@@ -79023,16 +82738,18 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Raid_DoesAnyMemberHaveExpeditionLocko
   bool result;
   
   arg1 = (Raid *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   arg4 = (int)jarg4; 
   result = (bool)(arg1)->DoesAnyMemberHaveExpeditionLockout((std::string const &)*arg2,(std::string const &)*arg3,arg4);
   jresult = result; 
@@ -79040,7 +82757,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Raid_DoesAnyMemberHaveExpeditionLocko
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Raid_DoesAnyMemberHaveExpeditionLockout__SWIG_1(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Raid_DoesAnyMemberHaveExpeditionLockout__SWIG_1(void * jarg1, const char * jarg2, const char * jarg3) {
   unsigned int jresult ;
   Raid *arg1 = (Raid *) 0 ;
   std::string *arg2 = 0 ;
@@ -79048,16 +82765,18 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Raid_DoesAnyMemberHaveExpeditionLocko
   bool result;
   
   arg1 = (Raid *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   result = (bool)(arg1)->DoesAnyMemberHaveExpeditionLockout((std::string const &)*arg2,(std::string const &)*arg3);
   jresult = result; 
   return jresult;
@@ -79437,90 +83156,6 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Trap_UpdateTrap__SWIG_2(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Trap_respawn_timer_set(void * jarg1, void * jarg2) {
-  Trap *arg1 = (Trap *) 0 ;
-  Timer arg2 ;
-  Timer *argp2 ;
-  
-  arg1 = (Trap *)jarg1; 
-  argp2 = (Timer *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null Timer", 0);
-    return ;
-  }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->respawn_timer = arg2;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Trap_respawn_timer_get(void * jarg1) {
-  void * jresult ;
-  Trap *arg1 = (Trap *) 0 ;
-  Timer result;
-  
-  arg1 = (Trap *)jarg1; 
-  result =  ((arg1)->respawn_timer);
-  jresult = new Timer(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_Trap_chkarea_timer_set(void * jarg1, void * jarg2) {
-  Trap *arg1 = (Trap *) 0 ;
-  Timer arg2 ;
-  Timer *argp2 ;
-  
-  arg1 = (Trap *)jarg1; 
-  argp2 = (Timer *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null Timer", 0);
-    return ;
-  }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->chkarea_timer = arg2;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Trap_chkarea_timer_get(void * jarg1) {
-  void * jresult ;
-  Trap *arg1 = (Trap *) 0 ;
-  Timer result;
-  
-  arg1 = (Trap *)jarg1; 
-  result =  ((arg1)->chkarea_timer);
-  jresult = new Timer(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_Trap_reset_timer_set(void * jarg1, void * jarg2) {
-  Trap *arg1 = (Trap *) 0 ;
-  Timer arg2 ;
-  Timer *argp2 ;
-  
-  arg1 = (Trap *)jarg1; 
-  argp2 = (Timer *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null Timer", 0);
-    return ;
-  }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->reset_timer = arg2;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Trap_reset_timer_get(void * jarg1) {
-  void * jresult ;
-  Trap *arg1 = (Trap *) 0 ;
-  Timer result;
-  
-  arg1 = (Trap *)jarg1; 
-  result =  ((arg1)->reset_timer);
-  jresult = new Timer(result); 
-  return jresult;
-}
-
-
 SWIGEXPORT void SWIGSTDCALL CSharp_Trap_trap_id_set(void * jarg1, unsigned int jarg2) {
   Trap *arg1 = (Trap *) 0 ;
   uint32 arg2 ;
@@ -79561,34 +83196,6 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Trap_db_id_get(void * jarg1) {
   arg1 = (Trap *)jarg1; 
   result = (uint32) ((arg1)->db_id);
   jresult = (unsigned int)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_Trap_m_Position_set(void * jarg1, void * jarg2) {
-  Trap *arg1 = (Trap *) 0 ;
-  glm::vec3 arg2 ;
-  glm::vec3 *argp2 ;
-  
-  arg1 = (Trap *)jarg1; 
-  argp2 = (glm::vec3 *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null glm::vec3", 0);
-    return ;
-  }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->m_Position = arg2;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Trap_m_Position_get(void * jarg1) {
-  void * jresult ;
-  Trap *arg1 = (Trap *) 0 ;
-  glm::vec3 result;
-  
-  arg1 = (Trap *)jarg1; 
-  result =  ((arg1)->m_Position);
-  jresult = new glm::vec3(result); 
   return jresult;
 }
 
@@ -79989,30 +83596,29 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Trap_undetectable_get(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Trap_message_set(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Trap_message_set(void * jarg1, const char * jarg2) {
   Trap *arg1 = (Trap *) 0 ;
-  std::string arg2 ;
-  std::string *argp2 ;
+  std::string *arg2 = 0 ;
   
   arg1 = (Trap *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->message = arg2;
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->message = *arg2;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Trap_message_get(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Trap_message_get(void * jarg1) {
+  const char * jresult ;
   Trap *arg1 = (Trap *) 0 ;
-  std::string result;
+  std::string *result = 0 ;
   
   arg1 = (Trap *)jarg1; 
-  result =  ((arg1)->message);
-  jresult = new std::string(result); 
+  result = (std::string *) & ((arg1)->message);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
@@ -81678,18 +85284,6 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Zone_GetGlobalLootTables(void * jarg1, void
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Zone_GetInstanceTimer(void * jarg1) {
-  void * jresult ;
-  Zone *arg1 = (Zone *) 0 ;
-  Timer *result = 0 ;
-  
-  arg1 = (Zone *)jarg1; 
-  result = (Timer *)(arg1)->GetInstanceTimer();
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
 SWIGEXPORT void SWIGSTDCALL CSharp_Zone_AddGlobalLootEntry(void * jarg1, void * jarg2) {
   Zone *arg1 = (Zone *) 0 ;
   GlobalLootEntry *arg2 = 0 ;
@@ -82260,62 +85854,6 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Zone_weather_timer_get(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Zone_spawn2_timer_set(void * jarg1, void * jarg2) {
-  Zone *arg1 = (Zone *) 0 ;
-  Timer arg2 ;
-  Timer *argp2 ;
-  
-  arg1 = (Zone *)jarg1; 
-  argp2 = (Timer *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null Timer", 0);
-    return ;
-  }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->spawn2_timer = arg2;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Zone_spawn2_timer_get(void * jarg1) {
-  void * jresult ;
-  Zone *arg1 = (Zone *) 0 ;
-  Timer result;
-  
-  arg1 = (Zone *)jarg1; 
-  result =  ((arg1)->spawn2_timer);
-  jresult = new Timer(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_Zone_hot_reload_timer_set(void * jarg1, void * jarg2) {
-  Zone *arg1 = (Zone *) 0 ;
-  Timer arg2 ;
-  Timer *argp2 ;
-  
-  arg1 = (Zone *)jarg1; 
-  argp2 = (Timer *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null Timer", 0);
-    return ;
-  }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->hot_reload_timer = arg2;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_Zone_hot_reload_timer_get(void * jarg1) {
-  void * jresult ;
-  Zone *arg1 = (Zone *) 0 ;
-  Timer result;
-  
-  arg1 = (Zone *)jarg1; 
-  result =  ((arg1)->hot_reload_timer);
-  jresult = new Timer(result); 
-  return jresult;
-}
-
-
 SWIGEXPORT void SWIGSTDCALL CSharp_Zone_weather_intensity_set(void * jarg1, unsigned char jarg2) {
   Zone *arg1 = (Zone *) 0 ;
   uint8 arg2 ;
@@ -82552,8 +86090,8 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Zone_GetCurrencyItemID(void * jarg1, 
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Zone_GetAAName(void * jarg1, int jarg2) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Zone_GetAAName(void * jarg1, int jarg2) {
+  const char * jresult ;
   Zone *arg1 = (Zone *) 0 ;
   int arg2 ;
   std::string result;
@@ -82561,7 +86099,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Zone_GetAAName(void * jarg1, int jarg2) {
   arg1 = (Zone *)jarg1; 
   arg2 = (int)jarg2; 
   result = (arg1)->GetAAName(arg2);
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
@@ -82590,30 +86128,28 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Zone_IsSnowing(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Zone_GetZoneDescription(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Zone_GetZoneDescription(void * jarg1) {
+  const char * jresult ;
   Zone *arg1 = (Zone *) 0 ;
   std::string result;
   
   arg1 = (Zone *)jarg1; 
   result = (arg1)->GetZoneDescription();
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Zone_SendReloadMessage(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Zone_SendReloadMessage(void * jarg1, const char * jarg2) {
   Zone *arg1 = (Zone *) 0 ;
   std::string arg2 ;
-  std::string *argp2 ;
   
   arg1 = (Zone *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   (arg1)->SendReloadMessage(arg2);
 }
 
@@ -82740,21 +86276,19 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Zone_DelAggroMob(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Zone_DeleteQGlobal(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Zone_DeleteQGlobal(void * jarg1, const char * jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5) {
   Zone *arg1 = (Zone *) 0 ;
   std::string arg2 ;
   uint32 arg3 ;
   uint32 arg4 ;
   uint32 arg5 ;
-  std::string *argp2 ;
   
   arg1 = (Zone *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   arg3 = (uint32)jarg3; 
   arg4 = (uint32)jarg4; 
   arg5 = (uint32)jarg5; 
@@ -83210,7 +86744,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Zone_SetQuestHotReloadQueued(void * jarg1, un
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Zone_CompareDataBucket(void * jarg1, unsigned char jarg2, void * jarg3, void * jarg4) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Zone_CompareDataBucket(void * jarg1, unsigned char jarg2, const char * jarg3, const char * jarg4) {
   unsigned int jresult ;
   Zone *arg1 = (Zone *) 0 ;
   uint8 arg2 ;
@@ -83220,16 +86754,18 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Zone_CompareDataBucket(void * jarg1, 
   
   arg1 = (Zone *)jarg1; 
   arg2 = (uint8)jarg2; 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
-  arg4 = (std::string *)jarg4;
-  if (!arg4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
+  if (!jarg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg4_str(jarg4);
+  arg4 = &arg4_str; 
   result = (bool)(arg1)->CompareDataBucket(arg2,(std::string const &)*arg3,(std::string const &)*arg4);
   jresult = result; 
   return jresult;
@@ -83346,18 +86882,6 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Zone_GetClosestZonePointWithoutZone__SWIG_1
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Zone_GetInitgridsTimer(void * jarg1) {
-  void * jresult ;
-  Zone *arg1 = (Zone *) 0 ;
-  Timer result;
-  
-  arg1 = (Zone *)jarg1; 
-  result = (arg1)->GetInitgridsTimer();
-  jresult = new Timer(result); 
-  return jresult;
-}
-
-
 SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Zone_GetInstanceTimeRemaining(void * jarg1) {
   unsigned int jresult ;
   Zone *arg1 = (Zone *) 0 ;
@@ -83380,68 +86904,70 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Zone_SetInstanceTimeRemaining(void * jarg1, u
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Zone_GMSayHookCallBackProcess(unsigned short jarg1, char * jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Zone_GMSayHookCallBackProcess(unsigned short jarg1, char * jarg2, const char * jarg3) {
   uint16 arg1 ;
   char *arg2 = (char *) 0 ;
   std::string arg3 ;
-  std::string *argp3 ;
   
   arg1 = (uint16)jarg1; 
   arg2 = (char *)jarg2; 
-  argp3 = (std::string *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg3 = *argp3; 
+  (&arg3)->assign(jarg3); 
   Zone::GMSayHookCallBackProcess(arg1,(char const *)arg2,SWIG_STD_MOVE(arg3));
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Zone_SendDiscordMessage__SWIG_0(int jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Zone_SendDiscordMessage__SWIG_0(int jarg1, const char * jarg2) {
   int arg1 ;
   std::string *arg2 = 0 ;
   
   arg1 = (int)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   Zone::SendDiscordMessage(arg1,(std::string const &)*arg2);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Zone_SendDiscordMessage__SWIG_1(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Zone_SendDiscordMessage__SWIG_1(const char * jarg1, const char * jarg2) {
   std::string *arg1 = 0 ;
   std::string *arg2 = 0 ;
   
-  arg1 = (std::string *)jarg1;
-  if (!arg1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  }
+  std::string arg1_str(jarg1);
+  arg1 = &arg1_str; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   Zone::SendDiscordMessage((std::string const &)*arg1,(std::string const &)*arg2);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Zone_DiscordWebhookMessageHandler(unsigned short jarg1, int jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Zone_DiscordWebhookMessageHandler(unsigned short jarg1, int jarg2, const char * jarg3) {
   uint16 arg1 ;
   int arg2 ;
   std::string *arg3 = 0 ;
   
   arg1 = (uint16)jarg1; 
   arg2 = (int)jarg2; 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   Zone::DiscordWebhookMessageHandler(arg1,arg2,(std::string const &)*arg3);
 }
 
@@ -84372,18 +87898,6 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Spawn2_SetNPCPointerNull(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Spawn2_GetTimer(void * jarg1) {
-  void * jresult ;
-  Spawn2 *arg1 = (Spawn2 *) 0 ;
-  Timer result;
-  
-  arg1 = (Spawn2 *)jarg1; 
-  result = (arg1)->GetTimer();
-  jresult = new Timer(result); 
-  return jresult;
-}
-
-
 SWIGEXPORT void SWIGSTDCALL CSharp_Spawn2_SetTimer(void * jarg1, unsigned int jarg2) {
   Spawn2 *arg1 = (Spawn2 *) 0 ;
   uint32 arg2 ;
@@ -84544,30 +88058,29 @@ SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SpawnEvent_condition_id_get(void * 
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_SpawnEvent_zone_name_set(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_SpawnEvent_zone_name_set(void * jarg1, const char * jarg2) {
   SpawnEvent *arg1 = (SpawnEvent *) 0 ;
-  std::string arg2 ;
-  std::string *argp2 ;
+  std::string *arg2 = 0 ;
   
   arg1 = (SpawnEvent *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->zone_name = arg2;
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->zone_name = *arg2;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_SpawnEvent_zone_name_get(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_SpawnEvent_zone_name_get(void * jarg1) {
+  const char * jresult ;
   SpawnEvent *arg1 = (SpawnEvent *) 0 ;
-  std::string result;
+  std::string *result = 0 ;
   
   arg1 = (SpawnEvent *)jarg1; 
-  result =  ((arg1)->zone_name);
-  jresult = new std::string(result); 
+  result = (std::string *) & ((arg1)->zone_name);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
@@ -84736,7 +88249,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_SpawnConditionManager_Process(void * jarg1) {
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_SpawnConditionManager_LoadSpawnConditions(void * jarg1, void * jarg2, unsigned int jarg3) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_SpawnConditionManager_LoadSpawnConditions(void * jarg1, const char * jarg2, unsigned int jarg3) {
   unsigned int jresult ;
   SpawnConditionManager *arg1 = (SpawnConditionManager *) 0 ;
   std::string *arg2 = 0 ;
@@ -84744,11 +88257,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_SpawnConditionManager_LoadSpawnCondit
   bool result;
   
   arg1 = (SpawnConditionManager *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (uint32)jarg3; 
   result = (bool)(arg1)->LoadSpawnConditions((std::string const &)*arg2,arg3);
   jresult = result; 
@@ -84756,7 +88270,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_SpawnConditionManager_LoadSpawnCondit
 }
 
 
-SWIGEXPORT short SWIGSTDCALL CSharp_SpawnConditionManager_GetCondition(void * jarg1, void * jarg2, unsigned int jarg3, unsigned short jarg4) {
+SWIGEXPORT short SWIGSTDCALL CSharp_SpawnConditionManager_GetCondition(void * jarg1, const char * jarg2, unsigned int jarg3, unsigned short jarg4) {
   short jresult ;
   SpawnConditionManager *arg1 = (SpawnConditionManager *) 0 ;
   std::string *arg2 = 0 ;
@@ -84765,11 +88279,12 @@ SWIGEXPORT short SWIGSTDCALL CSharp_SpawnConditionManager_GetCondition(void * ja
   int16 result;
   
   arg1 = (SpawnConditionManager *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (uint32)jarg3; 
   arg4 = (uint16)jarg4; 
   result = (int16)(arg1)->GetCondition((std::string const &)*arg2,arg3,arg4);
@@ -86716,58 +90231,56 @@ SWIGEXPORT signed char SWIGSTDCALL CSharp_DBbotspells_entries_Struct_max_hp_get(
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DBbotspells_entries_Struct_bucket_name_set(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_DBbotspells_entries_Struct_bucket_name_set(void * jarg1, const char * jarg2) {
   DBbotspells_entries_Struct *arg1 = (DBbotspells_entries_Struct *) 0 ;
-  std::string arg2 ;
-  std::string *argp2 ;
+  std::string *arg2 = 0 ;
   
   arg1 = (DBbotspells_entries_Struct *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->bucket_name = arg2;
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->bucket_name = *arg2;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_DBbotspells_entries_Struct_bucket_name_get(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_DBbotspells_entries_Struct_bucket_name_get(void * jarg1) {
+  const char * jresult ;
   DBbotspells_entries_Struct *arg1 = (DBbotspells_entries_Struct *) 0 ;
-  std::string result;
+  std::string *result = 0 ;
   
   arg1 = (DBbotspells_entries_Struct *)jarg1; 
-  result =  ((arg1)->bucket_name);
-  jresult = new std::string(result); 
+  result = (std::string *) & ((arg1)->bucket_name);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DBbotspells_entries_Struct_bucket_value_set(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_DBbotspells_entries_Struct_bucket_value_set(void * jarg1, const char * jarg2) {
   DBbotspells_entries_Struct *arg1 = (DBbotspells_entries_Struct *) 0 ;
-  std::string arg2 ;
-  std::string *argp2 ;
+  std::string *arg2 = 0 ;
   
   arg1 = (DBbotspells_entries_Struct *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->bucket_value = arg2;
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->bucket_value = *arg2;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_DBbotspells_entries_Struct_bucket_value_get(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_DBbotspells_entries_Struct_bucket_value_get(void * jarg1) {
+  const char * jresult ;
   DBbotspells_entries_Struct *arg1 = (DBbotspells_entries_Struct *) 0 ;
-  std::string result;
+  std::string *result = 0 ;
   
   arg1 = (DBbotspells_entries_Struct *)jarg1; 
-  result =  ((arg1)->bucket_value);
-  jresult = new std::string(result); 
+  result = (std::string *) & ((arg1)->bucket_value);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
@@ -87452,30 +90965,29 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DBTradeskillRecipe_Struct_salvage_get(void 
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DBTradeskillRecipe_Struct_name_set(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_DBTradeskillRecipe_Struct_name_set(void * jarg1, const char * jarg2) {
   DBTradeskillRecipe_Struct *arg1 = (DBTradeskillRecipe_Struct *) 0 ;
-  std::string arg2 ;
-  std::string *argp2 ;
+  std::string *arg2 = 0 ;
   
   arg1 = (DBTradeskillRecipe_Struct *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->name = arg2;
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->name = *arg2;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_DBTradeskillRecipe_Struct_name_get(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_DBTradeskillRecipe_Struct_name_get(void * jarg1) {
+  const char * jresult ;
   DBTradeskillRecipe_Struct *arg1 = (DBTradeskillRecipe_Struct *) 0 ;
-  std::string result;
+  std::string *result = 0 ;
   
   arg1 = (DBTradeskillRecipe_Struct *)jarg1; 
-  result =  ((arg1)->name);
-  jresult = new std::string(result); 
+  result = (std::string *) & ((arg1)->name);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
@@ -88296,62 +91808,6 @@ SWIGEXPORT signed char SWIGSTDCALL CSharp_ZoneSpellsBlocked_type_get(void * jarg
   arg1 = (ZoneSpellsBlocked *)jarg1; 
   result = (int8) ((arg1)->type);
   jresult = result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_ZoneSpellsBlocked_m_Location_set(void * jarg1, void * jarg2) {
-  ZoneSpellsBlocked *arg1 = (ZoneSpellsBlocked *) 0 ;
-  glm::vec3 arg2 ;
-  glm::vec3 *argp2 ;
-  
-  arg1 = (ZoneSpellsBlocked *)jarg1; 
-  argp2 = (glm::vec3 *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null glm::vec3", 0);
-    return ;
-  }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->m_Location = arg2;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_ZoneSpellsBlocked_m_Location_get(void * jarg1) {
-  void * jresult ;
-  ZoneSpellsBlocked *arg1 = (ZoneSpellsBlocked *) 0 ;
-  glm::vec3 result;
-  
-  arg1 = (ZoneSpellsBlocked *)jarg1; 
-  result =  ((arg1)->m_Location);
-  jresult = new glm::vec3(result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_ZoneSpellsBlocked_m_Difference_set(void * jarg1, void * jarg2) {
-  ZoneSpellsBlocked *arg1 = (ZoneSpellsBlocked *) 0 ;
-  glm::vec3 arg2 ;
-  glm::vec3 *argp2 ;
-  
-  arg1 = (ZoneSpellsBlocked *)jarg1; 
-  argp2 = (glm::vec3 *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null glm::vec3", 0);
-    return ;
-  }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->m_Difference = arg2;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_ZoneSpellsBlocked_m_Difference_get(void * jarg1) {
-  void * jresult ;
-  ZoneSpellsBlocked *arg1 = (ZoneSpellsBlocked *) 0 ;
-  glm::vec3 result;
-  
-  arg1 = (ZoneSpellsBlocked *)jarg1; 
-  result =  ((arg1)->m_Difference);
-  jresult = new glm::vec3(result); 
   return jresult;
 }
 
@@ -90080,30 +93536,29 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_CharacterCorpseItemEntry_attuned_get(
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_CharacterCorpseItemEntry_custom_data_set(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_CharacterCorpseItemEntry_custom_data_set(void * jarg1, const char * jarg2) {
   CharacterCorpseItemEntry *arg1 = (CharacterCorpseItemEntry *) 0 ;
-  std::string arg2 ;
-  std::string *argp2 ;
+  std::string *arg2 = 0 ;
   
   arg1 = (CharacterCorpseItemEntry *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
   }
-  arg2 = *argp2; 
-  if (arg1) (arg1)->custom_data = arg2;
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->custom_data = *arg2;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_CharacterCorpseItemEntry_custom_data_get(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_CharacterCorpseItemEntry_custom_data_get(void * jarg1) {
+  const char * jresult ;
   CharacterCorpseItemEntry *arg1 = (CharacterCorpseItemEntry *) 0 ;
-  std::string result;
+  std::string *result = 0 ;
   
   arg1 = (CharacterCorpseItemEntry *)jarg1; 
-  result =  ((arg1)->custom_data);
-  jresult = new std::string(result); 
+  result = (std::string *) & ((arg1)->custom_data);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
@@ -92246,18 +95701,19 @@ SWIGEXPORT void SWIGSTDCALL CSharp_ZoneDatabase_SetEXPModifierByCharID__SWIG_1(v
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_NoRentExpired(void * jarg1, void * jarg2) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_NoRentExpired(void * jarg1, const char * jarg2) {
   unsigned int jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   std::string *arg2 = 0 ;
   bool result;
   
   arg1 = (ZoneDatabase *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   result = (bool)(arg1)->NoRentExpired((std::string const &)*arg2);
   jresult = result; 
   return jresult;
@@ -92648,7 +96104,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_ZoneDatabase_MarkCorpseAsResurrected(void * j
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_SaveCharacterCorpse(void * jarg1, unsigned int jarg2, void * jarg3, unsigned int jarg4, unsigned short jarg5, void * jarg6, void * jarg7, unsigned int jarg8) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_SaveCharacterCorpse(void * jarg1, unsigned int jarg2, const char * jarg3, unsigned int jarg4, unsigned short jarg5, void * jarg6, void * jarg7, unsigned int jarg8) {
   unsigned int jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   uint32 arg2 ;
@@ -92662,11 +96118,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_SaveCharacterCorpse(void
   
   arg1 = (ZoneDatabase *)jarg1; 
   arg2 = (uint32)jarg2; 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   arg4 = (uint32)jarg4; 
   arg5 = (uint16)jarg5; 
   arg6 = (CharacterCorpseEntry *)jarg6;
@@ -92792,7 +96249,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_UnburyCharacterCorpse(vo
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_UpdateCharacterCorpse__SWIG_0(void * jarg1, unsigned int jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, unsigned short jarg6, void * jarg7, void * jarg8, unsigned int jarg9, unsigned int jarg10) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_UpdateCharacterCorpse__SWIG_0(void * jarg1, unsigned int jarg2, unsigned int jarg3, const char * jarg4, unsigned int jarg5, unsigned short jarg6, void * jarg7, void * jarg8, unsigned int jarg9, unsigned int jarg10) {
   unsigned int jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   uint32 arg2 ;
@@ -92809,11 +96266,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_UpdateCharacterCorpse__S
   arg1 = (ZoneDatabase *)jarg1; 
   arg2 = (uint32)jarg2; 
   arg3 = (uint32)jarg3; 
-  arg4 = (std::string *)jarg4;
-  if (!arg4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg4_str(jarg4);
+  arg4 = &arg4_str; 
   arg5 = (uint32)jarg5; 
   arg6 = (uint16)jarg6; 
   arg7 = (CharacterCorpseEntry *)jarg7;
@@ -92834,7 +96292,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_UpdateCharacterCorpse__S
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_UpdateCharacterCorpse__SWIG_1(void * jarg1, unsigned int jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, unsigned short jarg6, void * jarg7, void * jarg8, unsigned int jarg9) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_UpdateCharacterCorpse__SWIG_1(void * jarg1, unsigned int jarg2, unsigned int jarg3, const char * jarg4, unsigned int jarg5, unsigned short jarg6, void * jarg7, void * jarg8, unsigned int jarg9) {
   unsigned int jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   uint32 arg2 ;
@@ -92850,11 +96308,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_UpdateCharacterCorpse__S
   arg1 = (ZoneDatabase *)jarg1; 
   arg2 = (uint32)jarg2; 
   arg3 = (uint32)jarg3; 
-  arg4 = (std::string *)jarg4;
-  if (!arg4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg4_str(jarg4);
+  arg4 = &arg4_str; 
   arg5 = (uint32)jarg5; 
   arg6 = (uint16)jarg6; 
   arg7 = (CharacterCorpseEntry *)jarg7;
@@ -92930,8 +96389,8 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_GetFactionName__SWIG_0(v
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_ZoneDatabase_GetFactionName__SWIG_1(void * jarg1, int jarg2) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_ZoneDatabase_GetFactionName__SWIG_1(void * jarg1, int jarg2) {
+  const char * jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   int arg2 ;
   std::string result;
@@ -92939,7 +96398,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_ZoneDatabase_GetFactionName__SWIG_1(void * 
   arg1 = (ZoneDatabase *)jarg1; 
   arg2 = (int)jarg2; 
   result = (arg1)->GetFactionName(arg2);
-  jresult = new std::string(result); 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
@@ -93174,7 +96633,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_PopulateZoneSpawnList(vo
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_CreateSpawn2(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, void * jarg5, unsigned int jarg6, unsigned int jarg7, unsigned short jarg8, short jarg9) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_CreateSpawn2(void * jarg1, void * jarg2, unsigned int jarg3, const char * jarg4, void * jarg5, unsigned int jarg6, unsigned int jarg7, unsigned short jarg8, short jarg9) {
   unsigned int jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   Client *arg2 = (Client *) 0 ;
@@ -93190,11 +96649,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_CreateSpawn2(void * jarg
   arg1 = (ZoneDatabase *)jarg1; 
   arg2 = (Client *)jarg2; 
   arg3 = (uint32)jarg3; 
-  arg4 = (std::string *)jarg4;
-  if (!arg4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg4_str(jarg4);
+  arg4 = &arg4_str; 
   arg5 = (glm::vec4 *)jarg5;
   if (!arg5) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec4 const & is null", 0);
@@ -93474,7 +96934,7 @@ SWIGEXPORT int SWIGSTDCALL CSharp_ZoneDatabase_GetRandomWaypointFromGrid(void * 
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_NPCSpawnDB__SWIG_0(void * jarg1, unsigned char jarg2, void * jarg3, unsigned int jarg4, void * jarg5, void * jarg6, unsigned int jarg7) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_NPCSpawnDB__SWIG_0(void * jarg1, unsigned char jarg2, const char * jarg3, unsigned int jarg4, void * jarg5, void * jarg6, unsigned int jarg7) {
   unsigned int jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   uint8 arg2 ;
@@ -93487,11 +96947,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_NPCSpawnDB__SWIG_0(void 
   
   arg1 = (ZoneDatabase *)jarg1; 
   arg2 = (uint8)jarg2; 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   arg4 = (uint32)jarg4; 
   arg5 = (Client *)jarg5; 
   arg6 = (NPC *)jarg6; 
@@ -93502,7 +96963,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_NPCSpawnDB__SWIG_0(void 
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_NPCSpawnDB__SWIG_1(void * jarg1, unsigned char jarg2, void * jarg3, unsigned int jarg4, void * jarg5, void * jarg6) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_NPCSpawnDB__SWIG_1(void * jarg1, unsigned char jarg2, const char * jarg3, unsigned int jarg4, void * jarg5, void * jarg6) {
   unsigned int jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   uint8 arg2 ;
@@ -93514,11 +96975,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_NPCSpawnDB__SWIG_1(void 
   
   arg1 = (ZoneDatabase *)jarg1; 
   arg2 = (uint8)jarg2; 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   arg4 = (uint32)jarg4; 
   arg5 = (Client *)jarg5; 
   arg6 = (NPC *)jarg6; 
@@ -93528,7 +96990,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_NPCSpawnDB__SWIG_1(void 
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_NPCSpawnDB__SWIG_2(void * jarg1, unsigned char jarg2, void * jarg3, unsigned int jarg4, void * jarg5) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_NPCSpawnDB__SWIG_2(void * jarg1, unsigned char jarg2, const char * jarg3, unsigned int jarg4, void * jarg5) {
   unsigned int jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   uint8 arg2 ;
@@ -93539,11 +97001,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_NPCSpawnDB__SWIG_2(void 
   
   arg1 = (ZoneDatabase *)jarg1; 
   arg2 = (uint8)jarg2; 
-  arg3 = (std::string *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   arg4 = (uint32)jarg4; 
   arg5 = (Client *)jarg5; 
   result = (uint32)(arg1)->NPCSpawnDB(arg2,(std::string const &)*arg3,arg4,arg5);
@@ -93552,7 +97015,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_NPCSpawnDB__SWIG_2(void 
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_CreateNewNPCCommand(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, void * jarg5, unsigned int jarg6) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_CreateNewNPCCommand(void * jarg1, const char * jarg2, unsigned int jarg3, void * jarg4, void * jarg5, unsigned int jarg6) {
   unsigned int jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   std::string *arg2 = 0 ;
@@ -93563,11 +97026,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_CreateNewNPCCommand(void
   uint32 result;
   
   arg1 = (ZoneDatabase *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (uint32)jarg3; 
   arg4 = (Client *)jarg4; 
   arg5 = (NPC *)jarg5; 
@@ -93578,7 +97042,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_CreateNewNPCCommand(void
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_AddNewNPCSpawnGroupCommand(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, void * jarg5, unsigned int jarg6) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_AddNewNPCSpawnGroupCommand(void * jarg1, const char * jarg2, unsigned int jarg3, void * jarg4, void * jarg5, unsigned int jarg6) {
   unsigned int jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   std::string *arg2 = 0 ;
@@ -93589,11 +97053,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_AddNewNPCSpawnGroupComma
   uint32 result;
   
   arg1 = (ZoneDatabase *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (uint32)jarg3; 
   arg4 = (Client *)jarg4; 
   arg5 = (NPC *)jarg5; 
@@ -93604,7 +97069,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_AddNewNPCSpawnGroupComma
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_DeleteSpawnLeaveInNPCTypeTable(void * jarg1, void * jarg2, void * jarg3, void * jarg4) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_DeleteSpawnLeaveInNPCTypeTable(void * jarg1, const char * jarg2, void * jarg3, void * jarg4) {
   unsigned int jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   std::string *arg2 = 0 ;
@@ -93613,11 +97078,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_DeleteSpawnLeaveInNPCTyp
   uint32 result;
   
   arg1 = (ZoneDatabase *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (Client *)jarg3; 
   arg4 = (NPC *)jarg4; 
   result = (uint32)(arg1)->DeleteSpawnLeaveInNPCTypeTable((std::string const &)*arg2,arg3,arg4);
@@ -93626,7 +97092,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_DeleteSpawnLeaveInNPCTyp
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_DeleteSpawnRemoveFromNPCTypeTable(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, void * jarg5) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_DeleteSpawnRemoveFromNPCTypeTable(void * jarg1, const char * jarg2, unsigned int jarg3, void * jarg4, void * jarg5) {
   unsigned int jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   std::string *arg2 = 0 ;
@@ -93636,11 +97102,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_DeleteSpawnRemoveFromNPC
   uint32 result;
   
   arg1 = (ZoneDatabase *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (uint32)jarg3; 
   arg4 = (Client *)jarg4; 
   arg5 = (NPC *)jarg5; 
@@ -93650,7 +97117,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_DeleteSpawnRemoveFromNPC
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_AddSpawnFromSpawnGroup(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, void * jarg5, unsigned int jarg6) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_AddSpawnFromSpawnGroup(void * jarg1, const char * jarg2, unsigned int jarg3, void * jarg4, void * jarg5, unsigned int jarg6) {
   unsigned int jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   std::string *arg2 = 0 ;
@@ -93661,11 +97128,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_AddSpawnFromSpawnGroup(v
   uint32 result;
   
   arg1 = (ZoneDatabase *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (uint32)jarg3; 
   arg4 = (Client *)jarg4; 
   arg5 = (NPC *)jarg5; 
@@ -93676,7 +97144,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_AddSpawnFromSpawnGroup(v
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_AddNPCTypes(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, void * jarg5, unsigned int jarg6) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_AddNPCTypes(void * jarg1, const char * jarg2, unsigned int jarg3, void * jarg4, void * jarg5, unsigned int jarg6) {
   unsigned int jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   std::string *arg2 = 0 ;
@@ -93687,11 +97155,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_AddNPCTypes(void * jarg1
   uint32 result;
   
   arg1 = (ZoneDatabase *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (uint32)jarg3; 
   arg4 = (Client *)jarg4; 
   arg5 = (NPC *)jarg5; 
@@ -93734,7 +97203,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_SetSpecialAttkFlag(void 
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_GetPetEntry(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_GetPetEntry(void * jarg1, const char * jarg2, void * jarg3) {
   unsigned int jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   std::string *arg2 = 0 ;
@@ -93742,11 +97211,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_GetPetEntry(void * jarg1
   bool result;
   
   arg1 = (ZoneDatabase *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (PetRecord *)jarg3; 
   result = (bool)(arg1)->GetPetEntry((std::string const &)*arg2,arg3);
   jresult = result; 
@@ -93754,7 +97224,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_GetPetEntry(void * jarg1
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_GetPoweredPetEntry(void * jarg1, void * jarg2, short jarg3, void * jarg4) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_GetPoweredPetEntry(void * jarg1, const char * jarg2, short jarg3, void * jarg4) {
   unsigned int jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   std::string *arg2 = 0 ;
@@ -93763,11 +97233,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_GetPoweredPetEntry(void 
   bool result;
   
   arg1 = (ZoneDatabase *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (int16)jarg3; 
   arg4 = (PetRecord *)jarg4; 
   result = (bool)(arg1)->GetPoweredPetEntry((std::string const &)*arg2,arg3,arg4);
@@ -94314,7 +97785,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_LoadTributes(void * jarg
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_ZoneDatabase_LoadDoors(void * jarg1, void * jarg2, short jarg3) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_ZoneDatabase_LoadDoors(void * jarg1, const char * jarg2, short jarg3) {
   void * jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   std::string *arg2 = 0 ;
@@ -94322,11 +97793,12 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_ZoneDatabase_LoadDoors(void * jarg1, void *
   SwigValueWrapper< std::vector< DoorsRepository::Doors > > result;
   
   arg1 = (ZoneDatabase *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (int16)jarg3; 
   result = (arg1)->LoadDoors((std::string const &)*arg2,arg3);
   jresult = new std::vector< DoorsRepository::Doors >(result); 
@@ -94346,21 +97818,19 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_GetDoorsCountPlusOne(voi
 }
 
 
-SWIGEXPORT int SWIGSTDCALL CSharp_ZoneDatabase_GetDoorsDBCountPlusOne(void * jarg1, void * jarg2, short jarg3) {
+SWIGEXPORT int SWIGSTDCALL CSharp_ZoneDatabase_GetDoorsDBCountPlusOne(void * jarg1, const char * jarg2, short jarg3) {
   int jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   std::string arg2 ;
   int16 arg3 ;
-  std::string *argp2 ;
   int result;
   
   arg1 = (ZoneDatabase *)jarg1; 
-  argp2 = (std::string *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::string", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
   }
-  arg2 = *argp2; 
+  (&arg2)->assign(jarg2); 
   arg3 = (int16)jarg3; 
   result = (int)(arg1)->GetDoorsDBCountPlusOne(arg2,arg3);
   jresult = result; 
@@ -94400,7 +97870,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_LoadBlockedSpells(void *
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_LoadTraps(void * jarg1, void * jarg2, short jarg3) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_LoadTraps(void * jarg1, const char * jarg2, short jarg3) {
   unsigned int jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   std::string *arg2 = 0 ;
@@ -94408,11 +97878,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_LoadTraps(void * jarg1, 
   bool result;
   
   arg1 = (ZoneDatabase *)jarg1; 
-  arg2 = (std::string *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string const & is null", 0);
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return 0;
-  } 
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
   arg3 = (int16)jarg3; 
   result = (bool)(arg1)->LoadTraps((std::string const &)*arg2,arg3);
   jresult = result; 
@@ -94653,6 +98124,14480 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_content_db_get() {
   ZoneDatabase *result = 0 ;
   
   result = (ZoneDatabase *)&content_db;
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_WorldServer() {
+  void * jresult ;
+  WorldServer *result = 0 ;
+  
+  result = (WorldServer *)new WorldServer();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_WorldServer(void * jarg1) {
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  
+  arg1 = (WorldServer *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_WorldServer_Connect(void * jarg1) {
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  
+  arg1 = (WorldServer *)jarg1; 
+  (arg1)->Connect();
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_WorldServer_SendPacket(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  ServerPacket *arg2 = (ServerPacket *) 0 ;
+  bool result;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (ServerPacket *)jarg2; 
+  result = (bool)(arg1)->SendPacket(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_WorldServer_GetIP(void * jarg1) {
+  const char * jresult ;
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  std::string result;
+  
+  arg1 = (WorldServer *)jarg1; 
+  result = ((WorldServer const *)arg1)->GetIP();
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_WorldServer_GetPort(void * jarg1) {
+  unsigned short jresult ;
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  uint16 result;
+  
+  arg1 = (WorldServer *)jarg1; 
+  result = (uint16)((WorldServer const *)arg1)->GetPort();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_WorldServer_Connected(void * jarg1) {
+  unsigned int jresult ;
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  bool result;
+  
+  arg1 = (WorldServer *)jarg1; 
+  result = (bool)((WorldServer const *)arg1)->Connected();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_WorldServer_HandleMessage(void * jarg1, unsigned short jarg2, void * jarg3) {
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  uint16 arg2 ;
+  EQ::Net::Packet *arg3 = 0 ;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (EQ::Net::Packet *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "EQ::Net::Packet const & is null", 0);
+    return ;
+  } 
+  (arg1)->HandleMessage(arg2,(EQ::Net::Packet const &)*arg3);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_WorldServer_SendChannelMessage(void * jarg1, void * jarg2, char * jarg3, unsigned char jarg4, unsigned int jarg5, unsigned char jarg6, unsigned char jarg7, char * jarg8) {
+  unsigned int jresult ;
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  Client *arg2 = (Client *) 0 ;
+  char *arg3 = (char *) 0 ;
+  uint8 arg4 ;
+  uint32 arg5 ;
+  uint8 arg6 ;
+  uint8 arg7 ;
+  char *arg8 = (char *) 0 ;
+  void *arg9 = 0 ;
+  bool result;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (Client *)jarg2; 
+  arg3 = (char *)jarg3; 
+  arg4 = (uint8)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint8)jarg6; 
+  arg7 = (uint8)jarg7; 
+  arg8 = (char *)jarg8; 
+  result = (bool)(arg1)->SendChannelMessage(arg2,(char const *)arg3,arg4,arg5,arg6,arg7,(char const *)arg8,arg9);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_WorldServer_SendEmoteMessage__SWIG_0(void * jarg1, char * jarg2, unsigned int jarg3, unsigned int jarg4, char * jarg5) {
+  unsigned int jresult ;
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  char *arg2 = (char *) 0 ;
+  uint32 arg3 ;
+  uint32 arg4 ;
+  char *arg5 = (char *) 0 ;
+  void *arg6 = 0 ;
+  bool result;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (char *)jarg5; 
+  result = (bool)(arg1)->SendEmoteMessage((char const *)arg2,arg3,arg4,(char const *)arg5,arg6);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_WorldServer_SendEmoteMessage__SWIG_1(void * jarg1, char * jarg2, unsigned int jarg3, short jarg4, unsigned int jarg5, char * jarg6) {
+  unsigned int jresult ;
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  char *arg2 = (char *) 0 ;
+  uint32 arg3 ;
+  int16 arg4 ;
+  uint32 arg5 ;
+  char *arg6 = (char *) 0 ;
+  void *arg7 = 0 ;
+  bool result;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (int16)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (char *)jarg6; 
+  result = (bool)(arg1)->SendEmoteMessage((char const *)arg2,arg3,arg4,arg5,(char const *)arg6,arg7);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_WorldServer_SendVoiceMacro__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, char * jarg4, unsigned int jarg5, unsigned int jarg6) {
+  unsigned int jresult ;
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  Client *arg2 = (Client *) 0 ;
+  uint32 arg3 ;
+  char *arg4 = (char *) 0 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  bool result;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (Client *)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (char *)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  result = (bool)(arg1)->SendVoiceMacro(arg2,arg3,arg4,arg5,arg6);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_WorldServer_SendVoiceMacro__SWIG_1(void * jarg1, void * jarg2, unsigned int jarg3, char * jarg4, unsigned int jarg5) {
+  unsigned int jresult ;
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  Client *arg2 = (Client *) 0 ;
+  uint32 arg3 ;
+  char *arg4 = (char *) 0 ;
+  uint32 arg5 ;
+  bool result;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (Client *)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (char *)jarg4; 
+  arg5 = (uint32)jarg5; 
+  result = (bool)(arg1)->SendVoiceMacro(arg2,arg3,arg4,arg5);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_WorldServer_SetZoneData__SWIG_0(void * jarg1, unsigned int jarg2, unsigned int jarg3) {
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  (arg1)->SetZoneData(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_WorldServer_SetZoneData__SWIG_1(void * jarg1, unsigned int jarg2) {
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->SetZoneData(arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_WorldServer_RezzPlayer(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, unsigned short jarg5) {
+  unsigned int jresult ;
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  EQApplicationPacket *arg2 = (EQApplicationPacket *) 0 ;
+  uint32 arg3 ;
+  uint32 arg4 ;
+  uint16 arg5 ;
+  bool result;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (EQApplicationPacket *)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint16)jarg5; 
+  result = (bool)(arg1)->RezzPlayer(arg2,arg3,arg4,arg5);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_WorldServer_IsOOCMuted(void * jarg1) {
+  unsigned int jresult ;
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  bool result;
+  
+  arg1 = (WorldServer *)jarg1; 
+  result = (bool)((WorldServer const *)arg1)->IsOOCMuted();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_WorldServer_NextGroupID(void * jarg1) {
+  unsigned int jresult ;
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  uint32 result;
+  
+  arg1 = (WorldServer *)jarg1; 
+  result = (uint32)(arg1)->NextGroupID();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_WorldServer_SetLaunchedName(void * jarg1, char * jarg2) {
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (char *)jarg2; 
+  (arg1)->SetLaunchedName((char const *)arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_WorldServer_SetLauncherName(void * jarg1, char * jarg2) {
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (char *)jarg2; 
+  (arg1)->SetLauncherName((char const *)arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_WorldServer_SendReloadTasks__SWIG_0(void * jarg1, unsigned char jarg2, unsigned int jarg3) {
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  (arg1)->SendReloadTasks(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_WorldServer_SendReloadTasks__SWIG_1(void * jarg1, unsigned char jarg2) {
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  (arg1)->SendReloadTasks(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_WorldServer_HandleReloadTasks(void * jarg1, void * jarg2) {
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  ServerPacket *arg2 = (ServerPacket *) 0 ;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (ServerPacket *)jarg2; 
+  (arg1)->HandleReloadTasks(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_WorldServer_UpdateLFP__SWIG_0(void * jarg1, unsigned int jarg2, unsigned char jarg3, unsigned char jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, char * jarg8, void * jarg9) {
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  uint32 arg2 ;
+  uint8 arg3 ;
+  uint8 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  uint32 arg7 ;
+  char *arg8 = (char *) 0 ;
+  GroupLFPMemberEntry *arg9 = (GroupLFPMemberEntry *) 0 ;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint8)jarg3; 
+  arg4 = (uint8)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  arg7 = (uint32)jarg7; 
+  arg8 = (char *)jarg8; 
+  arg9 = (GroupLFPMemberEntry *)jarg9; 
+  (arg1)->UpdateLFP(arg2,arg3,arg4,arg5,arg6,arg7,(char const *)arg8,arg9);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_WorldServer_UpdateLFP__SWIG_1(void * jarg1, unsigned int jarg2, void * jarg3) {
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  uint32 arg2 ;
+  GroupLFPMemberEntry *arg3 = (GroupLFPMemberEntry *) 0 ;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (GroupLFPMemberEntry *)jarg3; 
+  (arg1)->UpdateLFP(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_WorldServer_StopLFP(void * jarg1, unsigned int jarg2) {
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->StopLFP(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_WorldServer_HandleLFGMatches(void * jarg1, void * jarg2) {
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  ServerPacket *arg2 = (ServerPacket *) 0 ;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (ServerPacket *)jarg2; 
+  (arg1)->HandleLFGMatches(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_WorldServer_HandleLFPMatches(void * jarg1, void * jarg2) {
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  ServerPacket *arg2 = (ServerPacket *) 0 ;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (ServerPacket *)jarg2; 
+  (arg1)->HandleLFPMatches(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_WorldServer_RequestTellQueue(void * jarg1, char * jarg2) {
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (char *)jarg2; 
+  (arg1)->RequestTellQueue((char const *)arg2);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_WorldServer_GetScheduler(void * jarg1) {
+  void * jresult ;
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  ZoneEventScheduler *result = 0 ;
+  
+  arg1 = (WorldServer *)jarg1; 
+  result = (ZoneEventScheduler *)((WorldServer const *)arg1)->GetScheduler();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_WorldServer_SetScheduler(void * jarg1, void * jarg2) {
+  WorldServer *arg1 = (WorldServer *) 0 ;
+  ZoneEventScheduler *arg2 = (ZoneEventScheduler *) 0 ;
+  
+  arg1 = (WorldServer *)jarg1; 
+  arg2 = (ZoneEventScheduler *)jarg2; 
+  (arg1)->SetScheduler(arg2);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_QuestManager() {
+  void * jresult ;
+  QuestManager *result = 0 ;
+  
+  result = (QuestManager *)new QuestManager();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_QuestManager(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_StartQuest__SWIG_0(void * jarg1, void * jarg2, void * jarg3, void * jarg4, void * jarg5, const char * jarg6) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  Client *arg3 = (Client *) 0 ;
+  EQ::ItemInstance *arg4 = (EQ::ItemInstance *) 0 ;
+  SPDat_Spell_Struct *arg5 = (SPDat_Spell_Struct *) 0 ;
+  std::string arg6 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  arg3 = (Client *)jarg3; 
+  arg4 = (EQ::ItemInstance *)jarg4; 
+  arg5 = (SPDat_Spell_Struct *)jarg5; 
+  if (!jarg6) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  (&arg6)->assign(jarg6); 
+  (arg1)->StartQuest(arg2,arg3,arg4,(SPDat_Spell_Struct const *)arg5,arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_StartQuest__SWIG_1(void * jarg1, void * jarg2, void * jarg3, void * jarg4, void * jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  Client *arg3 = (Client *) 0 ;
+  EQ::ItemInstance *arg4 = (EQ::ItemInstance *) 0 ;
+  SPDat_Spell_Struct *arg5 = (SPDat_Spell_Struct *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  arg3 = (Client *)jarg3; 
+  arg4 = (EQ::ItemInstance *)jarg4; 
+  arg5 = (SPDat_Spell_Struct *)jarg5; 
+  (arg1)->StartQuest(arg2,arg3,arg4,(SPDat_Spell_Struct const *)arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_StartQuest__SWIG_2(void * jarg1, void * jarg2, void * jarg3, void * jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  Client *arg3 = (Client *) 0 ;
+  EQ::ItemInstance *arg4 = (EQ::ItemInstance *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  arg3 = (Client *)jarg3; 
+  arg4 = (EQ::ItemInstance *)jarg4; 
+  (arg1)->StartQuest(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_StartQuest__SWIG_3(void * jarg1, void * jarg2, void * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  Client *arg3 = (Client *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  arg3 = (Client *)jarg3; 
+  (arg1)->StartQuest(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_StartQuest__SWIG_4(void * jarg1, void * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  (arg1)->StartQuest(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_EndQuest(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->EndQuest();
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_QuestsRunning(void * jarg1) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = (bool)(arg1)->QuestsRunning();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_Process(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->Process();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_ClearAllTimers(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->ClearAllTimers();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_echo(void * jarg1, int jarg2, char * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  char *arg3 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (char *)jarg3; 
+  (arg1)->echo(arg2,(char const *)arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_say(void * jarg1, char * jarg2, void * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  Journal::Options *arg3 = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (Journal::Options *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Journal::Options & is null", 0);
+    return ;
+  } 
+  (arg1)->say((char const *)arg2,*arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_me(void * jarg1, char * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  (arg1)->me((char const *)arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_summonitem__SWIG_0(void * jarg1, unsigned int jarg2, short jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  (arg1)->summonitem(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_summonitem__SWIG_1(void * jarg1, unsigned int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->summonitem(arg2);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_CreateItem__SWIG_0(void * jarg1, unsigned int jarg2, short jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  uint32 arg7 ;
+  uint32 arg8 ;
+  uint32 arg9 ;
+  bool arg10 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  arg7 = (uint32)jarg7; 
+  arg8 = (uint32)jarg8; 
+  arg9 = (uint32)jarg9; 
+  arg10 = jarg10 ? true : false; 
+  result = (EQ::ItemInstance *)((QuestManager const *)arg1)->CreateItem(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_CreateItem__SWIG_1(void * jarg1, unsigned int jarg2, short jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8, unsigned int jarg9) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  uint32 arg7 ;
+  uint32 arg8 ;
+  uint32 arg9 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  arg7 = (uint32)jarg7; 
+  arg8 = (uint32)jarg8; 
+  arg9 = (uint32)jarg9; 
+  result = (EQ::ItemInstance *)((QuestManager const *)arg1)->CreateItem(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_CreateItem__SWIG_2(void * jarg1, unsigned int jarg2, short jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  uint32 arg7 ;
+  uint32 arg8 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  arg7 = (uint32)jarg7; 
+  arg8 = (uint32)jarg8; 
+  result = (EQ::ItemInstance *)((QuestManager const *)arg1)->CreateItem(arg2,arg3,arg4,arg5,arg6,arg7,arg8);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_CreateItem__SWIG_3(void * jarg1, unsigned int jarg2, short jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  uint32 arg7 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  arg7 = (uint32)jarg7; 
+  result = (EQ::ItemInstance *)((QuestManager const *)arg1)->CreateItem(arg2,arg3,arg4,arg5,arg6,arg7);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_CreateItem__SWIG_4(void * jarg1, unsigned int jarg2, short jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  result = (EQ::ItemInstance *)((QuestManager const *)arg1)->CreateItem(arg2,arg3,arg4,arg5,arg6);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_CreateItem__SWIG_5(void * jarg1, unsigned int jarg2, short jarg3, unsigned int jarg4, unsigned int jarg5) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  result = (EQ::ItemInstance *)((QuestManager const *)arg1)->CreateItem(arg2,arg3,arg4,arg5);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_CreateItem__SWIG_6(void * jarg1, unsigned int jarg2, short jarg3, unsigned int jarg4) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  uint32 arg4 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  arg4 = (uint32)jarg4; 
+  result = (EQ::ItemInstance *)((QuestManager const *)arg1)->CreateItem(arg2,arg3,arg4);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_CreateItem__SWIG_7(void * jarg1, unsigned int jarg2, short jarg3) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  result = (EQ::ItemInstance *)((QuestManager const *)arg1)->CreateItem(arg2,arg3);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_CreateItem__SWIG_8(void * jarg1, unsigned int jarg2) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (EQ::ItemInstance *)((QuestManager const *)arg1)->CreateItem(arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_write(void * jarg1, char * jarg2, char * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  char *arg3 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (char *)jarg3; 
+  (arg1)->write((char const *)arg2,(char const *)arg3);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_spawn2(void * jarg1, int jarg2, int jarg3, int jarg4, void * jarg5) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  glm::vec4 *arg5 = 0 ;
+  Mob *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (glm::vec4 *)jarg5;
+  if (!arg5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec4 const & is null", 0);
+    return 0;
+  } 
+  result = (Mob *)(arg1)->spawn2(arg2,arg3,arg4,(glm::vec4 const &)*arg5);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_unique_spawn(void * jarg1, int jarg2, int jarg3, int jarg4, void * jarg5) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  glm::vec4 *arg5 = 0 ;
+  Mob *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (glm::vec4 *)jarg5;
+  if (!arg5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec4 const & is null", 0);
+    return 0;
+  } 
+  result = (Mob *)(arg1)->unique_spawn(arg2,arg3,arg4,(glm::vec4 const &)*arg5);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_spawn_from_spawn2(void * jarg1, unsigned int jarg2) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  Mob *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (Mob *)(arg1)->spawn_from_spawn2(arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_enable_spawn2(void * jarg1, unsigned int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->enable_spawn2(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_disable_spawn2(void * jarg1, unsigned int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->disable_spawn2(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_setstat(void * jarg1, int jarg2, int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  (arg1)->setstat(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_incstat(void * jarg1, int jarg2, int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  (arg1)->incstat(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_castspell(void * jarg1, unsigned short jarg2, unsigned short jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint16 arg2 ;
+  uint16 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (uint16)jarg3; 
+  (arg1)->castspell(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_selfcast(void * jarg1, unsigned short jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  (arg1)->selfcast(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_addloot__SWIG_0(void * jarg1, int jarg2, int jarg3, unsigned int jarg4, int jarg5, int jarg6, int jarg7, int jarg8, int jarg9, int jarg10) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  bool arg4 ;
+  int arg5 ;
+  int arg6 ;
+  int arg7 ;
+  int arg8 ;
+  int arg9 ;
+  int arg10 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  arg5 = (int)jarg5; 
+  arg6 = (int)jarg6; 
+  arg7 = (int)jarg7; 
+  arg8 = (int)jarg8; 
+  arg9 = (int)jarg9; 
+  arg10 = (int)jarg10; 
+  (arg1)->addloot(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_addloot__SWIG_1(void * jarg1, int jarg2, int jarg3, unsigned int jarg4, int jarg5, int jarg6, int jarg7, int jarg8, int jarg9) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  bool arg4 ;
+  int arg5 ;
+  int arg6 ;
+  int arg7 ;
+  int arg8 ;
+  int arg9 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  arg5 = (int)jarg5; 
+  arg6 = (int)jarg6; 
+  arg7 = (int)jarg7; 
+  arg8 = (int)jarg8; 
+  arg9 = (int)jarg9; 
+  (arg1)->addloot(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_addloot__SWIG_2(void * jarg1, int jarg2, int jarg3, unsigned int jarg4, int jarg5, int jarg6, int jarg7, int jarg8) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  bool arg4 ;
+  int arg5 ;
+  int arg6 ;
+  int arg7 ;
+  int arg8 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  arg5 = (int)jarg5; 
+  arg6 = (int)jarg6; 
+  arg7 = (int)jarg7; 
+  arg8 = (int)jarg8; 
+  (arg1)->addloot(arg2,arg3,arg4,arg5,arg6,arg7,arg8);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_addloot__SWIG_3(void * jarg1, int jarg2, int jarg3, unsigned int jarg4, int jarg5, int jarg6, int jarg7) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  bool arg4 ;
+  int arg5 ;
+  int arg6 ;
+  int arg7 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  arg5 = (int)jarg5; 
+  arg6 = (int)jarg6; 
+  arg7 = (int)jarg7; 
+  (arg1)->addloot(arg2,arg3,arg4,arg5,arg6,arg7);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_addloot__SWIG_4(void * jarg1, int jarg2, int jarg3, unsigned int jarg4, int jarg5, int jarg6) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  bool arg4 ;
+  int arg5 ;
+  int arg6 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  arg5 = (int)jarg5; 
+  arg6 = (int)jarg6; 
+  (arg1)->addloot(arg2,arg3,arg4,arg5,arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_addloot__SWIG_5(void * jarg1, int jarg2, int jarg3, unsigned int jarg4, int jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  bool arg4 ;
+  int arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  arg5 = (int)jarg5; 
+  (arg1)->addloot(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_addloot__SWIG_6(void * jarg1, int jarg2, int jarg3, unsigned int jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  bool arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  (arg1)->addloot(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_addloot__SWIG_7(void * jarg1, int jarg2, int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  (arg1)->addloot(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_addloot__SWIG_8(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->addloot(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_Zone(void * jarg1, char * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  (arg1)->Zone((char const *)arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_ZoneGroup(void * jarg1, char * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  (arg1)->ZoneGroup((char const *)arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_ZoneRaid(void * jarg1, char * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  (arg1)->ZoneRaid((char const *)arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_settimer__SWIG_0(void * jarg1, const char * jarg2, unsigned int jarg3, void * jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  uint32 arg3 ;
+  Mob *arg4 = (Mob *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (Mob *)jarg4; 
+  (arg1)->settimer((std::string const &)*arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_settimer__SWIG_1(void * jarg1, const char * jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  uint32 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (uint32)jarg3; 
+  (arg1)->settimer((std::string const &)*arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_settimerMS__SWIG_0(void * jarg1, const char * jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  uint32 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (uint32)jarg3; 
+  (arg1)->settimerMS((std::string const &)*arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_settimerMS__SWIG_1(void * jarg1, const char * jarg2, unsigned int jarg3, void * jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  uint32 arg3 ;
+  EQ::ItemInstance *arg4 = (EQ::ItemInstance *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (EQ::ItemInstance *)jarg4; 
+  (arg1)->settimerMS((std::string const &)*arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_settimerMS__SWIG_2(void * jarg1, const char * jarg2, unsigned int jarg3, void * jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  uint32 arg3 ;
+  Mob *arg4 = (Mob *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (Mob *)jarg4; 
+  (arg1)->settimerMS((std::string const &)*arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_stoptimer__SWIG_0(void * jarg1, const char * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  (arg1)->stoptimer((std::string const &)*arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_stoptimer__SWIG_1(void * jarg1, const char * jarg2, void * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  EQ::ItemInstance *arg3 = (EQ::ItemInstance *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (EQ::ItemInstance *)jarg3; 
+  (arg1)->stoptimer((std::string const &)*arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_stoptimer__SWIG_2(void * jarg1, const char * jarg2, void * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  Mob *arg3 = (Mob *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (Mob *)jarg3; 
+  (arg1)->stoptimer((std::string const &)*arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_stopalltimers__SWIG_0(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->stopalltimers();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_stopalltimers__SWIG_1(void * jarg1, void * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  EQ::ItemInstance *arg2 = (EQ::ItemInstance *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (EQ::ItemInstance *)jarg2; 
+  (arg1)->stopalltimers(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_stopalltimers__SWIG_2(void * jarg1, void * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  (arg1)->stopalltimers(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_pausetimer__SWIG_0(void * jarg1, const char * jarg2, void * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  Mob *arg3 = (Mob *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (Mob *)jarg3; 
+  (arg1)->pausetimer((std::string const &)*arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_pausetimer__SWIG_1(void * jarg1, const char * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  (arg1)->pausetimer((std::string const &)*arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_resumetimer__SWIG_0(void * jarg1, const char * jarg2, void * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  Mob *arg3 = (Mob *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (Mob *)jarg3; 
+  (arg1)->resumetimer((std::string const &)*arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_resumetimer__SWIG_1(void * jarg1, const char * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  (arg1)->resumetimer((std::string const &)*arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_ispausedtimer__SWIG_0(void * jarg1, const char * jarg2, void * jarg3) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  Mob *arg3 = (Mob *) 0 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (Mob *)jarg3; 
+  result = (bool)(arg1)->ispausedtimer((std::string const &)*arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_ispausedtimer__SWIG_1(void * jarg1, const char * jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  result = (bool)(arg1)->ispausedtimer((std::string const &)*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_hastimer__SWIG_0(void * jarg1, const char * jarg2, void * jarg3) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  Mob *arg3 = (Mob *) 0 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (Mob *)jarg3; 
+  result = (bool)(arg1)->hastimer((std::string const &)*arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_hastimer__SWIG_1(void * jarg1, const char * jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  result = (bool)(arg1)->hastimer((std::string const &)*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_getremainingtimeMS__SWIG_0(void * jarg1, const char * jarg2, void * jarg3) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  Mob *arg3 = (Mob *) 0 ;
+  uint32 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (Mob *)jarg3; 
+  result = (uint32)(arg1)->getremainingtimeMS((std::string const &)*arg2,arg3);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_getremainingtimeMS__SWIG_1(void * jarg1, const char * jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  uint32 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  result = (uint32)(arg1)->getremainingtimeMS((std::string const &)*arg2);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_gettimerdurationMS__SWIG_0(void * jarg1, const char * jarg2, void * jarg3) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  Mob *arg3 = (Mob *) 0 ;
+  uint32 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (Mob *)jarg3; 
+  result = (uint32)(arg1)->gettimerdurationMS((std::string const &)*arg2,arg3);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_gettimerdurationMS__SWIG_1(void * jarg1, const char * jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  uint32 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  result = (uint32)(arg1)->gettimerdurationMS((std::string const &)*arg2);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_emote(void * jarg1, char * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  (arg1)->emote((char const *)arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_shout(void * jarg1, char * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  (arg1)->shout((char const *)arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_shout2(void * jarg1, char * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  (arg1)->shout2((char const *)arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_gmsay(void * jarg1, char * jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  uint32 arg3 ;
+  bool arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  (arg1)->gmsay((char const *)arg2,arg3,arg4,arg5,arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_depop__SWIG_0(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->depop(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_depop__SWIG_1(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->depop();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_depop_withtimer__SWIG_0(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->depop_withtimer(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_depop_withtimer__SWIG_1(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->depop_withtimer();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_depopall__SWIG_0(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->depopall(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_depopall__SWIG_1(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->depopall();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_depopzone__SWIG_0(void * jarg1, unsigned int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  (arg1)->depopzone(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_depopzone__SWIG_1(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->depopzone();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_repopzone__SWIG_0(void * jarg1, unsigned int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  (arg1)->repopzone(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_repopzone__SWIG_1(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->repopzone();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_processmobswhilezoneempty(void * jarg1, unsigned int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  (arg1)->processmobswhilezoneempty(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_settarget(void * jarg1, char * jarg2, int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  int arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (int)jarg3; 
+  (arg1)->settarget((char const *)arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_follow(void * jarg1, int jarg2, int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  (arg1)->follow(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_sfollow(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->sfollow();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_changedeity(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->changedeity(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_exp(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->exp(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_level(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->level(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_traindisc(void * jarg1, unsigned int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->traindisc(arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_isdisctome(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (bool)(arg1)->isdisctome(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getracename(void * jarg1, unsigned short jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint16 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  result = (arg1)->getracename(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getspellname(void * jarg1, unsigned int jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (arg1)->getspellname(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getskillname(void * jarg1, int jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (arg1)->getskillname(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getldonthemename(void * jarg1, unsigned int jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (arg1)->getldonthemename(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getfactionname(void * jarg1, int jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (arg1)->getfactionname(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getlanguagename(void * jarg1, unsigned char jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  result = (arg1)->getlanguagename(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getbodytypename(void * jarg1, unsigned int jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (arg1)->getbodytypename(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getconsiderlevelname(void * jarg1, unsigned char jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  result = (arg1)->getconsiderlevelname(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_safemove(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->safemove();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_rain(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->rain(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_snow(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->snow(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_rename(void * jarg1, const char * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  (&arg2)->assign(jarg2); 
+  (arg1)->rename(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_surname(void * jarg1, const char * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  (&arg2)->assign(jarg2); 
+  (arg1)->surname(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_permaclass(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->permaclass(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_permarace(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->permarace(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_permagender(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->permagender(arg2);
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QuestManager_scribespells__SWIG_0(void * jarg1, unsigned char jarg2, unsigned char jarg3) {
+  unsigned short jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint8 arg3 ;
+  uint16 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint8)jarg3; 
+  result = (uint16)(arg1)->scribespells(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QuestManager_scribespells__SWIG_1(void * jarg1, unsigned char jarg2) {
+  unsigned short jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint16 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  result = (uint16)(arg1)->scribespells(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QuestManager_traindiscs__SWIG_0(void * jarg1, unsigned char jarg2, unsigned char jarg3) {
+  unsigned short jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint8 arg3 ;
+  uint16 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint8)jarg3; 
+  result = (uint16)(arg1)->traindiscs(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QuestManager_traindiscs__SWIG_1(void * jarg1, unsigned char jarg2) {
+  unsigned short jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint16 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  result = (uint16)(arg1)->traindiscs(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_unscribespells(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->unscribespells();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_untraindiscs(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->untraindiscs();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_givecash__SWIG_0(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  (arg1)->givecash(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_givecash__SWIG_1(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  uint32 arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (uint32)jarg4; 
+  (arg1)->givecash(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_givecash__SWIG_2(void * jarg1, unsigned int jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  (arg1)->givecash(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_givecash__SWIG_3(void * jarg1, unsigned int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->givecash(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_pvp(void * jarg1, char * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  (arg1)->pvp((char const *)arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_movepc(void * jarg1, int jarg2, float jarg3, float jarg4, float jarg5, float jarg6) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  float arg6 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  arg5 = (float)jarg5; 
+  arg6 = (float)jarg6; 
+  (arg1)->movepc(arg2,arg3,arg4,arg5,arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_gmmove(void * jarg1, float jarg2, float jarg3, float jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (float)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  (arg1)->gmmove(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_movegrp(void * jarg1, int jarg2, float jarg3, float jarg4, float jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  arg5 = (float)jarg5; 
+  (arg1)->movegrp(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_doanim__SWIG_0(void * jarg1, int jarg2, int jarg3, unsigned int jarg4, void * jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  bool arg4 ;
+  eqFilterType arg5 ;
+  eqFilterType *argp5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  argp5 = (eqFilterType *)jarg5; 
+  if (!argp5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
+    return ;
+  }
+  arg5 = *argp5; 
+  (arg1)->doanim(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_doanim__SWIG_1(void * jarg1, int jarg2, int jarg3, unsigned int jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  bool arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  (arg1)->doanim(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_doanim__SWIG_2(void * jarg1, int jarg2, int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  (arg1)->doanim(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_doanim__SWIG_3(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->doanim(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_addskill(void * jarg1, int jarg2, int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  (arg1)->addskill(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_setlanguage(void * jarg1, unsigned char jarg2, unsigned char jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint8 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint8)jarg3; 
+  (arg1)->setlanguage(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_setskill(void * jarg1, int jarg2, int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  (arg1)->setskill(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_setallskill(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->setallskill(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_attack(void * jarg1, char * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  (arg1)->attack((char const *)arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_attacknpc(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->attacknpc(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_attacknpctype(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->attacknpctype(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_save(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->save();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_faction(void * jarg1, int jarg2, int jarg3, int jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (int)jarg4; 
+  (arg1)->faction(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_rewardfaction(void * jarg1, int jarg2, int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  (arg1)->rewardfaction(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_setsky(void * jarg1, unsigned char jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  (arg1)->setsky(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_setguild(void * jarg1, unsigned int jarg2, unsigned char jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint8 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint8)jarg3; 
+  (arg1)->setguild(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CreateGuild(void * jarg1, char * jarg2, char * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  char *arg3 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (char *)jarg3; 
+  (arg1)->CreateGuild((char const *)arg2,(char const *)arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_settime__SWIG_0(void * jarg1, unsigned char jarg2, unsigned char jarg3, unsigned int jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint8 arg3 ;
+  bool arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint8)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  (arg1)->settime(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_settime__SWIG_1(void * jarg1, unsigned char jarg2, unsigned char jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint8 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint8)jarg3; 
+  (arg1)->settime(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_itemlink(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->itemlink(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_signal__SWIG_0(void * jarg1, int jarg2, int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  (arg1)->signal(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_signal__SWIG_1(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->signal(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_signalwith__SWIG_0(void * jarg1, int jarg2, int jarg3, int jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (int)jarg4; 
+  (arg1)->signalwith(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_signalwith__SWIG_1(void * jarg1, int jarg2, int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  (arg1)->signalwith(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_setglobal(void * jarg1, char * jarg2, char * jarg3, int jarg4, char * jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  char *arg3 = (char *) 0 ;
+  int arg4 ;
+  char *arg5 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (char *)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (char *)jarg5; 
+  (arg1)->setglobal((char const *)arg2,(char const *)arg3,arg4,(char const *)arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_targlobal(void * jarg1, char * jarg2, char * jarg3, char * jarg4, int jarg5, int jarg6, int jarg7) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  char *arg3 = (char *) 0 ;
+  char *arg4 = (char *) 0 ;
+  int arg5 ;
+  int arg6 ;
+  int arg7 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (char *)jarg3; 
+  arg4 = (char *)jarg4; 
+  arg5 = (int)jarg5; 
+  arg6 = (int)jarg6; 
+  arg7 = (int)jarg7; 
+  (arg1)->targlobal((char const *)arg2,(char const *)arg3,(char const *)arg4,arg5,arg6,arg7);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_delglobal(void * jarg1, char * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  (arg1)->delglobal((char const *)arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_ding(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->ding();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_rebind__SWIG_0(void * jarg1, int jarg2, void * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  glm::vec3 *arg3 = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (glm::vec3 *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec3 const & is null", 0);
+    return ;
+  } 
+  (arg1)->rebind(arg2,(glm::vec3 const &)*arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_rebind__SWIG_1(void * jarg1, int jarg2, void * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  glm::vec4 *arg3 = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (glm::vec4 *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec4 const & is null", 0);
+    return ;
+  } 
+  (arg1)->rebind(arg2,(glm::vec4 const &)*arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_start(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->start(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_stop(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->stop();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_pause(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->pause(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_moveto(void * jarg1, void * jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  glm::vec4 *arg2 = 0 ;
+  bool arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (glm::vec4 *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec4 const & is null", 0);
+    return ;
+  } 
+  arg3 = jarg3 ? true : false; 
+  (arg1)->moveto((glm::vec4 const &)*arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_resume(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->resume();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_addldonpoints(void * jarg1, unsigned int jarg2, int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int)jarg3; 
+  (arg1)->addldonpoints(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_addldonloss(void * jarg1, unsigned int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->addldonloss(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_addldonwin(void * jarg1, unsigned int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->addldonwin(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_removeldonloss(void * jarg1, unsigned int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->removeldonloss(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_removeldonwin(void * jarg1, unsigned int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->removeldonwin(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_setnexthpevent(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->setnexthpevent(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_setnextinchpevent(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->setnextinchpevent(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_respawn(void * jarg1, int jarg2, int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  (arg1)->respawn(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_set_proximity__SWIG_0(void * jarg1, float jarg2, float jarg3, float jarg4, float jarg5, float jarg6, float jarg7, unsigned int jarg8) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  float arg6 ;
+  float arg7 ;
+  bool arg8 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (float)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  arg5 = (float)jarg5; 
+  arg6 = (float)jarg6; 
+  arg7 = (float)jarg7; 
+  arg8 = jarg8 ? true : false; 
+  (arg1)->set_proximity(arg2,arg3,arg4,arg5,arg6,arg7,arg8);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_set_proximity__SWIG_1(void * jarg1, float jarg2, float jarg3, float jarg4, float jarg5, float jarg6, float jarg7) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  float arg6 ;
+  float arg7 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (float)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  arg5 = (float)jarg5; 
+  arg6 = (float)jarg6; 
+  arg7 = (float)jarg7; 
+  (arg1)->set_proximity(arg2,arg3,arg4,arg5,arg6,arg7);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_set_proximity__SWIG_2(void * jarg1, float jarg2, float jarg3, float jarg4, float jarg5, float jarg6) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  float arg6 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (float)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  arg5 = (float)jarg5; 
+  arg6 = (float)jarg6; 
+  (arg1)->set_proximity(arg2,arg3,arg4,arg5,arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_set_proximity__SWIG_3(void * jarg1, float jarg2, float jarg3, float jarg4, float jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (float)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  arg5 = (float)jarg5; 
+  (arg1)->set_proximity(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_set_proximity_range__SWIG_0(void * jarg1, float jarg2, float jarg3, float jarg4, unsigned int jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  bool arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (float)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  arg5 = jarg5 ? true : false; 
+  (arg1)->set_proximity_range(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_set_proximity_range__SWIG_1(void * jarg1, float jarg2, float jarg3, float jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (float)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  (arg1)->set_proximity_range(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_set_proximity_range__SWIG_2(void * jarg1, float jarg2, float jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (float)jarg2; 
+  arg3 = (float)jarg3; 
+  (arg1)->set_proximity_range(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_clear_proximity(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->clear_proximity();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_enable_proximity_say(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->enable_proximity_say();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_disable_proximity_say(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->disable_proximity_say();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_setanim(void * jarg1, int jarg2, int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  (arg1)->setanim(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_showgrid(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->showgrid(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_spawn_condition(void * jarg1, char * jarg2, unsigned int jarg3, unsigned short jarg4, short jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  uint32 arg3 ;
+  uint16 arg4 ;
+  short arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (uint16)jarg4; 
+  arg5 = (short)jarg5; 
+  (arg1)->spawn_condition((char const *)arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_QuestManager_get_spawn_condition(void * jarg1, char * jarg2, unsigned int jarg3, unsigned short jarg4) {
+  short jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  uint32 arg3 ;
+  uint16 arg4 ;
+  short result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (uint16)jarg4; 
+  result = (short)(arg1)->get_spawn_condition((char const *)arg2,arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_toggle_spawn_event(void * jarg1, int jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  bool arg3 ;
+  bool arg4 ;
+  bool arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = jarg3 ? true : false; 
+  arg4 = jarg4 ? true : false; 
+  arg5 = jarg5 ? true : false; 
+  (arg1)->toggle_spawn_event(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_has_zone_flag(void * jarg1, int jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (bool)(arg1)->has_zone_flag(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_set_zone_flag(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->set_zone_flag(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_clear_zone_flag(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->clear_zone_flag(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_sethp(void * jarg1, long long jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int64 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int64)jarg2; 
+  (arg1)->sethp(arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_summonburiedplayercorpse(void * jarg1, unsigned int jarg2, void * jarg3) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  glm::vec4 *arg3 = 0 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (glm::vec4 *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec4 const & is null", 0);
+    return 0;
+  } 
+  result = (bool)(arg1)->summonburiedplayercorpse(arg2,(glm::vec4 const &)*arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_summonallplayercorpses(void * jarg1, unsigned int jarg2, void * jarg3) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  glm::vec4 *arg3 = 0 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (glm::vec4 *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec4 const & is null", 0);
+    return 0;
+  } 
+  result = (bool)(arg1)->summonallplayercorpses(arg2,(glm::vec4 const &)*arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT long long SWIGSTDCALL CSharp_QuestManager_getplayerburiedcorpsecount(void * jarg1, unsigned int jarg2) {
+  long long jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int64 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (int64)(arg1)->getplayerburiedcorpsecount(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT long long SWIGSTDCALL CSharp_QuestManager_getplayercorpsecount(void * jarg1, unsigned int jarg2) {
+  long long jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int64 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (int64)(arg1)->getplayercorpsecount(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT long long SWIGSTDCALL CSharp_QuestManager_getplayercorpsecountbyzoneid(void * jarg1, unsigned int jarg2, unsigned int jarg3) {
+  long long jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  int64 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  result = (int64)(arg1)->getplayercorpsecountbyzoneid(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_buryplayercorpse(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (bool)(arg1)->buryplayercorpse(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_forcedooropen(void * jarg1, unsigned int jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  bool arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = jarg3 ? true : false; 
+  (arg1)->forcedooropen(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_forcedoorclose(void * jarg1, unsigned int jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  bool arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = jarg3 ? true : false; 
+  (arg1)->forcedoorclose(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_toggledoorstate(void * jarg1, unsigned int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->toggledoorstate(arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_isdooropen(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (bool)(arg1)->isdooropen(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_npcrace(void * jarg1, unsigned short jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  (arg1)->npcrace(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_npcgender(void * jarg1, unsigned char jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  (arg1)->npcgender(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_npcsize(void * jarg1, float jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  float arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (float)jarg2; 
+  (arg1)->npcsize(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_npctexture(void * jarg1, unsigned char jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  (arg1)->npctexture(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_playerrace(void * jarg1, unsigned short jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  (arg1)->playerrace(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_playergender(void * jarg1, unsigned char jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  (arg1)->playergender(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_playersize(void * jarg1, float jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  float arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (float)jarg2; 
+  (arg1)->playersize(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_playertexture(void * jarg1, unsigned char jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  (arg1)->playertexture(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_playerfeature(void * jarg1, char * jarg2, int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  int arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (int)jarg3; 
+  (arg1)->playerfeature((char const *)arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_npcfeature(void * jarg1, char * jarg2, int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  int arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (int)jarg3; 
+  (arg1)->npcfeature((char const *)arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_popup(void * jarg1, char * jarg2, char * jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  char *arg3 = (char *) 0 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (char *)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  (arg1)->popup((char const *)arg2,(char const *)arg3,arg4,arg5,arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_taskselector__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::vector< int > *arg2 = 0 ;
+  bool arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (std::vector< int > *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< int > const & is null", 0);
+    return ;
+  } 
+  arg3 = jarg3 ? true : false; 
+  (arg1)->taskselector((std::vector< int > const &)*arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_taskselector__SWIG_1(void * jarg1, void * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::vector< int > *arg2 = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (std::vector< int > *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< int > const & is null", 0);
+    return ;
+  } 
+  (arg1)->taskselector((std::vector< int > const &)*arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_tasksetselector__SWIG_0(void * jarg1, int jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  bool arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = jarg3 ? true : false; 
+  (arg1)->tasksetselector(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_tasksetselector__SWIG_1(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->tasksetselector(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_enabletask(void * jarg1, int jarg2, void * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int *arg3 = (int *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int *)jarg3; 
+  (arg1)->enabletask(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_disabletask(void * jarg1, int jarg2, void * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int *arg3 = (int *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int *)jarg3; 
+  (arg1)->disabletask(arg2,arg3);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_istaskenabled(void * jarg1, int jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (bool)(arg1)->istaskenabled(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_istaskactive(void * jarg1, int jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (bool)(arg1)->istaskactive(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_istaskactivityactive(void * jarg1, int jarg2, int jarg3) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  result = (bool)(arg1)->istaskactivityactive(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_gettaskactivitydonecount(void * jarg1, int jarg2, int jarg3) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  result = (int)(arg1)->gettaskactivitydonecount(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_updatetaskactivity__SWIG_0(void * jarg1, int jarg2, int jarg3, int jarg4, unsigned int jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  bool arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = jarg5 ? true : false; 
+  (arg1)->updatetaskactivity(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_updatetaskactivity__SWIG_1(void * jarg1, int jarg2, int jarg3, int jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (int)jarg4; 
+  (arg1)->updatetaskactivity(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_resettaskactivity(void * jarg1, int jarg2, int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  (arg1)->resettaskactivity(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_assigntask__SWIG_0(void * jarg1, int jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  bool arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = jarg3 ? true : false; 
+  (arg1)->assigntask(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_assigntask__SWIG_1(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->assigntask(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_failtask(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->failtask(arg2);
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_tasktimeleft(void * jarg1, int jarg2) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (int)(arg1)->tasktimeleft(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_istaskcompleted(void * jarg1, int jarg2) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (int)(arg1)->istaskcompleted(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_enabledtaskcount(void * jarg1, int jarg2) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (int)(arg1)->enabledtaskcount(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_firsttaskinset(void * jarg1, int jarg2) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (int)(arg1)->firsttaskinset(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_lasttaskinset(void * jarg1, int jarg2) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (int)(arg1)->lasttaskinset(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_nexttaskinset(void * jarg1, int jarg2, int jarg3) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  result = (int)(arg1)->nexttaskinset(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_activespeaktask(void * jarg1) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = (int)(arg1)->activespeaktask();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_activespeakactivity(void * jarg1, int jarg2) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (int)(arg1)->activespeakactivity(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_activetasksinset(void * jarg1, int jarg2) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (int)(arg1)->activetasksinset(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_completedtasksinset(void * jarg1, int jarg2) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (int)(arg1)->completedtasksinset(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_istaskappropriate(void * jarg1, int jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (bool)(arg1)->istaskappropriate(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_gettaskname(void * jarg1, unsigned int jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (arg1)->gettaskname(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_GetCurrentDzTaskID(void * jarg1) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = (int)(arg1)->GetCurrentDzTaskID();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_EndCurrentDzTask__SWIG_0(void * jarg1, unsigned int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  (arg1)->EndCurrentDzTask(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_EndCurrentDzTask__SWIG_1(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->EndCurrentDzTask();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_clearspawntimers(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->clearspawntimers();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_ze(void * jarg1, int jarg2, char * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  char *arg3 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (char *)jarg3; 
+  (arg1)->ze(arg2,(char const *)arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_we(void * jarg1, int jarg2, char * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  char *arg3 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (char *)jarg3; 
+  (arg1)->we(arg2,(char const *)arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_marquee__SWIG_0(void * jarg1, unsigned int jarg2, const char * jarg3, unsigned int jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string arg3 ;
+  uint32 arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  (&arg3)->assign(jarg3); 
+  arg4 = (uint32)jarg4; 
+  (arg1)->marquee(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_marquee__SWIG_1(void * jarg1, unsigned int jarg2, const char * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  (&arg3)->assign(jarg3); 
+  (arg1)->marquee(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_marquee__SWIG_2(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, const char * jarg7) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  std::string arg7 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  if (!jarg7) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  (&arg7)->assign(jarg7); 
+  (arg1)->marquee(arg2,arg3,arg4,arg5,arg6,arg7);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_message(void * jarg1, unsigned int jarg2, char * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  char *arg3 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (char *)jarg3; 
+  (arg1)->message(arg2,(char const *)arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_whisper(void * jarg1, char * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  (arg1)->whisper((char const *)arg2);
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_getlevel(void * jarg1, unsigned char jarg2) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  result = (int)(arg1)->getlevel(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_collectitems(void * jarg1, unsigned int jarg2, unsigned int jarg3) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  bool arg3 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = jarg3 ? true : false; 
+  result = (int)(arg1)->collectitems(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_collectitems_processSlot(void * jarg1, short jarg2, unsigned int jarg3, unsigned int jarg4) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int16 arg2 ;
+  uint32 arg3 ;
+  bool arg4 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int16)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  result = (int)(arg1)->collectitems_processSlot(arg2,arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_countitem(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (int)(arg1)->countitem(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_removeitem__SWIG_0(void * jarg1, unsigned int jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  (arg1)->removeitem(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_removeitem__SWIG_1(void * jarg1, unsigned int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->removeitem(arg2);
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getitemcomment(void * jarg1, unsigned int jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (arg1)->getitemcomment(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getitemlore(void * jarg1, unsigned int jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (arg1)->getitemlore(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getitemname(void * jarg1, unsigned int jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (arg1)->getitemname(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_enabletitle(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->enabletitle(arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_checktitle(void * jarg1, int jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (bool)(arg1)->checktitle(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_removetitle(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->removetitle(arg2);
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QuestManager_CreateGroundObject__SWIG_0(void * jarg1, unsigned int jarg2, void * jarg3, unsigned int jarg4) {
+  unsigned short jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  glm::vec4 *arg3 = 0 ;
+  uint32 arg4 ;
+  uint16 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (glm::vec4 *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec4 const & is null", 0);
+    return 0;
+  } 
+  arg4 = (uint32)jarg4; 
+  result = (uint16)(arg1)->CreateGroundObject(arg2,(glm::vec4 const &)*arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QuestManager_CreateGroundObject__SWIG_1(void * jarg1, unsigned int jarg2, void * jarg3) {
+  unsigned short jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  glm::vec4 *arg3 = 0 ;
+  uint16 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (glm::vec4 *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec4 const & is null", 0);
+    return 0;
+  } 
+  result = (uint16)(arg1)->CreateGroundObject(arg2,(glm::vec4 const &)*arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QuestManager_CreateGroundObjectFromModel__SWIG_0(void * jarg1, char * jarg2, void * jarg3, unsigned char jarg4, unsigned int jarg5) {
+  unsigned short jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  glm::vec4 *arg3 = 0 ;
+  uint8 arg4 ;
+  uint32 arg5 ;
+  uint16 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (glm::vec4 *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec4 const & is null", 0);
+    return 0;
+  } 
+  arg4 = (uint8)jarg4; 
+  arg5 = (uint32)jarg5; 
+  result = (uint16)(arg1)->CreateGroundObjectFromModel((char const *)arg2,(glm::vec4 const &)*arg3,arg4,arg5);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QuestManager_CreateGroundObjectFromModel__SWIG_1(void * jarg1, char * jarg2, void * jarg3, unsigned char jarg4) {
+  unsigned short jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  glm::vec4 *arg3 = 0 ;
+  uint8 arg4 ;
+  uint16 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (glm::vec4 *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec4 const & is null", 0);
+    return 0;
+  } 
+  arg4 = (uint8)jarg4; 
+  result = (uint16)(arg1)->CreateGroundObjectFromModel((char const *)arg2,(glm::vec4 const &)*arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QuestManager_CreateGroundObjectFromModel__SWIG_2(void * jarg1, char * jarg2, void * jarg3) {
+  unsigned short jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  glm::vec4 *arg3 = 0 ;
+  uint16 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (glm::vec4 *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec4 const & is null", 0);
+    return 0;
+  } 
+  result = (uint16)(arg1)->CreateGroundObjectFromModel((char const *)arg2,(glm::vec4 const &)*arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_ModifyNPCStat(void * jarg1, const char * jarg2, const char * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string arg2 ;
+  std::string arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  (&arg2)->assign(jarg2); 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  (&arg3)->assign(jarg3); 
+  (arg1)->ModifyNPCStat(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_UpdateSpawnTimer(void * jarg1, unsigned int jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  (arg1)->UpdateSpawnTimer(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_MerchantSetItem__SWIG_0(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  uint32 arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (uint32)jarg4; 
+  (arg1)->MerchantSetItem(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_MerchantSetItem__SWIG_1(void * jarg1, unsigned int jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  (arg1)->MerchantSetItem(arg2,arg3);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_MerchantCountItem(void * jarg1, unsigned int jarg2, unsigned int jarg3) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  uint32 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  result = (uint32)(arg1)->MerchantCountItem(arg2,arg3);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QuestManager_CreateInstance(void * jarg1, const char * jarg2, short jarg3, unsigned int jarg4) {
+  unsigned short jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  int16 arg3 ;
+  uint32 arg4 ;
+  uint16 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (int16)jarg3; 
+  arg4 = (uint32)jarg4; 
+  result = (uint16)(arg1)->CreateInstance((std::string const &)*arg2,arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_UpdateInstanceTimer(void * jarg1, unsigned short jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint16 arg2 ;
+  uint32 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (uint32)jarg3; 
+  (arg1)->UpdateInstanceTimer(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_UpdateZoneHeader(void * jarg1, const char * jarg2, const char * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string arg2 ;
+  std::string arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  (&arg2)->assign(jarg2); 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  (&arg3)->assign(jarg3); 
+  (arg1)->UpdateZoneHeader(arg2,arg3);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_GetInstanceTimer(void * jarg1) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = (uint32)(arg1)->GetInstanceTimer();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_GetInstanceTimerByID__SWIG_0(void * jarg1, unsigned short jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint16 arg2 ;
+  uint32 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  result = (uint32)(arg1)->GetInstanceTimerByID(arg2);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_GetInstanceTimerByID__SWIG_1(void * jarg1) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = (uint32)(arg1)->GetInstanceTimerByID();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_DestroyInstance(void * jarg1, unsigned short jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  (arg1)->DestroyInstance(arg2);
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QuestManager_GetInstanceID(void * jarg1, char * jarg2, short jarg3) {
+  unsigned short jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  int16 arg3 ;
+  uint16 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (int16)jarg3; 
+  result = (uint16)(arg1)->GetInstanceID((char const *)arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_GetInstanceIDs__SWIG_0(void * jarg1, const char * jarg2, unsigned int jarg3) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string arg2 ;
+  uint32 arg3 ;
+  std::vector< uint16 > result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  (&arg2)->assign(jarg2); 
+  arg3 = (uint32)jarg3; 
+  result = (arg1)->GetInstanceIDs(arg2,arg3);
+  jresult = new std::vector< uint16 >(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_GetInstanceIDs__SWIG_1(void * jarg1, const char * jarg2) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string arg2 ;
+  std::vector< uint16 > result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  (&arg2)->assign(jarg2); 
+  result = (arg1)->GetInstanceIDs(arg2);
+  jresult = new std::vector< uint16 >(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QuestManager_GetInstanceIDByCharID(void * jarg1, const char * jarg2, short jarg3, unsigned int jarg4) {
+  unsigned short jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string *arg2 = 0 ;
+  int16 arg3 ;
+  uint32 arg4 ;
+  uint16 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (int16)jarg3; 
+  arg4 = (uint32)jarg4; 
+  result = (uint16)(arg1)->GetInstanceIDByCharID((std::string const &)*arg2,arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_AssignToInstance(void * jarg1, unsigned short jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  (arg1)->AssignToInstance(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_AssignToInstanceByCharID(void * jarg1, unsigned short jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint16 arg2 ;
+  uint32 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (uint32)jarg3; 
+  (arg1)->AssignToInstanceByCharID(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_AssignGroupToInstance(void * jarg1, unsigned short jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  (arg1)->AssignGroupToInstance(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_AssignRaidToInstance(void * jarg1, unsigned short jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  (arg1)->AssignRaidToInstance(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_RemoveFromInstance(void * jarg1, unsigned short jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  (arg1)->RemoveFromInstance(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_RemoveFromInstanceByCharID(void * jarg1, unsigned short jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint16 arg2 ;
+  uint32 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (uint32)jarg3; 
+  (arg1)->RemoveFromInstanceByCharID(arg2,arg3);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_CheckInstanceByCharID(void * jarg1, unsigned short jarg2, unsigned int jarg3) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint16 arg2 ;
+  uint32 arg3 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (uint32)jarg3; 
+  result = (bool)(arg1)->CheckInstanceByCharID(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_RemoveAllFromInstance(void * jarg1, unsigned short jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  (arg1)->RemoveAllFromInstance(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_MovePCInstance(void * jarg1, int jarg2, int jarg3, void * jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  glm::vec4 *arg4 = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (glm::vec4 *)jarg4;
+  if (!arg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec4 const & is null", 0);
+    return ;
+  } 
+  (arg1)->MovePCInstance(arg2,arg3,(glm::vec4 const &)*arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_FlagInstanceByGroupLeader(void * jarg1, unsigned int jarg2, short jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  (arg1)->FlagInstanceByGroupLeader(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_FlagInstanceByRaidLeader(void * jarg1, unsigned int jarg2, short jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  (arg1)->FlagInstanceByRaidLeader(arg2,arg3);
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_varlink__SWIG_0(void * jarg1, unsigned int jarg2, short jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  uint32 arg7 ;
+  uint32 arg8 ;
+  uint32 arg9 ;
+  bool arg10 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  arg7 = (uint32)jarg7; 
+  arg8 = (uint32)jarg8; 
+  arg9 = (uint32)jarg9; 
+  arg10 = jarg10 ? true : false; 
+  result = (arg1)->varlink(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_varlink__SWIG_1(void * jarg1, unsigned int jarg2, short jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8, unsigned int jarg9) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  uint32 arg7 ;
+  uint32 arg8 ;
+  uint32 arg9 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  arg7 = (uint32)jarg7; 
+  arg8 = (uint32)jarg8; 
+  arg9 = (uint32)jarg9; 
+  result = (arg1)->varlink(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_varlink__SWIG_2(void * jarg1, unsigned int jarg2, short jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  uint32 arg7 ;
+  uint32 arg8 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  arg7 = (uint32)jarg7; 
+  arg8 = (uint32)jarg8; 
+  result = (arg1)->varlink(arg2,arg3,arg4,arg5,arg6,arg7,arg8);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_varlink__SWIG_3(void * jarg1, unsigned int jarg2, short jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  uint32 arg7 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  arg7 = (uint32)jarg7; 
+  result = (arg1)->varlink(arg2,arg3,arg4,arg5,arg6,arg7);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_varlink__SWIG_4(void * jarg1, unsigned int jarg2, short jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  result = (arg1)->varlink(arg2,arg3,arg4,arg5,arg6);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_varlink__SWIG_5(void * jarg1, unsigned int jarg2, short jarg3, unsigned int jarg4, unsigned int jarg5) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  result = (arg1)->varlink(arg2,arg3,arg4,arg5);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_varlink__SWIG_6(void * jarg1, unsigned int jarg2, short jarg3, unsigned int jarg4) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  uint32 arg4 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  arg4 = (uint32)jarg4; 
+  result = (arg1)->varlink(arg2,arg3,arg4);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_varlink__SWIG_7(void * jarg1, unsigned int jarg2, short jarg3) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  result = (arg1)->varlink(arg2,arg3);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_varlink__SWIG_8(void * jarg1, unsigned int jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (arg1)->varlink(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_saylink(void * jarg1, char * jarg2, unsigned int jarg3, char * jarg4) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  bool arg3 ;
+  char *arg4 = (char *) 0 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = jarg3 ? true : false; 
+  arg4 = (char *)jarg4; 
+  result = (arg1)->saylink(arg2,arg3,(char const *)arg4);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getcharnamebyid(void * jarg1, unsigned int jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (arg1)->getcharnamebyid(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_getcharidbyname(void * jarg1, char * jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  uint32 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  result = (uint32)(arg1)->getcharidbyname((char const *)arg2);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getclassname__SWIG_0(void * jarg1, unsigned char jarg2, unsigned char jarg3) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint8 arg3 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint8)jarg3; 
+  result = (arg1)->getclassname(arg2,arg3);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getclassname__SWIG_1(void * jarg1, unsigned char jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  result = (arg1)->getclassname(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_getcurrencyid(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (uint32)(arg1)->getcurrencyid(arg2);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_getcurrencyitemid(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (uint32)(arg1)->getcurrencyitemid(arg2);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_QuestManager_getguildnamebyid(void * jarg1, int jarg2) {
+  char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  char *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (char *)(arg1)->getguildnamebyid(arg2);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_getguildidbycharid(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (int)(arg1)->getguildidbycharid(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_getgroupidbycharid(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (int)(arg1)->getgroupidbycharid(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getnpcnamebyid(void * jarg1, unsigned int jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (arg1)->getnpcnamebyid(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getcleannpcnamebyid(void * jarg1, unsigned int jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (arg1)->getcleannpcnamebyid(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_getraididbycharid(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (int)(arg1)->getraididbycharid(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_SetRunning(void * jarg1, unsigned int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  (arg1)->SetRunning(arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_IsRunning(void * jarg1) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = (bool)(arg1)->IsRunning();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_FlyMode(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  GravityBehavior arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (GravityBehavior)jarg2; 
+  (arg1)->FlyMode(arg2);
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_QuestManager_FactionValue(void * jarg1) {
+  unsigned char jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = (uint8)(arg1)->FactionValue();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_wearchange__SWIG_0(void * jarg1, unsigned char jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  (arg1)->wearchange(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_wearchange__SWIG_1(void * jarg1, unsigned char jarg2, unsigned int jarg3, unsigned int jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  uint32 arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (uint32)jarg4; 
+  (arg1)->wearchange(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_wearchange__SWIG_2(void * jarg1, unsigned char jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  (arg1)->wearchange(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_voicetell(void * jarg1, char * jarg2, int jarg3, int jarg4, int jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  int arg3 ;
+  int arg4 ;
+  int arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (int)jarg5; 
+  (arg1)->voicetell((char const *)arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_LearnRecipe(void * jarg1, unsigned int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->LearnRecipe(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_SendMail(void * jarg1, char * jarg2, char * jarg3, char * jarg4, char * jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  char *arg3 = (char *) 0 ;
+  char *arg4 = (char *) 0 ;
+  char *arg5 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (char *)jarg3; 
+  arg4 = (char *)jarg4; 
+  arg5 = (char *)jarg5; 
+  (arg1)->SendMail((char const *)arg2,(char const *)arg3,(char const *)arg4,(char const *)arg5);
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QuestManager_CreateDoor(void * jarg1, char * jarg2, float jarg3, float jarg4, float jarg5, float jarg6, unsigned char jarg7, unsigned short jarg8) {
+  unsigned short jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  float arg6 ;
+  uint8 arg7 ;
+  uint16 arg8 ;
+  uint16 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  arg5 = (float)jarg5; 
+  arg6 = (float)jarg6; 
+  arg7 = (uint8)jarg7; 
+  arg8 = (uint16)jarg8; 
+  result = (uint16)(arg1)->CreateDoor((char const *)arg2,arg3,arg4,arg5,arg6,arg7,arg8);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_GetZoneID(void * jarg1, char * jarg2) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  int32 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  result = (int32)(arg1)->GetZoneID((char const *)arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_GetZoneLongName(const char * jarg1) {
+  const char * jresult ;
+  std::string arg1 ;
+  std::string result;
+  
+  if (!jarg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  (&arg1)->assign(jarg1); 
+  result = QuestManager::GetZoneLongName(SWIG_STD_MOVE(arg1));
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_GetZoneLongNameByID(unsigned int jarg1) {
+  const char * jresult ;
+  uint32 arg1 ;
+  std::string result;
+  
+  arg1 = (uint32)jarg1; 
+  result = QuestManager::GetZoneLongNameByID(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_GetZoneShortName(unsigned int jarg1) {
+  const char * jresult ;
+  uint32 arg1 ;
+  std::string result;
+  
+  arg1 = (uint32)jarg1; 
+  result = QuestManager::GetZoneShortName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneDialogueWindow__SWIG_0(void * jarg1, unsigned char jarg2, int jarg3, char * jarg4, char * jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  int arg3 ;
+  char *arg4 = (char *) 0 ;
+  char *arg5 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (char *)jarg4; 
+  arg5 = (char *)jarg5; 
+  (arg1)->CrossZoneDialogueWindow(arg2,arg3,(char const *)arg4,(char const *)arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneDialogueWindow__SWIG_1(void * jarg1, unsigned char jarg2, int jarg3, char * jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  int arg3 ;
+  char *arg4 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (char *)jarg4; 
+  (arg1)->CrossZoneDialogueWindow(arg2,arg3,(char const *)arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneLDoNUpdate__SWIG_0(void * jarg1, unsigned char jarg2, unsigned char jarg3, int jarg4, unsigned int jarg5, int jarg6, char * jarg7) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint8 arg3 ;
+  int arg4 ;
+  uint32 arg5 ;
+  int arg6 ;
+  char *arg7 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint8)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (int)jarg6; 
+  arg7 = (char *)jarg7; 
+  (arg1)->CrossZoneLDoNUpdate(arg2,arg3,arg4,arg5,arg6,(char const *)arg7);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneLDoNUpdate__SWIG_1(void * jarg1, unsigned char jarg2, unsigned char jarg3, int jarg4, unsigned int jarg5, int jarg6) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint8 arg3 ;
+  int arg4 ;
+  uint32 arg5 ;
+  int arg6 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint8)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (int)jarg6; 
+  (arg1)->CrossZoneLDoNUpdate(arg2,arg3,arg4,arg5,arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneLDoNUpdate__SWIG_2(void * jarg1, unsigned char jarg2, unsigned char jarg3, int jarg4, unsigned int jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint8 arg3 ;
+  int arg4 ;
+  uint32 arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint8)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (uint32)jarg5; 
+  (arg1)->CrossZoneLDoNUpdate(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneMarquee__SWIG_0(void * jarg1, unsigned char jarg2, int jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8, char * jarg9, char * jarg10) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  int arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  uint32 arg7 ;
+  uint32 arg8 ;
+  char *arg9 = (char *) 0 ;
+  char *arg10 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  arg7 = (uint32)jarg7; 
+  arg8 = (uint32)jarg8; 
+  arg9 = (char *)jarg9; 
+  arg10 = (char *)jarg10; 
+  (arg1)->CrossZoneMarquee(arg2,arg3,arg4,arg5,arg6,arg7,arg8,(char const *)arg9,(char const *)arg10);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneMarquee__SWIG_1(void * jarg1, unsigned char jarg2, int jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8, char * jarg9) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  int arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  uint32 arg7 ;
+  uint32 arg8 ;
+  char *arg9 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  arg7 = (uint32)jarg7; 
+  arg8 = (uint32)jarg8; 
+  arg9 = (char *)jarg9; 
+  (arg1)->CrossZoneMarquee(arg2,arg3,arg4,arg5,arg6,arg7,arg8,(char const *)arg9);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneMessage__SWIG_0(void * jarg1, unsigned char jarg2, int jarg3, unsigned int jarg4, char * jarg5, char * jarg6) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  int arg3 ;
+  uint32 arg4 ;
+  char *arg5 = (char *) 0 ;
+  char *arg6 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (char *)jarg5; 
+  arg6 = (char *)jarg6; 
+  (arg1)->CrossZoneMessage(arg2,arg3,arg4,(char const *)arg5,(char const *)arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneMessage__SWIG_1(void * jarg1, unsigned char jarg2, int jarg3, unsigned int jarg4, char * jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  int arg3 ;
+  uint32 arg4 ;
+  char *arg5 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (char *)jarg5; 
+  (arg1)->CrossZoneMessage(arg2,arg3,arg4,(char const *)arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneMove(void * jarg1, void * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  CZMove_Struct *arg2 = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (CZMove_Struct *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "CZMove_Struct const & is null", 0);
+    return ;
+  } 
+  (arg1)->CrossZoneMove((CZMove_Struct const &)*arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneSetEntityVariable__SWIG_0(void * jarg1, unsigned char jarg2, int jarg3, char * jarg4, char * jarg5, char * jarg6) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  int arg3 ;
+  char *arg4 = (char *) 0 ;
+  char *arg5 = (char *) 0 ;
+  char *arg6 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (char *)jarg4; 
+  arg5 = (char *)jarg5; 
+  arg6 = (char *)jarg6; 
+  (arg1)->CrossZoneSetEntityVariable(arg2,arg3,(char const *)arg4,(char const *)arg5,(char const *)arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneSetEntityVariable__SWIG_1(void * jarg1, unsigned char jarg2, int jarg3, char * jarg4, char * jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  int arg3 ;
+  char *arg4 = (char *) 0 ;
+  char *arg5 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (char *)jarg4; 
+  arg5 = (char *)jarg5; 
+  (arg1)->CrossZoneSetEntityVariable(arg2,arg3,(char const *)arg4,(char const *)arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneSignal__SWIG_0(void * jarg1, unsigned char jarg2, int jarg3, int jarg4, char * jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  int arg3 ;
+  int arg4 ;
+  char *arg5 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (char *)jarg5; 
+  (arg1)->CrossZoneSignal(arg2,arg3,arg4,(char const *)arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneSignal__SWIG_1(void * jarg1, unsigned char jarg2, int jarg3, int jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  int arg3 ;
+  int arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (int)jarg4; 
+  (arg1)->CrossZoneSignal(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneSpell__SWIG_0(void * jarg1, unsigned char jarg2, unsigned char jarg3, int jarg4, unsigned int jarg5, char * jarg6) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint8 arg3 ;
+  int arg4 ;
+  uint32 arg5 ;
+  char *arg6 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint8)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (char *)jarg6; 
+  (arg1)->CrossZoneSpell(arg2,arg3,arg4,arg5,(char const *)arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneSpell__SWIG_1(void * jarg1, unsigned char jarg2, unsigned char jarg3, int jarg4, unsigned int jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint8 arg3 ;
+  int arg4 ;
+  uint32 arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint8)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (uint32)jarg5; 
+  (arg1)->CrossZoneSpell(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneTaskUpdate__SWIG_0(void * jarg1, unsigned char jarg2, unsigned char jarg3, int jarg4, unsigned int jarg5, int jarg6, int jarg7, unsigned int jarg8, char * jarg9) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint8 arg3 ;
+  int arg4 ;
+  uint32 arg5 ;
+  int arg6 ;
+  int arg7 ;
+  bool arg8 ;
+  char *arg9 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint8)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (int)jarg6; 
+  arg7 = (int)jarg7; 
+  arg8 = jarg8 ? true : false; 
+  arg9 = (char *)jarg9; 
+  (arg1)->CrossZoneTaskUpdate(arg2,arg3,arg4,arg5,arg6,arg7,arg8,(char const *)arg9);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneTaskUpdate__SWIG_1(void * jarg1, unsigned char jarg2, unsigned char jarg3, int jarg4, unsigned int jarg5, int jarg6, int jarg7, unsigned int jarg8) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint8 arg3 ;
+  int arg4 ;
+  uint32 arg5 ;
+  int arg6 ;
+  int arg7 ;
+  bool arg8 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint8)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (int)jarg6; 
+  arg7 = (int)jarg7; 
+  arg8 = jarg8 ? true : false; 
+  (arg1)->CrossZoneTaskUpdate(arg2,arg3,arg4,arg5,arg6,arg7,arg8);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneTaskUpdate__SWIG_2(void * jarg1, unsigned char jarg2, unsigned char jarg3, int jarg4, unsigned int jarg5, int jarg6, int jarg7) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint8 arg3 ;
+  int arg4 ;
+  uint32 arg5 ;
+  int arg6 ;
+  int arg7 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint8)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (int)jarg6; 
+  arg7 = (int)jarg7; 
+  (arg1)->CrossZoneTaskUpdate(arg2,arg3,arg4,arg5,arg6,arg7);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneTaskUpdate__SWIG_3(void * jarg1, unsigned char jarg2, unsigned char jarg3, int jarg4, unsigned int jarg5, int jarg6) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint8 arg3 ;
+  int arg4 ;
+  uint32 arg5 ;
+  int arg6 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint8)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (int)jarg6; 
+  (arg1)->CrossZoneTaskUpdate(arg2,arg3,arg4,arg5,arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_CrossZoneTaskUpdate__SWIG_4(void * jarg1, unsigned char jarg2, unsigned char jarg3, int jarg4, unsigned int jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint8 arg3 ;
+  int arg4 ;
+  uint32 arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint8)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (uint32)jarg5; 
+  (arg1)->CrossZoneTaskUpdate(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideDialogueWindow__SWIG_0(void * jarg1, char * jarg2, unsigned char jarg3, unsigned char jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  uint8 arg3 ;
+  uint8 arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (uint8)jarg3; 
+  arg4 = (uint8)jarg4; 
+  (arg1)->WorldWideDialogueWindow((char const *)arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideDialogueWindow__SWIG_1(void * jarg1, char * jarg2, unsigned char jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  uint8 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (uint8)jarg3; 
+  (arg1)->WorldWideDialogueWindow((char const *)arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideDialogueWindow__SWIG_2(void * jarg1, char * jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  (arg1)->WorldWideDialogueWindow((char const *)arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideLDoNUpdate__SWIG_0(void * jarg1, unsigned char jarg2, unsigned int jarg3, int jarg4, unsigned char jarg5, unsigned char jarg6) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  int arg4 ;
+  uint8 arg5 ;
+  uint8 arg6 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (uint8)jarg5; 
+  arg6 = (uint8)jarg6; 
+  (arg1)->WorldWideLDoNUpdate(arg2,arg3,arg4,arg5,arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideLDoNUpdate__SWIG_1(void * jarg1, unsigned char jarg2, unsigned int jarg3, int jarg4, unsigned char jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  int arg4 ;
+  uint8 arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (uint8)jarg5; 
+  (arg1)->WorldWideLDoNUpdate(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideLDoNUpdate__SWIG_2(void * jarg1, unsigned char jarg2, unsigned int jarg3, int jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  int arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (int)jarg4; 
+  (arg1)->WorldWideLDoNUpdate(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideLDoNUpdate__SWIG_3(void * jarg1, unsigned char jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  (arg1)->WorldWideLDoNUpdate(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideMarquee__SWIG_0(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, char * jarg7, unsigned char jarg8, unsigned char jarg9) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  char *arg7 = (char *) 0 ;
+  uint8 arg8 ;
+  uint8 arg9 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  arg7 = (char *)jarg7; 
+  arg8 = (uint8)jarg8; 
+  arg9 = (uint8)jarg9; 
+  (arg1)->WorldWideMarquee(arg2,arg3,arg4,arg5,arg6,(char const *)arg7,arg8,arg9);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideMarquee__SWIG_1(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, char * jarg7, unsigned char jarg8) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  char *arg7 = (char *) 0 ;
+  uint8 arg8 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  arg7 = (char *)jarg7; 
+  arg8 = (uint8)jarg8; 
+  (arg1)->WorldWideMarquee(arg2,arg3,arg4,arg5,arg6,(char const *)arg7,arg8);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideMarquee__SWIG_2(void * jarg1, unsigned int jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, char * jarg7) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  char *arg7 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  arg7 = (char *)jarg7; 
+  (arg1)->WorldWideMarquee(arg2,arg3,arg4,arg5,arg6,(char const *)arg7);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideMessage__SWIG_0(void * jarg1, unsigned int jarg2, char * jarg3, unsigned char jarg4, unsigned char jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  char *arg3 = (char *) 0 ;
+  uint8 arg4 ;
+  uint8 arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (char *)jarg3; 
+  arg4 = (uint8)jarg4; 
+  arg5 = (uint8)jarg5; 
+  (arg1)->WorldWideMessage(arg2,(char const *)arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideMessage__SWIG_1(void * jarg1, unsigned int jarg2, char * jarg3, unsigned char jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  char *arg3 = (char *) 0 ;
+  uint8 arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (char *)jarg3; 
+  arg4 = (uint8)jarg4; 
+  (arg1)->WorldWideMessage(arg2,(char const *)arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideMessage__SWIG_2(void * jarg1, unsigned int jarg2, char * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  char *arg3 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (char *)jarg3; 
+  (arg1)->WorldWideMessage(arg2,(char const *)arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideMove__SWIG_0(void * jarg1, unsigned char jarg2, char * jarg3, unsigned short jarg4, unsigned char jarg5, unsigned char jarg6) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  char *arg3 = (char *) 0 ;
+  uint16 arg4 ;
+  uint8 arg5 ;
+  uint8 arg6 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (char *)jarg3; 
+  arg4 = (uint16)jarg4; 
+  arg5 = (uint8)jarg5; 
+  arg6 = (uint8)jarg6; 
+  (arg1)->WorldWideMove(arg2,(char const *)arg3,arg4,arg5,arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideMove__SWIG_1(void * jarg1, unsigned char jarg2, char * jarg3, unsigned short jarg4, unsigned char jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  char *arg3 = (char *) 0 ;
+  uint16 arg4 ;
+  uint8 arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (char *)jarg3; 
+  arg4 = (uint16)jarg4; 
+  arg5 = (uint8)jarg5; 
+  (arg1)->WorldWideMove(arg2,(char const *)arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideMove__SWIG_2(void * jarg1, unsigned char jarg2, char * jarg3, unsigned short jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  char *arg3 = (char *) 0 ;
+  uint16 arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (char *)jarg3; 
+  arg4 = (uint16)jarg4; 
+  (arg1)->WorldWideMove(arg2,(char const *)arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideMove__SWIG_3(void * jarg1, unsigned char jarg2, char * jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  char *arg3 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (char *)jarg3; 
+  (arg1)->WorldWideMove(arg2,(char const *)arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideSetEntityVariable__SWIG_0(void * jarg1, unsigned char jarg2, char * jarg3, char * jarg4, unsigned char jarg5, unsigned char jarg6) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  char *arg3 = (char *) 0 ;
+  char *arg4 = (char *) 0 ;
+  uint8 arg5 ;
+  uint8 arg6 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (char *)jarg3; 
+  arg4 = (char *)jarg4; 
+  arg5 = (uint8)jarg5; 
+  arg6 = (uint8)jarg6; 
+  (arg1)->WorldWideSetEntityVariable(arg2,(char const *)arg3,(char const *)arg4,arg5,arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideSetEntityVariable__SWIG_1(void * jarg1, unsigned char jarg2, char * jarg3, char * jarg4, unsigned char jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  char *arg3 = (char *) 0 ;
+  char *arg4 = (char *) 0 ;
+  uint8 arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (char *)jarg3; 
+  arg4 = (char *)jarg4; 
+  arg5 = (uint8)jarg5; 
+  (arg1)->WorldWideSetEntityVariable(arg2,(char const *)arg3,(char const *)arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideSetEntityVariable__SWIG_2(void * jarg1, unsigned char jarg2, char * jarg3, char * jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  char *arg3 = (char *) 0 ;
+  char *arg4 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (char *)jarg3; 
+  arg4 = (char *)jarg4; 
+  (arg1)->WorldWideSetEntityVariable(arg2,(char const *)arg3,(char const *)arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideSignal__SWIG_0(void * jarg1, unsigned char jarg2, int jarg3, unsigned char jarg4, unsigned char jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  int arg3 ;
+  uint8 arg4 ;
+  uint8 arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (uint8)jarg4; 
+  arg5 = (uint8)jarg5; 
+  (arg1)->WorldWideSignal(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideSignal__SWIG_1(void * jarg1, unsigned char jarg2, int jarg3, unsigned char jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  int arg3 ;
+  uint8 arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (uint8)jarg4; 
+  (arg1)->WorldWideSignal(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideSignal__SWIG_2(void * jarg1, unsigned char jarg2, int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  int arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (int)jarg3; 
+  (arg1)->WorldWideSignal(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideSpell__SWIG_0(void * jarg1, unsigned char jarg2, unsigned int jarg3, unsigned char jarg4, unsigned char jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  uint8 arg4 ;
+  uint8 arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (uint8)jarg4; 
+  arg5 = (uint8)jarg5; 
+  (arg1)->WorldWideSpell(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideSpell__SWIG_1(void * jarg1, unsigned char jarg2, unsigned int jarg3, unsigned char jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  uint8 arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (uint8)jarg4; 
+  (arg1)->WorldWideSpell(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideSpell__SWIG_2(void * jarg1, unsigned char jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  (arg1)->WorldWideSpell(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideTaskUpdate__SWIG_0(void * jarg1, unsigned char jarg2, unsigned int jarg3, int jarg4, int jarg5, unsigned int jarg6, unsigned char jarg7, unsigned char jarg8) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  int arg4 ;
+  int arg5 ;
+  bool arg6 ;
+  uint8 arg7 ;
+  uint8 arg8 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (int)jarg5; 
+  arg6 = jarg6 ? true : false; 
+  arg7 = (uint8)jarg7; 
+  arg8 = (uint8)jarg8; 
+  (arg1)->WorldWideTaskUpdate(arg2,arg3,arg4,arg5,arg6,arg7,arg8);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideTaskUpdate__SWIG_1(void * jarg1, unsigned char jarg2, unsigned int jarg3, int jarg4, int jarg5, unsigned int jarg6, unsigned char jarg7) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  int arg4 ;
+  int arg5 ;
+  bool arg6 ;
+  uint8 arg7 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (int)jarg5; 
+  arg6 = jarg6 ? true : false; 
+  arg7 = (uint8)jarg7; 
+  (arg1)->WorldWideTaskUpdate(arg2,arg3,arg4,arg5,arg6,arg7);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideTaskUpdate__SWIG_2(void * jarg1, unsigned char jarg2, unsigned int jarg3, int jarg4, int jarg5, unsigned int jarg6) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  int arg4 ;
+  int arg5 ;
+  bool arg6 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (int)jarg5; 
+  arg6 = jarg6 ? true : false; 
+  (arg1)->WorldWideTaskUpdate(arg2,arg3,arg4,arg5,arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideTaskUpdate__SWIG_3(void * jarg1, unsigned char jarg2, unsigned int jarg3, int jarg4, int jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  int arg4 ;
+  int arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (int)jarg5; 
+  (arg1)->WorldWideTaskUpdate(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideTaskUpdate__SWIG_4(void * jarg1, unsigned char jarg2, unsigned int jarg3, int jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  int arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (int)jarg4; 
+  (arg1)->WorldWideTaskUpdate(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_WorldWideTaskUpdate__SWIG_5(void * jarg1, unsigned char jarg2, unsigned int jarg3) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  (arg1)->WorldWideTaskUpdate(arg2,arg3);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_EnableRecipe(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (bool)(arg1)->EnableRecipe(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_DisableRecipe(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (bool)(arg1)->DisableRecipe(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_ClearNPCTypeCache(void * jarg1, int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->ClearNPCTypeCache(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_ReloadZoneStaticData(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->ReloadZoneStaticData();
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_gethexcolorcode(void * jarg1, const char * jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  (&arg2)->assign(jarg2); 
+  result = (arg1)->gethexcolorcode(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_QuestManager_GetAAEXPModifierByCharID__SWIG_0(void * jarg1, unsigned int jarg2, unsigned int jarg3, short jarg4) {
+  float jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  int16 arg4 ;
+  float result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (int16)jarg4; 
+  result = (float)((QuestManager const *)arg1)->GetAAEXPModifierByCharID(arg2,arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_QuestManager_GetAAEXPModifierByCharID__SWIG_1(void * jarg1, unsigned int jarg2, unsigned int jarg3) {
+  float jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  float result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  result = (float)((QuestManager const *)arg1)->GetAAEXPModifierByCharID(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_QuestManager_GetEXPModifierByCharID__SWIG_0(void * jarg1, unsigned int jarg2, unsigned int jarg3, short jarg4) {
+  float jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  int16 arg4 ;
+  float result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (int16)jarg4; 
+  result = (float)((QuestManager const *)arg1)->GetEXPModifierByCharID(arg2,arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_QuestManager_GetEXPModifierByCharID__SWIG_1(void * jarg1, unsigned int jarg2, unsigned int jarg3) {
+  float jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  float result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  result = (float)((QuestManager const *)arg1)->GetEXPModifierByCharID(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_SetAAEXPModifierByCharID__SWIG_0(void * jarg1, unsigned int jarg2, unsigned int jarg3, float jarg4, short jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  float arg4 ;
+  int16 arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (float)jarg4; 
+  arg5 = (int16)jarg5; 
+  (arg1)->SetAAEXPModifierByCharID(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_SetAAEXPModifierByCharID__SWIG_1(void * jarg1, unsigned int jarg2, unsigned int jarg3, float jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  float arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (float)jarg4; 
+  (arg1)->SetAAEXPModifierByCharID(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_SetEXPModifierByCharID__SWIG_0(void * jarg1, unsigned int jarg2, unsigned int jarg3, float jarg4, short jarg5) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  float arg4 ;
+  int16 arg5 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (float)jarg4; 
+  arg5 = (int16)jarg5; 
+  (arg1)->SetEXPModifierByCharID(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_SetEXPModifierByCharID__SWIG_1(void * jarg1, unsigned int jarg2, unsigned int jarg3, float jarg4) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  float arg4 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (float)jarg4; 
+  (arg1)->SetEXPModifierByCharID(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getgendername(void * jarg1, unsigned int jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (arg1)->getgendername(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getdeityname(void * jarg1, unsigned int jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (arg1)->getdeityname(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getinventoryslotname(void * jarg1, short jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int16 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (int16)jarg2; 
+  result = (arg1)->getinventoryslotname(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_getitemstat(void * jarg1, unsigned int jarg2, const char * jarg3) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string arg3 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  (&arg3)->assign(jarg3); 
+  result = (int)(arg1)->getitemstat(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_getspellstat__SWIG_0(void * jarg1, unsigned int jarg2, const char * jarg3, unsigned char jarg4) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string arg3 ;
+  uint8 arg4 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  (&arg3)->assign(jarg3); 
+  arg4 = (uint8)jarg4; 
+  result = (int)(arg1)->getspellstat(arg2,arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_getspellstat__SWIG_1(void * jarg1, unsigned int jarg2, const char * jarg3) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string arg3 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  (&arg3)->assign(jarg3); 
+  result = (int)(arg1)->getspellstat(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_getspell(void * jarg1, unsigned int jarg2) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  SPDat_Spell_Struct *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (SPDat_Spell_Struct *)(arg1)->getspell(arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_getenvironmentaldamagename(void * jarg1, unsigned char jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  result = (arg1)->getenvironmentaldamagename(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_TrackNPC(void * jarg1, unsigned int jarg2) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->TrackNPC(arg2);
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_GetRecipeMadeCount(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (int)(arg1)->GetRecipeMadeCount(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_GetRecipeName(void * jarg1, unsigned int jarg2) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (arg1)->GetRecipeName(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_HasRecipeLearned(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (bool)(arg1)->HasRecipeLearned(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_DoAugmentSlotsMatch(void * jarg1, unsigned int jarg2, unsigned int jarg3) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint32 arg2 ;
+  uint32 arg3 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (uint32)jarg3; 
+  result = (bool)(arg1)->DoAugmentSlotsMatch(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_QuestManager_DoesAugmentFit__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, unsigned char jarg4) {
+  signed char jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  EQ::ItemInstance *arg2 = (EQ::ItemInstance *) 0 ;
+  uint32 arg3 ;
+  uint8 arg4 ;
+  int8 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (EQ::ItemInstance *)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (uint8)jarg4; 
+  result = (int8)(arg1)->DoesAugmentFit(arg2,arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_QuestManager_DoesAugmentFit__SWIG_1(void * jarg1, void * jarg2, unsigned int jarg3) {
+  signed char jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  EQ::ItemInstance *arg2 = (EQ::ItemInstance *) 0 ;
+  uint32 arg3 ;
+  int8 result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (EQ::ItemInstance *)jarg2; 
+  arg3 = (uint32)jarg3; 
+  result = (int8)(arg1)->DoesAugmentFit(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_SendPlayerHandinEvent(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  (arg1)->SendPlayerHandinEvent();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_SendChannelMessage__SWIG_0(void * jarg1, unsigned char jarg2, unsigned int jarg3, unsigned char jarg4, unsigned char jarg5, char * jarg6) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  uint32 arg3 ;
+  uint8 arg4 ;
+  uint8 arg5 ;
+  char *arg6 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (uint32)jarg3; 
+  arg4 = (uint8)jarg4; 
+  arg5 = (uint8)jarg5; 
+  arg6 = (char *)jarg6; 
+  (arg1)->SendChannelMessage(arg2,arg3,arg4,arg5,(char const *)arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_SendChannelMessage__SWIG_1(void * jarg1, void * jarg2, unsigned char jarg3, unsigned int jarg4, unsigned char jarg5, unsigned char jarg6, char * jarg7) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  Client *arg2 = (Client *) 0 ;
+  uint8 arg3 ;
+  uint32 arg4 ;
+  uint8 arg5 ;
+  uint8 arg6 ;
+  char *arg7 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (Client *)jarg2; 
+  arg3 = (uint8)jarg3; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint8)jarg5; 
+  arg6 = (uint8)jarg6; 
+  arg7 = (char *)jarg7; 
+  (arg1)->SendChannelMessage(arg2,arg3,arg4,arg5,arg6,(char const *)arg7);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_SendChannelMessage__SWIG_2(void * jarg1, void * jarg2, char * jarg3, unsigned char jarg4, unsigned int jarg5, unsigned char jarg6, unsigned char jarg7, char * jarg8) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  Client *arg2 = (Client *) 0 ;
+  char *arg3 = (char *) 0 ;
+  uint8 arg4 ;
+  uint32 arg5 ;
+  uint8 arg6 ;
+  uint8 arg7 ;
+  char *arg8 = (char *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (Client *)jarg2; 
+  arg3 = (char *)jarg3; 
+  arg4 = (uint8)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint8)jarg6; 
+  arg7 = (uint8)jarg7; 
+  arg8 = (char *)jarg8; 
+  (arg1)->SendChannelMessage(arg2,(char const *)arg3,arg4,arg5,arg6,arg7,(char const *)arg8);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_GetBot(void * jarg1) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  Bot *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = (Bot *)((QuestManager const *)arg1)->GetBot();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_GetInitiator(void * jarg1) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  Client *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = (Client *)((QuestManager const *)arg1)->GetInitiator();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_GetNPC(void * jarg1) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  NPC *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = (NPC *)((QuestManager const *)arg1)->GetNPC();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_GetOwner(void * jarg1) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  Mob *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = (Mob *)((QuestManager const *)arg1)->GetOwner();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_GetInventory(void * jarg1) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  EQ::InventoryProfile *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = (EQ::InventoryProfile *)((QuestManager const *)arg1)->GetInventory();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_GetQuestItem(void * jarg1) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = (EQ::ItemInstance *)((QuestManager const *)arg1)->GetQuestItem();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_QuestManager_GetQuestSpell(void * jarg1) {
+  void * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  SPDat_Spell_Struct *result = 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = (SPDat_Spell_Struct *)(arg1)->GetQuestSpell();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_QuestManager_GetEncounter(void * jarg1) {
+  const char * jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  std::string result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = ((QuestManager const *)arg1)->GetEncounter();
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_ProximitySayInUse(void * jarg1) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = (bool)(arg1)->ProximitySayInUse();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_createbotcount__SWIG_0(void * jarg1, unsigned char jarg2) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  result = (int)(arg1)->createbotcount(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_createbotcount__SWIG_1(void * jarg1) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = (int)(arg1)->createbotcount();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_spawnbotcount__SWIG_0(void * jarg1, unsigned char jarg2) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  uint8 arg2 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  result = (int)(arg1)->spawnbotcount(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_QuestManager_spawnbotcount__SWIG_1(void * jarg1) {
+  int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  int result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = (int)(arg1)->spawnbotcount();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_botquest(void * jarg1) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  result = (bool)(arg1)->botquest();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_QuestManager_createBot(void * jarg1, char * jarg2, char * jarg3, unsigned char jarg4, unsigned short jarg5, unsigned char jarg6, unsigned char jarg7) {
+  unsigned int jresult ;
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  char *arg2 = (char *) 0 ;
+  char *arg3 = (char *) 0 ;
+  uint8 arg4 ;
+  uint16 arg5 ;
+  uint8 arg6 ;
+  uint8 arg7 ;
+  bool result;
+  
+  arg1 = (QuestManager *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (char *)jarg3; 
+  arg4 = (uint8)jarg4; 
+  arg5 = (uint16)jarg5; 
+  arg6 = (uint8)jarg6; 
+  arg7 = (uint8)jarg7; 
+  result = (bool)(arg1)->createBot((char const *)arg2,(char const *)arg3,arg4,arg5,arg6,arg7);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_quest_manager_set(void * jarg1) {
+  QuestManager *arg1 = (QuestManager *) 0 ;
+  
+  arg1 = (QuestManager *)jarg1; 
+  quest_manager = *arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_quest_manager_get() {
+  void * jresult ;
+  QuestManager *result = 0 ;
+  
+  result = (QuestManager *)&quest_manager;
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_ItemInstance__SWIG_0(void * jarg1, short jarg2) {
+  void * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int16 arg2 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int16)jarg2; 
+  result = (EQ::ItemInstance *)new EQ::ItemInstance((EQ::ItemData const *)arg1,arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_ItemInstance__SWIG_1(void * jarg1) {
+  void * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (EQ::ItemInstance *)new EQ::ItemInstance((EQ::ItemData const *)arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_ItemInstance__SWIG_2() {
+  void * jresult ;
+  EQ::ItemInstance *result = 0 ;
+  
+  result = (EQ::ItemInstance *)new EQ::ItemInstance();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_ItemInstance__SWIG_3(void * jarg1, unsigned int jarg2, short jarg3) {
+  void * jresult ;
+  SharedDatabase *arg1 = (SharedDatabase *) 0 ;
+  uint32 arg2 ;
+  int16 arg3 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (SharedDatabase *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  arg3 = (int16)jarg3; 
+  result = (EQ::ItemInstance *)new EQ::ItemInstance(arg1,arg2,arg3);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_ItemInstance__SWIG_4(void * jarg1, unsigned int jarg2) {
+  void * jresult ;
+  SharedDatabase *arg1 = (SharedDatabase *) 0 ;
+  uint32 arg2 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (SharedDatabase *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (EQ::ItemInstance *)new EQ::ItemInstance(arg1,arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_ItemInstance__SWIG_5(int jarg1) {
+  void * jresult ;
+  ItemInstTypes arg1 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (ItemInstTypes)jarg1; 
+  result = (EQ::ItemInstance *)new EQ::ItemInstance(arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_ItemInstance__SWIG_6(void * jarg1) {
+  void * jresult ;
+  EQ::ItemInstance *arg1 = 0 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "EQ::ItemInstance const & is null", 0);
+    return 0;
+  } 
+  result = (EQ::ItemInstance *)new EQ::ItemInstance((EQ::ItemInstance const &)*arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_ItemInstance(void * jarg1) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsType(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  item::ItemClass arg2 ;
+  item::ItemClass *argp2 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  argp2 = (item::ItemClass *)jarg2; 
+  if (!argp2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null item::ItemClass", 0);
+    return 0;
+  }
+  arg2 = *argp2; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsType(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsClassCommon(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsClassCommon();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsClassBag(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsClassBag();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsClassBook(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsClassBook();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsStackable(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsStackable();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsCharged(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsCharged();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsEquipable__SWIG_0(void * jarg1, unsigned short jarg2, unsigned short jarg3) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint16 arg2 ;
+  uint16 arg3 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (uint16)jarg3; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsEquipable(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsClassEquipable(void * jarg1, unsigned short jarg2) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint16 arg2 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsClassEquipable(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsRaceEquipable(void * jarg1, unsigned short jarg2) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint16 arg2 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsRaceEquipable(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsEquipable__SWIG_1(void * jarg1, short jarg2) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int16 arg2 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (int16)jarg2; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsEquipable(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsAugmentable(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsAugmentable();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_AvailableWearSlot(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 arg2 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->AvailableWearSlot(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemInstance_AvailableAugmentSlot(void * jarg1, int jarg2) {
+  signed char jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int32 arg2 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (int32)jarg2; 
+  result = (int8)((EQ::ItemInstance const *)arg1)->AvailableAugmentSlot(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsAugmentSlotAvailable(void * jarg1, int jarg2, unsigned char jarg3) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int32 arg2 ;
+  uint8 arg3 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (int32)jarg2; 
+  arg3 = (uint8)jarg3; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsAugmentSlotAvailable(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetAugmentType(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetAugmentType();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_GetAugmentRestriction(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (uint32)((EQ::ItemInstance const *)arg1)->GetAugmentRestriction();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsExpendable(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsExpendable();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemInstance_GetItem__SWIG_0(void * jarg1, unsigned char jarg2) {
+  void * jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint8 arg2 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  result = (EQ::ItemInstance *)((EQ::ItemInstance const *)arg1)->GetItem(arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_GetItemID(void * jarg1, unsigned char jarg2) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint8 arg2 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  result = (uint32)((EQ::ItemInstance const *)arg1)->GetItemID(arg2);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_PutItem__SWIG_0(void * jarg1, unsigned char jarg2, void * jarg3) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint8 arg2 ;
+  EQ::ItemInstance *arg3 = 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (EQ::ItemInstance *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "EQ::ItemInstance const & is null", 0);
+    return ;
+  } 
+  (arg1)->PutItem(arg2,(EQ::ItemInstance const &)*arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_PutItem__SWIG_1(void * jarg1, void * jarg2, unsigned char jarg3, unsigned int jarg4) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  SharedDatabase *arg2 = (SharedDatabase *) 0 ;
+  uint8 arg3 ;
+  uint32 arg4 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (SharedDatabase *)jarg2; 
+  arg3 = (uint8)jarg3; 
+  arg4 = (uint32)jarg4; 
+  (arg1)->PutItem(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_DeleteItem(void * jarg1, unsigned char jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  (arg1)->DeleteItem(arg2);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemInstance_PopItem(void * jarg1, unsigned char jarg2) {
+  void * jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint8 arg2 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  result = (EQ::ItemInstance *)(arg1)->PopItem(arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_Clear(void * jarg1) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  (arg1)->Clear();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_ClearByFlags(void * jarg1, int jarg2, int jarg3) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  byFlagSetting arg2 ;
+  byFlagSetting arg3 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (byFlagSetting)jarg2; 
+  arg3 = (byFlagSetting)jarg3; 
+  (arg1)->ClearByFlags(arg2,arg3);
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemInstance_FirstOpenSlot(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (uint8)((EQ::ItemInstance const *)arg1)->FirstOpenSlot();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemInstance_GetTotalItemCount(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (uint8)((EQ::ItemInstance const *)arg1)->GetTotalItemCount();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsNoneEmptyContainer(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (bool)(arg1)->IsNoneEmptyContainer();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemInstance_GetContents(void * jarg1) {
+  void * jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  std::map< uint8,EQ::ItemInstance * > *result = 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (std::map< uint8,EQ::ItemInstance * > *)(arg1)->GetContents();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemInstance_GetAugment(void * jarg1, unsigned char jarg2) {
+  void * jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint8 arg2 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  result = (EQ::ItemInstance *)((EQ::ItemInstance const *)arg1)->GetAugment(arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_GetAugmentItemID(void * jarg1, unsigned char jarg2) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint8 arg2 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  result = (uint32)((EQ::ItemInstance const *)arg1)->GetAugmentItemID(arg2);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_PutAugment__SWIG_0(void * jarg1, unsigned char jarg2, void * jarg3) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint8 arg2 ;
+  EQ::ItemInstance *arg3 = 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = (EQ::ItemInstance *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "EQ::ItemInstance const & is null", 0);
+    return ;
+  } 
+  (arg1)->PutAugment(arg2,(EQ::ItemInstance const &)*arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_PutAugment__SWIG_1(void * jarg1, void * jarg2, unsigned char jarg3, unsigned int jarg4) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  SharedDatabase *arg2 = (SharedDatabase *) 0 ;
+  uint8 arg3 ;
+  uint32 arg4 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (SharedDatabase *)jarg2; 
+  arg3 = (uint8)jarg3; 
+  arg4 = (uint32)jarg4; 
+  (arg1)->PutAugment(arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_DeleteAugment(void * jarg1, unsigned char jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  (arg1)->DeleteAugment(arg2);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemInstance_RemoveAugment(void * jarg1, unsigned char jarg2) {
+  void * jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint8 arg2 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  result = (EQ::ItemInstance *)(arg1)->RemoveAugment(arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsAugmented(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (bool)(arg1)->IsAugmented();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_ContainsAugmentByID(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 arg2 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (bool)(arg1)->ContainsAugmentByID(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_CountAugmentByID(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  result = (int)(arg1)->CountAugmentByID(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsOrnamentationAugment(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  EQ::ItemInstance *arg2 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (EQ::ItemInstance *)jarg2; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsOrnamentationAugment(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemInstance_GetOrnamentationAugment(void * jarg1) {
+  void * jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (EQ::ItemInstance *)((EQ::ItemInstance const *)arg1)->GetOrnamentationAugment();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_UpdateOrnamentationInfo(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (bool)(arg1)->UpdateOrnamentationInfo();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_CanTransform__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  EQ::ItemData *arg2 = (EQ::ItemData *) 0 ;
+  bool arg3 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (EQ::ItemData *)jarg2; 
+  arg3 = jarg3 ? true : false; 
+  result = (bool)EQ::ItemInstance::CanTransform((EQ::ItemData const *)arg1,(EQ::ItemData const *)arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_CanTransform__SWIG_1(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  EQ::ItemData *arg2 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (EQ::ItemData *)jarg2; 
+  result = (bool)EQ::ItemInstance::CanTransform((EQ::ItemData const *)arg1,(EQ::ItemData const *)arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsWeapon(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsWeapon();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsAmmo(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsAmmo();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_GetID(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (uint32)((EQ::ItemInstance const *)arg1)->GetID();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_GetItemScriptID(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (uint32)((EQ::ItemInstance const *)arg1)->GetItemScriptID();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemInstance_GetItem__SWIG_1(void * jarg1) {
+  void * jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  EQ::ItemData *result = 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (EQ::ItemData *)((EQ::ItemInstance const *)arg1)->GetItem();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemInstance_GetUnscaledItem(void * jarg1) {
+  void * jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  EQ::ItemData *result = 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (EQ::ItemData *)((EQ::ItemInstance const *)arg1)->GetUnscaledItem();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemInstance_GetItemType(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (uint8)((EQ::ItemInstance const *)arg1)->GetItemType();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_ItemInstance_GetCharges(void * jarg1) {
+  short jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int16 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int16)((EQ::ItemInstance const *)arg1)->GetCharges();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetCharges(void * jarg1, short jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int16 arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (int16)jarg2; 
+  (arg1)->SetCharges(arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_GetPrice(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (uint32)((EQ::ItemInstance const *)arg1)->GetPrice();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetPrice(void * jarg1, unsigned int jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->SetPrice(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetColor(void * jarg1, unsigned int jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->SetColor(arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_GetColor(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (uint32)((EQ::ItemInstance const *)arg1)->GetColor();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_GetMerchantSlot(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (uint32)((EQ::ItemInstance const *)arg1)->GetMerchantSlot();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetMerchantSlot(void * jarg1, unsigned int jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->SetMerchantSlot(arg2);
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetMerchantCount(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int32)((EQ::ItemInstance const *)arg1)->GetMerchantCount();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetMerchantCount(void * jarg1, int jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (int32)jarg2; 
+  (arg1)->SetMerchantCount(arg2);
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_ItemInstance_GetCurrentSlot(void * jarg1) {
+  short jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int16 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int16)((EQ::ItemInstance const *)arg1)->GetCurrentSlot();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetCurrentSlot(void * jarg1, short jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int16 arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (int16)jarg2; 
+  (arg1)->SetCurrentSlot(arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsAttuned(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsAttuned();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetAttuned(void * jarg1, unsigned int jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  (arg1)->SetAttuned(arg2);
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_ItemInstance_GetCustomDataString(void * jarg1) {
+  const char * jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  std::string result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = ((EQ::ItemInstance const *)arg1)->GetCustomDataString();
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_ItemInstance_GetCustomData(void * jarg1, const char * jarg2) {
+  const char * jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  std::string *arg2 = 0 ;
+  std::string result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  result = (arg1)->GetCustomData((std::string const &)*arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetCustomDataString(void * jarg1, const char * jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  std::string *arg2 = 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  (arg1)->SetCustomDataString((std::string const &)*arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetCustomData__SWIG_0(void * jarg1, const char * jarg2, const char * jarg3) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  std::string *arg2 = 0 ;
+  std::string *arg3 = 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
+  (arg1)->SetCustomData((std::string const &)*arg2,(std::string const &)*arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetCustomData__SWIG_1(void * jarg1, const char * jarg2, int jarg3) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  std::string *arg2 = 0 ;
+  int arg3 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (int)jarg3; 
+  (arg1)->SetCustomData((std::string const &)*arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetCustomData__SWIG_2(void * jarg1, const char * jarg2, float jarg3) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  std::string *arg2 = 0 ;
+  float arg3 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (float)jarg3; 
+  (arg1)->SetCustomData((std::string const &)*arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetCustomData__SWIG_3(void * jarg1, const char * jarg2, unsigned int jarg3) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  std::string *arg2 = 0 ;
+  bool arg3 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = jarg3 ? true : false; 
+  (arg1)->SetCustomData((std::string const &)*arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_DeleteCustomData(void * jarg1, const char * jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  std::string *arg2 = 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  (arg1)->DeleteCustomData((std::string const &)*arg2);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemInstance_Clone(void * jarg1) {
+  void * jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (EQ::ItemInstance *)((EQ::ItemInstance const *)arg1)->Clone();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsSlotAllowed(void * jarg1, short jarg2) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int16 arg2 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (int16)jarg2; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsSlotAllowed(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsDroppable__SWIG_0(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsDroppable(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsDroppable__SWIG_1(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsDroppable();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsScaling(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsScaling();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsEvolving(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->IsEvolving();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_GetExp(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (uint32)((EQ::ItemInstance const *)arg1)->GetExp();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetExp(void * jarg1, unsigned int jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->SetExp(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_AddExp(void * jarg1, unsigned int jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->AddExp(arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_IsActivated(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (bool)(arg1)->IsActivated();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetActivated(void * jarg1, unsigned int jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  (arg1)->SetActivated(arg2);
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemInstance_GetEvolveLvl(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int8)((EQ::ItemInstance const *)arg1)->GetEvolveLvl();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetScaling(void * jarg1, unsigned int jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  (arg1)->SetScaling(arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_GetOrnamentationIcon(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (uint32)((EQ::ItemInstance const *)arg1)->GetOrnamentationIcon();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetOrnamentIcon(void * jarg1, unsigned int jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->SetOrnamentIcon(arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_GetOrnamentationIDFile(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (uint32)((EQ::ItemInstance const *)arg1)->GetOrnamentationIDFile();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetOrnamentationIDFile(void * jarg1, unsigned int jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->SetOrnamentationIDFile(arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_GetNewIDFile(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (uint32)((EQ::ItemInstance const *)arg1)->GetNewIDFile();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetNewIDFile(void * jarg1, unsigned int jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->SetNewIDFile(arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_GetOrnamentHeroModel__SWIG_0(void * jarg1, int jarg2) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int32 arg2 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (int32)jarg2; 
+  result = (uint32)((EQ::ItemInstance const *)arg1)->GetOrnamentHeroModel(arg2);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_GetOrnamentHeroModel__SWIG_1(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (uint32)((EQ::ItemInstance const *)arg1)->GetOrnamentHeroModel();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetOrnamentHeroModel(void * jarg1, unsigned int jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->SetOrnamentHeroModel(arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_GetRecastTimestamp(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (uint32)((EQ::ItemInstance const *)arg1)->GetRecastTimestamp();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetRecastTimestamp(void * jarg1, unsigned int jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  (arg1)->SetRecastTimestamp(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_Initialize__SWIG_0(void * jarg1, void * jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  SharedDatabase *arg2 = (SharedDatabase *) 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (SharedDatabase *)jarg2; 
+  (arg1)->Initialize(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_Initialize__SWIG_1(void * jarg1) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  (arg1)->Initialize();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_ScaleItem(void * jarg1) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  (arg1)->ScaleItem();
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_EvolveOnAllKills(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (bool)((EQ::ItemInstance const *)arg1)->EvolveOnAllKills();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemInstance_GetMaxEvolveLvl(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int8)((EQ::ItemInstance const *)arg1)->GetMaxEvolveLvl();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_GetKillsNeeded(void * jarg1, unsigned char jarg2) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint8 arg2 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  result = (uint32)(arg1)->GetKillsNeeded(arg2);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_ItemInstance_Serialize__SWIG_0(void * jarg1, short jarg2) {
+  const char * jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int16 arg2 ;
+  std::string result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (int16)jarg2; 
+  result = ((EQ::ItemInstance const *)arg1)->Serialize(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_Serialize__SWIG_1(void * jarg1, void * jarg2, short jarg3) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  OutBuffer *arg2 = 0 ;
+  int16 arg3 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (OutBuffer *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "OutBuffer & is null", 0);
+    return ;
+  } 
+  arg3 = (int16)jarg3; 
+  ((EQ::ItemInstance const *)arg1)->Serialize(*arg2,arg3);
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetSerialNumber(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int32)((EQ::ItemInstance const *)arg1)->GetSerialNumber();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetSerialNumber(void * jarg1, int jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (int32)jarg2; 
+  (arg1)->SetSerialNumber(arg2);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemInstance_GetTimers(void * jarg1) {
+  void * jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  std::map< std::string,::Timer > *result = 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (std::map< std::string,::Timer > *) &(arg1)->GetTimers();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetTimer(void * jarg1, const char * jarg2, unsigned int jarg3) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  std::string arg2 ;
+  uint32 arg3 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  (&arg2)->assign(jarg2); 
+  arg3 = (uint32)jarg3; 
+  (arg1)->SetTimer(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_StopTimer(void * jarg1, const char * jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  std::string arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  (&arg2)->assign(jarg2); 
+  (arg1)->StopTimer(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_ClearTimers(void * jarg1) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  (arg1)->ClearTimers();
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetTaskDeliveredCount(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetTaskDeliveredCount();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemInstance_SetTaskDeliveredCount(void * jarg1, int jarg2) {
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int arg2 ;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->SetTaskDeliveredCount(arg2);
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_RemoveTaskDeliveredItems(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)(arg1)->RemoveTaskDeliveredItems();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemArmorClass__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemArmorClass(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemArmorClass__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemArmorClass();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemElementalDamage__SWIG_0(void * jarg1, void * jarg2, void * jarg3, void * jarg4, void * jarg5, void * jarg6, void * jarg7, void * jarg8, void * jarg9, void * jarg10, unsigned int jarg11) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int *arg2 = 0 ;
+  int *arg3 = 0 ;
+  int *arg4 = 0 ;
+  int *arg5 = 0 ;
+  int *arg6 = 0 ;
+  int *arg7 = 0 ;
+  int *arg8 = 0 ;
+  int *arg9 = 0 ;
+  int *arg10 = 0 ;
+  bool arg11 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (int *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "int & is null", 0);
+    return 0;
+  } 
+  arg3 = (int *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "int & is null", 0);
+    return 0;
+  } 
+  arg4 = (int *)jarg4;
+  if (!arg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "int & is null", 0);
+    return 0;
+  } 
+  arg5 = (int *)jarg5;
+  if (!arg5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "int & is null", 0);
+    return 0;
+  } 
+  arg6 = (int *)jarg6;
+  if (!arg6) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "int & is null", 0);
+    return 0;
+  } 
+  arg7 = (int *)jarg7;
+  if (!arg7) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "int & is null", 0);
+    return 0;
+  } 
+  arg8 = (int *)jarg8;
+  if (!arg8) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "int & is null", 0);
+    return 0;
+  } 
+  arg9 = (int *)jarg9;
+  if (!arg9) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "int & is null", 0);
+    return 0;
+  } 
+  arg10 = (int *)jarg10;
+  if (!arg10) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "int & is null", 0);
+    return 0;
+  } 
+  arg11 = jarg11 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemElementalDamage(*arg2,*arg3,*arg4,*arg5,*arg6,*arg7,*arg8,*arg9,*arg10,arg11);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemElementalDamage__SWIG_1(void * jarg1, void * jarg2, void * jarg3, void * jarg4, void * jarg5, void * jarg6, void * jarg7, void * jarg8, void * jarg9, void * jarg10) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int *arg2 = 0 ;
+  int *arg3 = 0 ;
+  int *arg4 = 0 ;
+  int *arg5 = 0 ;
+  int *arg6 = 0 ;
+  int *arg7 = 0 ;
+  int *arg8 = 0 ;
+  int *arg9 = 0 ;
+  int *arg10 = 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (int *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "int & is null", 0);
+    return 0;
+  } 
+  arg3 = (int *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "int & is null", 0);
+    return 0;
+  } 
+  arg4 = (int *)jarg4;
+  if (!arg4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "int & is null", 0);
+    return 0;
+  } 
+  arg5 = (int *)jarg5;
+  if (!arg5) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "int & is null", 0);
+    return 0;
+  } 
+  arg6 = (int *)jarg6;
+  if (!arg6) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "int & is null", 0);
+    return 0;
+  } 
+  arg7 = (int *)jarg7;
+  if (!arg7) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "int & is null", 0);
+    return 0;
+  } 
+  arg8 = (int *)jarg8;
+  if (!arg8) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "int & is null", 0);
+    return 0;
+  } 
+  arg9 = (int *)jarg9;
+  if (!arg9) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "int & is null", 0);
+    return 0;
+  } 
+  arg10 = (int *)jarg10;
+  if (!arg10) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "int & is null", 0);
+    return 0;
+  } 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemElementalDamage(*arg2,*arg3,*arg4,*arg5,*arg6,*arg7,*arg8,*arg9,*arg10);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemElementalFlag__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemElementalFlag(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemElementalFlag__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemElementalFlag();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemElementalDamage__SWIG_2(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemElementalDamage(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemElementalDamage__SWIG_3(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemElementalDamage();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemRecommendedLevel__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemRecommendedLevel(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemRecommendedLevel__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemRecommendedLevel();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemRequiredLevel__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemRequiredLevel(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemRequiredLevel__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemRequiredLevel();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemWeaponDamage__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemWeaponDamage(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemWeaponDamage__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemWeaponDamage();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemBackstabDamage__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemBackstabDamage(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemBackstabDamage__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemBackstabDamage();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemBaneDamageBody__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemBaneDamageBody(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemBaneDamageBody__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemBaneDamageBody();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemBaneDamageRace__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemBaneDamageRace(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemBaneDamageRace__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemBaneDamageRace();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemBaneDamageBody__SWIG_2(void * jarg1, void * jarg2, unsigned int jarg3) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bodyType arg2 ;
+  bool arg3 ;
+  bodyType *argp2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  argp2 = (bodyType *)jarg2; 
+  if (!argp2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null bodyType", 0);
+    return 0;
+  }
+  arg2 = *argp2; 
+  arg3 = jarg3 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemBaneDamageBody(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemBaneDamageBody__SWIG_3(void * jarg1, void * jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bodyType arg2 ;
+  bodyType *argp2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  argp2 = (bodyType *)jarg2; 
+  if (!argp2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null bodyType", 0);
+    return 0;
+  }
+  arg2 = *argp2; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemBaneDamageBody(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemBaneDamageRace__SWIG_2(void * jarg1, unsigned short jarg2, unsigned int jarg3) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint16 arg2 ;
+  bool arg3 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = jarg3 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemBaneDamageRace(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemBaneDamageRace__SWIG_3(void * jarg1, unsigned short jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint16 arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemBaneDamageRace(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemMagical__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemMagical(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemMagical__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemMagical();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHP__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHP(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHP__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHP();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemMana__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemMana(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemMana__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemMana();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemEndur__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemEndur(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemEndur__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemEndur();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemAttack__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemAttack(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemAttack__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemAttack();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemStr__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemStr(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemStr__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemStr();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemSta__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemSta(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemSta__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemSta();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemDex__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemDex(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemDex__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemDex();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemAgi__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemAgi(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemAgi__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemAgi();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemInt__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemInt(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemInt__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemInt();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemWis__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemWis(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemWis__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemWis();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemCha__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemCha(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemCha__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemCha();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemMR__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemMR(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemMR__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemMR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemFR__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemFR(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemFR__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemFR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemCR__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemCR(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemCR__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemCR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemPR__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemPR(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemPR__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemPR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemDR__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemDR(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemDR__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemDR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemCorrup__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemCorrup(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemCorrup__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemCorrup();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicStr__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicStr(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicStr__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicStr();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicSta__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicSta(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicSta__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicSta();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicDex__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicDex(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicDex__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicDex();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicAgi__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicAgi(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicAgi__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicAgi();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicInt__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicInt(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicInt__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicInt();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicWis__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicWis(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicWis__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicWis();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicCha__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicCha(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicCha__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicCha();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicMR__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicMR(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicMR__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicMR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicFR__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicFR(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicFR__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicFR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicCR__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicCR(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicCR__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicCR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicPR__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicPR(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicPR__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicPR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicDR__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicDR(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicDR__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicDR();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicCorrup__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicCorrup(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHeroicCorrup__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHeroicCorrup();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHaste__SWIG_0(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  bool arg2 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHaste(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemInstance_GetItemHaste__SWIG_1(void * jarg1) {
+  int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (int)((EQ::ItemInstance const *)arg1)->GetItemHaste();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemInstance_GetItemGuildFavor(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = (uint32)((EQ::ItemInstance const *)arg1)->GetItemGuildFavor();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemInstance_GetAugmentIDs(void * jarg1) {
+  void * jresult ;
+  EQ::ItemInstance *arg1 = (EQ::ItemInstance *) 0 ;
+  std::vector< uint32 > result;
+  
+  arg1 = (EQ::ItemInstance *)jarg1; 
+  result = ((EQ::ItemInstance const *)arg1)->GetAugmentIDs();
+  jresult = new std::vector< uint32 >(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EvolveInfo_LvlKills_set(void * jarg1, void * jarg2) {
+  EvolveInfo *arg1 = (EvolveInfo *) 0 ;
+  uint16 *arg2 = (uint16 *) (uint16 *)0 ;
+  
+  arg1 = (EvolveInfo *)jarg1; 
+  arg2 = (uint16 *)jarg2; 
+  {
+    size_t ii;
+    uint16 *b = (uint16 *) arg1->LvlKills;
+    for (ii = 0; ii < (size_t)9; ii++) b[ii] = *((uint16 *) arg2 + ii);
+  }
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EvolveInfo_LvlKills_get(void * jarg1) {
+  void * jresult ;
+  EvolveInfo *arg1 = (EvolveInfo *) 0 ;
+  uint16 *result = 0 ;
+  
+  arg1 = (EvolveInfo *)jarg1; 
+  result = (uint16 *)(uint16 *) ((arg1)->LvlKills);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EvolveInfo_FirstItem_set(void * jarg1, unsigned int jarg2) {
+  EvolveInfo *arg1 = (EvolveInfo *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EvolveInfo *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->FirstItem = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EvolveInfo_FirstItem_get(void * jarg1) {
+  unsigned int jresult ;
+  EvolveInfo *arg1 = (EvolveInfo *) 0 ;
+  uint32 result;
+  
+  arg1 = (EvolveInfo *)jarg1; 
+  result = (uint32) ((arg1)->FirstItem);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EvolveInfo_MaxLvl_set(void * jarg1, unsigned char jarg2) {
+  EvolveInfo *arg1 = (EvolveInfo *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EvolveInfo *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->MaxLvl = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_EvolveInfo_MaxLvl_get(void * jarg1) {
+  unsigned char jresult ;
+  EvolveInfo *arg1 = (EvolveInfo *) 0 ;
+  uint8 result;
+  
+  arg1 = (EvolveInfo *)jarg1; 
+  result = (uint8) ((arg1)->MaxLvl);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EvolveInfo_AllKills_set(void * jarg1, unsigned int jarg2) {
+  EvolveInfo *arg1 = (EvolveInfo *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EvolveInfo *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->AllKills = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EvolveInfo_AllKills_get(void * jarg1) {
+  unsigned int jresult ;
+  EvolveInfo *arg1 = (EvolveInfo *) 0 ;
+  bool result;
+  
+  arg1 = (EvolveInfo *)jarg1; 
+  result = (bool) ((arg1)->AllKills);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EvolveInfo__SWIG_0() {
+  void * jresult ;
+  EvolveInfo *result = 0 ;
+  
+  result = (EvolveInfo *)new EvolveInfo();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EvolveInfo__SWIG_1(unsigned int jarg1, unsigned char jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, unsigned int jarg11, unsigned int jarg12) {
+  void * jresult ;
+  uint32 arg1 ;
+  uint8 arg2 ;
+  bool arg3 ;
+  uint32 arg4 ;
+  uint32 arg5 ;
+  uint32 arg6 ;
+  uint32 arg7 ;
+  uint32 arg8 ;
+  uint32 arg9 ;
+  uint32 arg10 ;
+  uint32 arg11 ;
+  uint32 arg12 ;
+  EvolveInfo *result = 0 ;
+  
+  arg1 = (uint32)jarg1; 
+  arg2 = (uint8)jarg2; 
+  arg3 = jarg3 ? true : false; 
+  arg4 = (uint32)jarg4; 
+  arg5 = (uint32)jarg5; 
+  arg6 = (uint32)jarg6; 
+  arg7 = (uint32)jarg7; 
+  arg8 = (uint32)jarg8; 
+  arg9 = (uint32)jarg9; 
+  arg10 = (uint32)jarg10; 
+  arg11 = (uint32)jarg11; 
+  arg12 = (uint32)jarg12; 
+  result = (EvolveInfo *)new EvolveInfo(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_EvolveInfo(void * jarg1) {
+  EvolveInfo *arg1 = (EvolveInfo *) 0 ;
+  
+  arg1 = (EvolveInfo *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemEffect_Struct_Effect_set(void * jarg1, int jarg2) {
+  EQ::item::ItemEffect_Struct *arg1 = (EQ::item::ItemEffect_Struct *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::item::ItemEffect_Struct *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->Effect = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemEffect_Struct_Effect_get(void * jarg1) {
+  int jresult ;
+  EQ::item::ItemEffect_Struct *arg1 = (EQ::item::ItemEffect_Struct *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::item::ItemEffect_Struct *)jarg1; 
+  result = (int32) ((arg1)->Effect);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemEffect_Struct_Type_set(void * jarg1, unsigned char jarg2) {
+  EQ::item::ItemEffect_Struct *arg1 = (EQ::item::ItemEffect_Struct *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::item::ItemEffect_Struct *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->Type = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemEffect_Struct_Type_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::item::ItemEffect_Struct *arg1 = (EQ::item::ItemEffect_Struct *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::item::ItemEffect_Struct *)jarg1; 
+  result = (uint8) ((arg1)->Type);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemEffect_Struct_Level_set(void * jarg1, unsigned char jarg2) {
+  EQ::item::ItemEffect_Struct *arg1 = (EQ::item::ItemEffect_Struct *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::item::ItemEffect_Struct *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->Level = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemEffect_Struct_Level_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::item::ItemEffect_Struct *arg1 = (EQ::item::ItemEffect_Struct *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::item::ItemEffect_Struct *)jarg1; 
+  result = (uint8) ((arg1)->Level);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemEffect_Struct_Level2_set(void * jarg1, unsigned char jarg2) {
+  EQ::item::ItemEffect_Struct *arg1 = (EQ::item::ItemEffect_Struct *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::item::ItemEffect_Struct *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->Level2 = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemEffect_Struct_Level2_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::item::ItemEffect_Struct *arg1 = (EQ::item::ItemEffect_Struct *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::item::ItemEffect_Struct *)jarg1; 
+  result = (uint8) ((arg1)->Level2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_ItemEffect_Struct() {
+  void * jresult ;
+  EQ::item::ItemEffect_Struct *result = 0 ;
+  
+  result = (EQ::item::ItemEffect_Struct *)new EQ::item::ItemEffect_Struct();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_ItemEffect_Struct(void * jarg1) {
+  EQ::item::ItemEffect_Struct *arg1 = (EQ::item::ItemEffect_Struct *) 0 ;
+  
+  arg1 = (EQ::item::ItemEffect_Struct *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ConvertAugTypeToAugTypeBit(unsigned char jarg1) {
+  unsigned int jresult ;
+  uint8 arg1 ;
+  uint32 result;
+  
+  arg1 = (uint8)jarg1; 
+  result = (uint32)EQ::item::ConvertAugTypeToAugTypeBit(arg1);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ConvertAugTypeBitToAugType(unsigned int jarg1) {
+  unsigned char jresult ;
+  uint32 arg1 ;
+  uint8 result;
+  
+  arg1 = (uint32)jarg1; 
+  result = (uint8)EQ::item::ConvertAugTypeBitToAugType(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_InternalSerializedItem_Struct_slot_id_set(void * jarg1, short jarg2) {
+  EQ::InternalSerializedItem_Struct *arg1 = (EQ::InternalSerializedItem_Struct *) 0 ;
+  int16 arg2 ;
+  
+  arg1 = (EQ::InternalSerializedItem_Struct *)jarg1; 
+  arg2 = (int16)jarg2; 
+  if (arg1) (arg1)->slot_id = arg2;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_InternalSerializedItem_Struct_slot_id_get(void * jarg1) {
+  short jresult ;
+  EQ::InternalSerializedItem_Struct *arg1 = (EQ::InternalSerializedItem_Struct *) 0 ;
+  int16 result;
+  
+  arg1 = (EQ::InternalSerializedItem_Struct *)jarg1; 
+  result = (int16) ((arg1)->slot_id);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_InternalSerializedItem_Struct_inst_set(void * jarg1, void * jarg2) {
+  EQ::InternalSerializedItem_Struct *arg1 = (EQ::InternalSerializedItem_Struct *) 0 ;
+  void *arg2 = (void *) 0 ;
+  
+  arg1 = (EQ::InternalSerializedItem_Struct *)jarg1; 
+  arg2 = (void *)jarg2; 
+  if (arg1) (arg1)->inst = (void const *)arg2;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_InternalSerializedItem_Struct_inst_get(void * jarg1) {
+  void * jresult ;
+  EQ::InternalSerializedItem_Struct *arg1 = (EQ::InternalSerializedItem_Struct *) 0 ;
+  void *result = 0 ;
+  
+  arg1 = (EQ::InternalSerializedItem_Struct *)jarg1; 
+  result = (void *) ((arg1)->inst);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_InternalSerializedItem_Struct() {
+  void * jresult ;
+  EQ::InternalSerializedItem_Struct *result = 0 ;
+  
+  result = (EQ::InternalSerializedItem_Struct *)new EQ::InternalSerializedItem_Struct();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_InternalSerializedItem_Struct(void * jarg1) {
+  EQ::InternalSerializedItem_Struct *arg1 = (EQ::InternalSerializedItem_Struct *) 0 ;
+  
+  arg1 = (EQ::InternalSerializedItem_Struct *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_MinStatus_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->MinStatus = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_MinStatus_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->MinStatus);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Comment_set(void * jarg1, char * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *arg2 = (char *) (char *)0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (char *)jarg2; 
+  {
+    if(arg2) {
+      strncpy((char*)arg1->Comment, (const char *)arg2, 255-1);
+      arg1->Comment[255-1] = 0;
+    } else {
+      arg1->Comment[0] = 0;
+    }
+  }
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_ItemData_Comment_get(void * jarg1) {
+  char * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (char *)(char *) ((arg1)->Comment);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ItemClass_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->ItemClass = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_ItemClass_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->ItemClass);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Name_set(void * jarg1, char * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *arg2 = (char *) (char *)0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (char *)jarg2; 
+  {
+    if(arg2) {
+      strncpy((char*)arg1->Name, (const char *)arg2, 64-1);
+      arg1->Name[64-1] = 0;
+    } else {
+      arg1->Name[0] = 0;
+    }
+  }
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_ItemData_Name_get(void * jarg1) {
+  char * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (char *)(char *) ((arg1)->Name);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Lore_set(void * jarg1, char * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *arg2 = (char *) (char *)0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (char *)jarg2; 
+  {
+    if(arg2) {
+      strncpy((char*)arg1->Lore, (const char *)arg2, 80-1);
+      arg1->Lore[80-1] = 0;
+    } else {
+      arg1->Lore[0] = 0;
+    }
+  }
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_ItemData_Lore_get(void * jarg1) {
+  char * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (char *)(char *) ((arg1)->Lore);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_IDFile_set(void * jarg1, char * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *arg2 = (char *) (char *)0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (char *)jarg2; 
+  {
+    if(arg2) {
+      strncpy((char*)arg1->IDFile, (const char *)arg2, 30-1);
+      arg1->IDFile[30-1] = 0;
+    } else {
+      arg1->IDFile[0] = 0;
+    }
+  }
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_ItemData_IDFile_get(void * jarg1) {
+  char * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (char *)(char *) ((arg1)->IDFile);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ID_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->ID = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_ID_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->ID);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Weight_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->Weight = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_Weight_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->Weight);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_NoRent_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->NoRent = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_NoRent_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->NoRent);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_NoDrop_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->NoDrop = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_NoDrop_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->NoDrop);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Size_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->Size = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_Size_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->Size);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Slots_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->Slots = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_Slots_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->Slots);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Price_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->Price = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_Price_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->Price);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Icon_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->Icon = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_Icon_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->Icon);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_LoreGroup_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->LoreGroup = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_LoreGroup_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->LoreGroup);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_LoreFlag_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->LoreFlag = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_LoreFlag_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool) ((arg1)->LoreFlag);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_PendingLoreFlag_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->PendingLoreFlag = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_PendingLoreFlag_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool) ((arg1)->PendingLoreFlag);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ArtifactFlag_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->ArtifactFlag = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_ArtifactFlag_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool) ((arg1)->ArtifactFlag);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_SummonedFlag_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->SummonedFlag = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_SummonedFlag_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool) ((arg1)->SummonedFlag);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_FVNoDrop_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->FVNoDrop = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_FVNoDrop_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->FVNoDrop);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Favor_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->Favor = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_Favor_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->Favor);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_GuildFavor_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->GuildFavor = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_GuildFavor_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->GuildFavor);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_PointType_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->PointType = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_PointType_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->PointType);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_BagType_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->BagType = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_BagType_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->BagType);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_BagSlots_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->BagSlots = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_BagSlots_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->BagSlots);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_BagSize_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->BagSize = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_BagSize_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->BagSize);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_BagWR_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->BagWR = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_BagWR_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->BagWR);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_BenefitFlag_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->BenefitFlag = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_BenefitFlag_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool) ((arg1)->BenefitFlag);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Tradeskills_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->Tradeskills = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_Tradeskills_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool) ((arg1)->Tradeskills);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_CR_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->CR = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_CR_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->CR);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_DR_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->DR = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_DR_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->DR);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_PR_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->PR = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_PR_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->PR);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_MR_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->MR = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_MR_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->MR);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_FR_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->FR = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_FR_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->FR);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_AStr_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->AStr = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_AStr_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->AStr);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ASta_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->ASta = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_ASta_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->ASta);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_AAgi_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->AAgi = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_AAgi_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->AAgi);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ADex_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->ADex = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_ADex_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->ADex);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ACha_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->ACha = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_ACha_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->ACha);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_AInt_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->AInt = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_AInt_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->AInt);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_AWis_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->AWis = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_AWis_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->AWis);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_HP_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->HP = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_HP_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->HP);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Mana_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->Mana = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_Mana_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->Mana);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_AC_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->AC = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_AC_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->AC);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Deity_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->Deity = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_Deity_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->Deity);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_SkillModValue_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->SkillModValue = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_SkillModValue_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->SkillModValue);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_SkillModMax_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->SkillModMax = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_SkillModMax_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->SkillModMax);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_SkillModType_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->SkillModType = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_SkillModType_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->SkillModType);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_BaneDmgRace_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->BaneDmgRace = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_BaneDmgRace_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->BaneDmgRace);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_BaneDmgAmt_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->BaneDmgAmt = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_BaneDmgAmt_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->BaneDmgAmt);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_BaneDmgBody_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->BaneDmgBody = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_BaneDmgBody_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->BaneDmgBody);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Magic_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->Magic = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_Magic_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool) ((arg1)->Magic);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_CastTime__set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->CastTime_ = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_CastTime__get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->CastTime_);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ReqLevel_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->ReqLevel = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_ReqLevel_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->ReqLevel);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_BardType_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->BardType = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_BardType_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->BardType);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_BardValue_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->BardValue = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_BardValue_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->BardValue);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Light_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->Light = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_Light_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->Light);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Delay_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->Delay = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_Delay_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->Delay);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_RecLevel_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->RecLevel = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_RecLevel_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->RecLevel);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_RecSkill_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->RecSkill = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_RecSkill_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->RecSkill);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ElemDmgType_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->ElemDmgType = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_ElemDmgType_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->ElemDmgType);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ElemDmgAmt_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->ElemDmgAmt = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_ElemDmgAmt_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->ElemDmgAmt);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Range_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->Range = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_Range_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->Range);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Damage_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->Damage = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_Damage_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->Damage);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Color_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->Color = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_Color_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->Color);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Classes_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->Classes = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_Classes_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->Classes);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Races_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->Races = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_Races_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->Races);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_MaxCharges_set(void * jarg1, short jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int16 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int16)jarg2; 
+  if (arg1) (arg1)->MaxCharges = arg2;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_ItemData_MaxCharges_get(void * jarg1) {
+  short jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int16 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int16) ((arg1)->MaxCharges);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ItemType_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->ItemType = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_ItemType_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->ItemType);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_SubType_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->SubType = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_SubType_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->SubType);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Material_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->Material = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_Material_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->Material);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_HerosForgeModel_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->HerosForgeModel = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_HerosForgeModel_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->HerosForgeModel);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_SellRate_set(void * jarg1, float jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  float arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (float)jarg2; 
+  if (arg1) (arg1)->SellRate = arg2;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_ItemData_SellRate_get(void * jarg1) {
+  float jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  float result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (float) ((arg1)->SellRate);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Fulfilment_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->Fulfilment = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_Fulfilment_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->Fulfilment);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_CastTime_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->CastTime = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_CastTime_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->CastTime);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_EliteMaterial_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->EliteMaterial = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_EliteMaterial_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->EliteMaterial);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ProcRate_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->ProcRate = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_ProcRate_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->ProcRate);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_CombatEffects_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->CombatEffects = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_CombatEffects_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->CombatEffects);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Shielding_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->Shielding = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_Shielding_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->Shielding);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_StunResist_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->StunResist = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_StunResist_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->StunResist);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_StrikeThrough_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->StrikeThrough = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_StrikeThrough_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->StrikeThrough);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ExtraDmgSkill_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->ExtraDmgSkill = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_ExtraDmgSkill_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->ExtraDmgSkill);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ExtraDmgAmt_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->ExtraDmgAmt = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_ExtraDmgAmt_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->ExtraDmgAmt);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_SpellShield_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->SpellShield = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_SpellShield_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->SpellShield);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Avoidance_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->Avoidance = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_Avoidance_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->Avoidance);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Accuracy_set(void * jarg1, signed char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int8)jarg2; 
+  if (arg1) (arg1)->Accuracy = arg2;
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ItemData_Accuracy_get(void * jarg1) {
+  signed char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int8) ((arg1)->Accuracy);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_CharmFileID_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->CharmFileID = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_CharmFileID_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->CharmFileID);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_FactionMod1_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->FactionMod1 = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_FactionMod1_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->FactionMod1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_FactionMod2_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->FactionMod2 = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_FactionMod2_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->FactionMod2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_FactionMod3_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->FactionMod3 = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_FactionMod3_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->FactionMod3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_FactionMod4_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->FactionMod4 = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_FactionMod4_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->FactionMod4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_FactionAmt1_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->FactionAmt1 = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_FactionAmt1_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->FactionAmt1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_FactionAmt2_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->FactionAmt2 = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_FactionAmt2_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->FactionAmt2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_FactionAmt3_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->FactionAmt3 = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_FactionAmt3_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->FactionAmt3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_FactionAmt4_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->FactionAmt4 = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_FactionAmt4_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->FactionAmt4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_CharmFile_set(void * jarg1, char * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *arg2 = (char *) (char *)0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (char *)jarg2; 
+  {
+    if(arg2) {
+      strncpy((char*)arg1->CharmFile, (const char *)arg2, 32-1);
+      arg1->CharmFile[32-1] = 0;
+    } else {
+      arg1->CharmFile[0] = 0;
+    }
+  }
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_ItemData_CharmFile_get(void * jarg1) {
+  char * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (char *)(char *) ((arg1)->CharmFile);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_AugType_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->AugType = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_AugType_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->AugType);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_AugSlotType_set(void * jarg1, void * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 *arg2 = (uint8 *) (uint8 *)0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8 *)jarg2; 
+  {
+    size_t ii;
+    uint8 *b = (uint8 *) arg1->AugSlotType;
+    for (ii = 0; ii < (size_t)invaug::SOCKET_COUNT; ii++) b[ii] = *((uint8 *) arg2 + ii);
+  }
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemData_AugSlotType_get(void * jarg1) {
+  void * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8 *)(uint8 *) ((arg1)->AugSlotType);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_AugSlotVisible_set(void * jarg1, void * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 *arg2 = (uint8 *) (uint8 *)0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8 *)jarg2; 
+  {
+    size_t ii;
+    uint8 *b = (uint8 *) arg1->AugSlotVisible;
+    for (ii = 0; ii < (size_t)invaug::SOCKET_COUNT; ii++) b[ii] = *((uint8 *) arg2 + ii);
+  }
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemData_AugSlotVisible_get(void * jarg1) {
+  void * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8 *)(uint8 *) ((arg1)->AugSlotVisible);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_AugSlotUnk2_set(void * jarg1, void * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 *arg2 = (uint8 *) (uint8 *)0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8 *)jarg2; 
+  {
+    size_t ii;
+    uint8 *b = (uint8 *) arg1->AugSlotUnk2;
+    for (ii = 0; ii < (size_t)invaug::SOCKET_COUNT; ii++) b[ii] = *((uint8 *) arg2 + ii);
+  }
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemData_AugSlotUnk2_get(void * jarg1) {
+  void * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8 *)(uint8 *) ((arg1)->AugSlotUnk2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_LDoNTheme_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->LDoNTheme = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_LDoNTheme_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->LDoNTheme);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_LDoNPrice_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->LDoNPrice = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_LDoNPrice_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->LDoNPrice);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_LDoNSold_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->LDoNSold = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_LDoNSold_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->LDoNSold);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_BaneDmgRaceAmt_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->BaneDmgRaceAmt = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_BaneDmgRaceAmt_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->BaneDmgRaceAmt);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_AugRestrict_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->AugRestrict = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_AugRestrict_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->AugRestrict);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Endur_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->Endur = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_Endur_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->Endur);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_DotShielding_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->DotShielding = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_DotShielding_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->DotShielding);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Attack_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->Attack = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_Attack_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->Attack);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Regen_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->Regen = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_Regen_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->Regen);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ManaRegen_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->ManaRegen = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_ManaRegen_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->ManaRegen);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_EnduranceRegen_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->EnduranceRegen = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_EnduranceRegen_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->EnduranceRegen);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Haste_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->Haste = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_Haste_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->Haste);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_DamageShield_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->DamageShield = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_DamageShield_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->DamageShield);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_RecastDelay_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->RecastDelay = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_RecastDelay_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->RecastDelay);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_RecastType_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->RecastType = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_RecastType_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int) ((arg1)->RecastType);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_AugDistiller_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->AugDistiller = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_AugDistiller_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->AugDistiller);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Attuneable_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->Attuneable = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_Attuneable_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool) ((arg1)->Attuneable);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_NoPet_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->NoPet = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_NoPet_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool) ((arg1)->NoPet);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_PotionBelt_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->PotionBelt = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_PotionBelt_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool) ((arg1)->PotionBelt);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Stackable_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->Stackable = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_Stackable_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool) ((arg1)->Stackable);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_NoTransfer_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->NoTransfer = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_NoTransfer_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool) ((arg1)->NoTransfer);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_QuestItemFlag_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->QuestItemFlag = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_QuestItemFlag_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool) ((arg1)->QuestItemFlag);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_StackSize_set(void * jarg1, short jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int16 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int16)jarg2; 
+  if (arg1) (arg1)->StackSize = arg2;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_ItemData_StackSize_get(void * jarg1) {
+  short jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int16 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int16) ((arg1)->StackSize);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_PotionBeltSlots_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->PotionBeltSlots = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_PotionBeltSlots_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->PotionBeltSlots);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Click_set(void * jarg1, void * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  EQ::item::ItemEffect_Struct *arg2 = (EQ::item::ItemEffect_Struct *) 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (EQ::item::ItemEffect_Struct *)jarg2; 
+  if (arg1) (arg1)->Click = *arg2;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemData_Click_get(void * jarg1) {
+  void * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  EQ::item::ItemEffect_Struct *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (EQ::item::ItemEffect_Struct *)& ((arg1)->Click);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Proc_set(void * jarg1, void * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  EQ::item::ItemEffect_Struct *arg2 = (EQ::item::ItemEffect_Struct *) 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (EQ::item::ItemEffect_Struct *)jarg2; 
+  if (arg1) (arg1)->Proc = *arg2;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemData_Proc_get(void * jarg1) {
+  void * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  EQ::item::ItemEffect_Struct *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (EQ::item::ItemEffect_Struct *)& ((arg1)->Proc);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Worn_set(void * jarg1, void * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  EQ::item::ItemEffect_Struct *arg2 = (EQ::item::ItemEffect_Struct *) 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (EQ::item::ItemEffect_Struct *)jarg2; 
+  if (arg1) (arg1)->Worn = *arg2;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemData_Worn_get(void * jarg1) {
+  void * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  EQ::item::ItemEffect_Struct *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (EQ::item::ItemEffect_Struct *)& ((arg1)->Worn);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Focus_set(void * jarg1, void * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  EQ::item::ItemEffect_Struct *arg2 = (EQ::item::ItemEffect_Struct *) 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (EQ::item::ItemEffect_Struct *)jarg2; 
+  if (arg1) (arg1)->Focus = *arg2;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemData_Focus_get(void * jarg1) {
+  void * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  EQ::item::ItemEffect_Struct *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (EQ::item::ItemEffect_Struct *)& ((arg1)->Focus);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Scroll_set(void * jarg1, void * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  EQ::item::ItemEffect_Struct *arg2 = (EQ::item::ItemEffect_Struct *) 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (EQ::item::ItemEffect_Struct *)jarg2; 
+  if (arg1) (arg1)->Scroll = *arg2;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemData_Scroll_get(void * jarg1) {
+  void * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  EQ::item::ItemEffect_Struct *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (EQ::item::ItemEffect_Struct *)& ((arg1)->Scroll);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Bard_set(void * jarg1, void * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  EQ::item::ItemEffect_Struct *arg2 = (EQ::item::ItemEffect_Struct *) 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (EQ::item::ItemEffect_Struct *)jarg2; 
+  if (arg1) (arg1)->Bard = *arg2;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemData_Bard_get(void * jarg1) {
+  void * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  EQ::item::ItemEffect_Struct *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (EQ::item::ItemEffect_Struct *)& ((arg1)->Bard);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Book_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->Book = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_Book_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->Book);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_BookType_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->BookType = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_BookType_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->BookType);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Filename_set(void * jarg1, char * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *arg2 = (char *) (char *)0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (char *)jarg2; 
+  {
+    if(arg2) {
+      strncpy((char*)arg1->Filename, (const char *)arg2, 33-1);
+      arg1->Filename[33-1] = 0;
+    } else {
+      arg1->Filename[0] = 0;
+    }
+  }
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_ItemData_Filename_get(void * jarg1) {
+  char * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (char *)(char *) ((arg1)->Filename);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_SVCorruption_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->SVCorruption = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_SVCorruption_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->SVCorruption);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Purity_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->Purity = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_Purity_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->Purity);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_EvolvingItem_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->EvolvingItem = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_EvolvingItem_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->EvolvingItem);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_EvolvingID_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->EvolvingID = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_EvolvingID_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->EvolvingID);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_EvolvingLevel_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->EvolvingLevel = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_EvolvingLevel_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->EvolvingLevel);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_EvolvingMax_set(void * jarg1, unsigned char jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->EvolvingMax = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ItemData_EvolvingMax_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint8) ((arg1)->EvolvingMax);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_BackstabDmg_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->BackstabDmg = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_BackstabDmg_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->BackstabDmg);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_DSMitigation_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->DSMitigation = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_DSMitigation_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->DSMitigation);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_HeroicStr_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->HeroicStr = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_HeroicStr_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->HeroicStr);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_HeroicInt_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->HeroicInt = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_HeroicInt_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->HeroicInt);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_HeroicWis_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->HeroicWis = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_HeroicWis_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->HeroicWis);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_HeroicAgi_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->HeroicAgi = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_HeroicAgi_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->HeroicAgi);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_HeroicDex_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->HeroicDex = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_HeroicDex_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->HeroicDex);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_HeroicSta_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->HeroicSta = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_HeroicSta_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->HeroicSta);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_HeroicCha_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->HeroicCha = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_HeroicCha_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->HeroicCha);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_HeroicMR_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->HeroicMR = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_HeroicMR_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->HeroicMR);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_HeroicFR_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->HeroicFR = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_HeroicFR_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->HeroicFR);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_HeroicCR_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->HeroicCR = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_HeroicCR_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->HeroicCR);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_HeroicDR_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->HeroicDR = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_HeroicDR_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->HeroicDR);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_HeroicPR_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->HeroicPR = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_HeroicPR_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->HeroicPR);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_HeroicSVCorrup_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->HeroicSVCorrup = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_HeroicSVCorrup_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->HeroicSVCorrup);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_HealAmt_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->HealAmt = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_HealAmt_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->HealAmt);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_SpellDmg_set(void * jarg1, int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (int32)jarg2; 
+  if (arg1) (arg1)->SpellDmg = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemData_SpellDmg_get(void * jarg1) {
+  int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  int32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (int32) ((arg1)->SpellDmg);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_LDoNSellBackRate_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->LDoNSellBackRate = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_LDoNSellBackRate_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->LDoNSellBackRate);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ScriptFileID_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->ScriptFileID = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_ScriptFileID_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->ScriptFileID);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ExpendableArrow_set(void * jarg1, unsigned short jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  if (arg1) (arg1)->ExpendableArrow = arg2;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ItemData_ExpendableArrow_get(void * jarg1) {
+  unsigned short jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint16 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint16) ((arg1)->ExpendableArrow);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_Clairvoyance_set(void * jarg1, unsigned int jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->Clairvoyance = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_Clairvoyance_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (uint32) ((arg1)->Clairvoyance);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ClickName_set(void * jarg1, char * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *arg2 = (char *) (char *)0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (char *)jarg2; 
+  {
+    if(arg2) {
+      strncpy((char*)arg1->ClickName, (const char *)arg2, 65-1);
+      arg1->ClickName[65-1] = 0;
+    } else {
+      arg1->ClickName[0] = 0;
+    }
+  }
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_ItemData_ClickName_get(void * jarg1) {
+  char * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (char *)(char *) ((arg1)->ClickName);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ProcName_set(void * jarg1, char * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *arg2 = (char *) (char *)0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (char *)jarg2; 
+  {
+    if(arg2) {
+      strncpy((char*)arg1->ProcName, (const char *)arg2, 65-1);
+      arg1->ProcName[65-1] = 0;
+    } else {
+      arg1->ProcName[0] = 0;
+    }
+  }
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_ItemData_ProcName_get(void * jarg1) {
+  char * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (char *)(char *) ((arg1)->ProcName);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_WornName_set(void * jarg1, char * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *arg2 = (char *) (char *)0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (char *)jarg2; 
+  {
+    if(arg2) {
+      strncpy((char*)arg1->WornName, (const char *)arg2, 65-1);
+      arg1->WornName[65-1] = 0;
+    } else {
+      arg1->WornName[0] = 0;
+    }
+  }
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_ItemData_WornName_get(void * jarg1) {
+  char * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (char *)(char *) ((arg1)->WornName);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_FocusName_set(void * jarg1, char * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *arg2 = (char *) (char *)0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (char *)jarg2; 
+  {
+    if(arg2) {
+      strncpy((char*)arg1->FocusName, (const char *)arg2, 65-1);
+      arg1->FocusName[65-1] = 0;
+    } else {
+      arg1->FocusName[0] = 0;
+    }
+  }
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_ItemData_FocusName_get(void * jarg1) {
+  char * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (char *)(char *) ((arg1)->FocusName);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemData_ScrollName_set(void * jarg1, char * jarg2) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *arg2 = (char *) (char *)0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (char *)jarg2; 
+  {
+    if(arg2) {
+      strncpy((char*)arg1->ScrollName, (const char *)arg2, 65-1);
+      arg1->ScrollName[65-1] = 0;
+    } else {
+      arg1->ScrollName[0] = 0;
+    }
+  }
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_ItemData_ScrollName_get(void * jarg1) {
+  char * jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  char *result = 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (char *)(char *) ((arg1)->ScrollName);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_IsEquipable(void * jarg1, unsigned short jarg2, unsigned short jarg3) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint16 arg2 ;
+  uint16 arg3 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  arg3 = (uint16)jarg3; 
+  result = (bool)((EQ::ItemData const *)arg1)->IsEquipable(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_IsClassEquipable(void * jarg1, unsigned short jarg2) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint16 arg2 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  result = (bool)((EQ::ItemData const *)arg1)->IsClassEquipable(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_IsRaceEquipable(void * jarg1, unsigned short jarg2) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  uint16 arg2 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  result = (bool)((EQ::ItemData const *)arg1)->IsRaceEquipable(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_IsClassCommon(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool)((EQ::ItemData const *)arg1)->IsClassCommon();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_IsClassBag(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool)((EQ::ItemData const *)arg1)->IsClassBag();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_IsClassBook(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool)((EQ::ItemData const *)arg1)->IsClassBook();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_IsType1HWeapon(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool)((EQ::ItemData const *)arg1)->IsType1HWeapon();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_IsType2HWeapon(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool)((EQ::ItemData const *)arg1)->IsType2HWeapon();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_IsTypeShield(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool)((EQ::ItemData const *)arg1)->IsTypeShield();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_IsQuestItem(void * jarg1) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  result = (bool)((EQ::ItemData const *)arg1)->IsQuestItem();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemData_CheckLoreConflict__SWIG_0(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  EQ::ItemData *arg2 = (EQ::ItemData *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  arg2 = (EQ::ItemData *)jarg2; 
+  result = (bool)EQ::ItemData::CheckLoreConflict((EQ::ItemData const *)arg1,(EQ::ItemData const *)arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_ItemData() {
+  void * jresult ;
+  EQ::ItemData *result = 0 ;
+  
+  result = (EQ::ItemData *)new EQ::ItemData();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_ItemData(void * jarg1) {
+  EQ::ItemData *arg1 = (EQ::ItemData *) 0 ;
+  
+  arg1 = (EQ::ItemData *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_LogCategoryName_set(void * jarg1) {
+  char **arg1 = (char **) (char **)0 ;
+  
+  arg1 = (char **)jarg1; 
+  {
+    size_t ii;
+    char const * *b = (char const * *) Logs::LogCategoryName;
+    for (ii = 0; ii < (size_t)LogCategory::MaxCategoryID; ii++) b[ii] = *((char const * *) arg1 + ii);
+  }
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_LogCategoryName_get() {
+  void * jresult ;
+  char **result = 0 ;
+  
+  result = (char **)(char **)Logs::LogCategoryName;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MAX_DISCORD_WEBHOOK_ID_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)MAX_DISCORD_WEBHOOK_ID;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EQEmuLogSys() {
+  void * jresult ;
+  EQEmuLogSys *result = 0 ;
+  
+  result = (EQEmuLogSys *)new EQEmuLogSys();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_EQEmuLogSys(void * jarg1) {
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_CloseFileLogs(void * jarg1) {
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  (arg1)->CloseFileLogs();
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQEmuLogSys_LoadLogSettingsDefaults(void * jarg1) {
+  void * jresult ;
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  EQEmuLogSys *result = 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  result = (EQEmuLogSys *)(arg1)->LoadLogSettingsDefaults();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQEmuLogSys_LoadLogDatabaseSettings(void * jarg1) {
+  void * jresult ;
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  EQEmuLogSys *result = 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  result = (EQEmuLogSys *)(arg1)->LoadLogDatabaseSettings();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_MakeDirectory(void * jarg1, const char * jarg2) {
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  std::string *arg2 = 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  (arg1)->MakeDirectory((std::string const &)*arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_Out(void * jarg1, int jarg2, unsigned short jarg3, char * jarg4, char * jarg5, int jarg6, char * jarg7) {
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  Logs::DebugLevel arg2 ;
+  uint16 arg3 ;
+  char *arg4 = (char *) 0 ;
+  char *arg5 = (char *) 0 ;
+  int arg6 ;
+  char *arg7 = (char *) 0 ;
+  void *arg8 = 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  arg2 = (Logs::DebugLevel)jarg2; 
+  arg3 = (uint16)jarg3; 
+  arg4 = (char *)jarg4; 
+  arg5 = (char *)jarg5; 
+  arg6 = (int)jarg6; 
+  arg7 = (char *)jarg7; 
+  (arg1)->Out(arg2,arg3,(char const *)arg4,(char const *)arg5,arg6,(char const *)arg7,arg8);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_SetCurrentTimeStamp(void * jarg1, char * jarg2) {
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  char *arg2 = (char *) 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  arg2 = (char *)jarg2; 
+  (arg1)->SetCurrentTimeStamp(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_StartFileLogs__SWIG_0(void * jarg1, const char * jarg2) {
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  std::string *arg2 = 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  (arg1)->StartFileLogs((std::string const &)*arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_StartFileLogs__SWIG_1(void * jarg1) {
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  (arg1)->StartFileLogs();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_LogSettings_log_to_file_set(void * jarg1, unsigned char jarg2) {
+  EQEmuLogSys::LogSettings *arg1 = (EQEmuLogSys::LogSettings *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQEmuLogSys::LogSettings *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->log_to_file = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_EQEmuLogSys_LogSettings_log_to_file_get(void * jarg1) {
+  unsigned char jresult ;
+  EQEmuLogSys::LogSettings *arg1 = (EQEmuLogSys::LogSettings *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQEmuLogSys::LogSettings *)jarg1; 
+  result = (uint8) ((arg1)->log_to_file);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_LogSettings_log_to_console_set(void * jarg1, unsigned char jarg2) {
+  EQEmuLogSys::LogSettings *arg1 = (EQEmuLogSys::LogSettings *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQEmuLogSys::LogSettings *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->log_to_console = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_EQEmuLogSys_LogSettings_log_to_console_get(void * jarg1) {
+  unsigned char jresult ;
+  EQEmuLogSys::LogSettings *arg1 = (EQEmuLogSys::LogSettings *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQEmuLogSys::LogSettings *)jarg1; 
+  result = (uint8) ((arg1)->log_to_console);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_LogSettings_log_to_gmsay_set(void * jarg1, unsigned char jarg2) {
+  EQEmuLogSys::LogSettings *arg1 = (EQEmuLogSys::LogSettings *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQEmuLogSys::LogSettings *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->log_to_gmsay = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_EQEmuLogSys_LogSettings_log_to_gmsay_get(void * jarg1) {
+  unsigned char jresult ;
+  EQEmuLogSys::LogSettings *arg1 = (EQEmuLogSys::LogSettings *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQEmuLogSys::LogSettings *)jarg1; 
+  result = (uint8) ((arg1)->log_to_gmsay);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_LogSettings_log_to_discord_set(void * jarg1, unsigned char jarg2) {
+  EQEmuLogSys::LogSettings *arg1 = (EQEmuLogSys::LogSettings *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQEmuLogSys::LogSettings *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->log_to_discord = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_EQEmuLogSys_LogSettings_log_to_discord_get(void * jarg1) {
+  unsigned char jresult ;
+  EQEmuLogSys::LogSettings *arg1 = (EQEmuLogSys::LogSettings *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQEmuLogSys::LogSettings *)jarg1; 
+  result = (uint8) ((arg1)->log_to_discord);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_LogSettings_discord_webhook_id_set(void * jarg1, int jarg2) {
+  EQEmuLogSys::LogSettings *arg1 = (EQEmuLogSys::LogSettings *) 0 ;
+  int arg2 ;
+  
+  arg1 = (EQEmuLogSys::LogSettings *)jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->discord_webhook_id = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_EQEmuLogSys_LogSettings_discord_webhook_id_get(void * jarg1) {
+  int jresult ;
+  EQEmuLogSys::LogSettings *arg1 = (EQEmuLogSys::LogSettings *) 0 ;
+  int result;
+  
+  arg1 = (EQEmuLogSys::LogSettings *)jarg1; 
+  result = (int) ((arg1)->discord_webhook_id);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_LogSettings_is_category_enabled_set(void * jarg1, unsigned char jarg2) {
+  EQEmuLogSys::LogSettings *arg1 = (EQEmuLogSys::LogSettings *) 0 ;
+  uint8 arg2 ;
+  
+  arg1 = (EQEmuLogSys::LogSettings *)jarg1; 
+  arg2 = (uint8)jarg2; 
+  if (arg1) (arg1)->is_category_enabled = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_EQEmuLogSys_LogSettings_is_category_enabled_get(void * jarg1) {
+  unsigned char jresult ;
+  EQEmuLogSys::LogSettings *arg1 = (EQEmuLogSys::LogSettings *) 0 ;
+  uint8 result;
+  
+  arg1 = (EQEmuLogSys::LogSettings *)jarg1; 
+  result = (uint8) ((arg1)->is_category_enabled);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EQEmuLogSys_LogSettings() {
+  void * jresult ;
+  EQEmuLogSys::LogSettings *result = 0 ;
+  
+  result = (EQEmuLogSys::LogSettings *)new EQEmuLogSys::LogSettings();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_EQEmuLogSys_LogSettings(void * jarg1) {
+  EQEmuLogSys::LogSettings *arg1 = (EQEmuLogSys::LogSettings *) 0 ;
+  
+  arg1 = (EQEmuLogSys::LogSettings *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_OriginationInfo_zone_short_name_set(void * jarg1, const char * jarg2) {
+  EQEmuLogSys::OriginationInfo *arg1 = (EQEmuLogSys::OriginationInfo *) 0 ;
+  std::string *arg2 = 0 ;
+  
+  arg1 = (EQEmuLogSys::OriginationInfo *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->zone_short_name = *arg2;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_EQEmuLogSys_OriginationInfo_zone_short_name_get(void * jarg1) {
+  const char * jresult ;
+  EQEmuLogSys::OriginationInfo *arg1 = (EQEmuLogSys::OriginationInfo *) 0 ;
+  std::string *result = 0 ;
+  
+  arg1 = (EQEmuLogSys::OriginationInfo *)jarg1; 
+  result = (std::string *) & ((arg1)->zone_short_name);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_OriginationInfo_zone_long_name_set(void * jarg1, const char * jarg2) {
+  EQEmuLogSys::OriginationInfo *arg1 = (EQEmuLogSys::OriginationInfo *) 0 ;
+  std::string *arg2 = 0 ;
+  
+  arg1 = (EQEmuLogSys::OriginationInfo *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->zone_long_name = *arg2;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_EQEmuLogSys_OriginationInfo_zone_long_name_get(void * jarg1) {
+  const char * jresult ;
+  EQEmuLogSys::OriginationInfo *arg1 = (EQEmuLogSys::OriginationInfo *) 0 ;
+  std::string *result = 0 ;
+  
+  arg1 = (EQEmuLogSys::OriginationInfo *)jarg1; 
+  result = (std::string *) & ((arg1)->zone_long_name);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_OriginationInfo_instance_id_set(void * jarg1, int jarg2) {
+  EQEmuLogSys::OriginationInfo *arg1 = (EQEmuLogSys::OriginationInfo *) 0 ;
+  int arg2 ;
+  
+  arg1 = (EQEmuLogSys::OriginationInfo *)jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->instance_id = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_EQEmuLogSys_OriginationInfo_instance_id_get(void * jarg1) {
+  int jresult ;
+  EQEmuLogSys::OriginationInfo *arg1 = (EQEmuLogSys::OriginationInfo *) 0 ;
+  int result;
+  
+  arg1 = (EQEmuLogSys::OriginationInfo *)jarg1; 
+  result = (int) ((arg1)->instance_id);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EQEmuLogSys_OriginationInfo() {
+  void * jresult ;
+  EQEmuLogSys::OriginationInfo *result = 0 ;
+  
+  result = (EQEmuLogSys::OriginationInfo *)new EQEmuLogSys::OriginationInfo();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_EQEmuLogSys_OriginationInfo(void * jarg1) {
+  EQEmuLogSys::OriginationInfo *arg1 = (EQEmuLogSys::OriginationInfo *) 0 ;
+  
+  arg1 = (EQEmuLogSys::OriginationInfo *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_origination_info_set(void * jarg1, void * jarg2) {
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  EQEmuLogSys::OriginationInfo *arg2 = (EQEmuLogSys::OriginationInfo *) 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  arg2 = (EQEmuLogSys::OriginationInfo *)jarg2; 
+  if (arg1) (arg1)->origination_info = *arg2;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQEmuLogSys_origination_info_get(void * jarg1) {
+  void * jresult ;
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  EQEmuLogSys::OriginationInfo *result = 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  result = (EQEmuLogSys::OriginationInfo *)& ((arg1)->origination_info);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_log_settings_set(void * jarg1, void * jarg2) {
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  EQEmuLogSys::LogSettings *arg2 = (EQEmuLogSys::LogSettings *) (EQEmuLogSys::LogSettings *)0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  arg2 = (EQEmuLogSys::LogSettings *)jarg2; 
+  {
+    size_t ii;
+    EQEmuLogSys::LogSettings *b = (EQEmuLogSys::LogSettings *) arg1->log_settings;
+    for (ii = 0; ii < (size_t)Logs::LogCategory::MaxCategoryID; ii++) b[ii] = *((EQEmuLogSys::LogSettings *) arg2 + ii);
+  }
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQEmuLogSys_log_settings_get(void * jarg1) {
+  void * jresult ;
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  EQEmuLogSys::LogSettings *result = 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  result = (EQEmuLogSys::LogSettings *)(EQEmuLogSys::LogSettings *) ((arg1)->log_settings);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_pre_silence_settings_set(void * jarg1, void * jarg2) {
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  EQEmuLogSys::LogSettings *arg2 = (EQEmuLogSys::LogSettings *) (EQEmuLogSys::LogSettings *)0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  arg2 = (EQEmuLogSys::LogSettings *)jarg2; 
+  {
+    size_t ii;
+    EQEmuLogSys::LogSettings *b = (EQEmuLogSys::LogSettings *) arg1->pre_silence_settings;
+    for (ii = 0; ii < (size_t)Logs::LogCategory::MaxCategoryID; ii++) b[ii] = *((EQEmuLogSys::LogSettings *) arg2 + ii);
+  }
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQEmuLogSys_pre_silence_settings_get(void * jarg1) {
+  void * jresult ;
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  EQEmuLogSys::LogSettings *result = 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  result = (EQEmuLogSys::LogSettings *)(EQEmuLogSys::LogSettings *) ((arg1)->pre_silence_settings);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_LogEnabled_log_to_file_enabled_set(void * jarg1, unsigned int jarg2) {
+  EQEmuLogSys::LogEnabled *arg1 = (EQEmuLogSys::LogEnabled *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQEmuLogSys::LogEnabled *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->log_to_file_enabled = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EQEmuLogSys_LogEnabled_log_to_file_enabled_get(void * jarg1) {
+  unsigned int jresult ;
+  EQEmuLogSys::LogEnabled *arg1 = (EQEmuLogSys::LogEnabled *) 0 ;
+  bool result;
+  
+  arg1 = (EQEmuLogSys::LogEnabled *)jarg1; 
+  result = (bool) ((arg1)->log_to_file_enabled);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_LogEnabled_log_to_console_enabled_set(void * jarg1, unsigned int jarg2) {
+  EQEmuLogSys::LogEnabled *arg1 = (EQEmuLogSys::LogEnabled *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQEmuLogSys::LogEnabled *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->log_to_console_enabled = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EQEmuLogSys_LogEnabled_log_to_console_enabled_get(void * jarg1) {
+  unsigned int jresult ;
+  EQEmuLogSys::LogEnabled *arg1 = (EQEmuLogSys::LogEnabled *) 0 ;
+  bool result;
+  
+  arg1 = (EQEmuLogSys::LogEnabled *)jarg1; 
+  result = (bool) ((arg1)->log_to_console_enabled);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_LogEnabled_log_to_gmsay_enabled_set(void * jarg1, unsigned int jarg2) {
+  EQEmuLogSys::LogEnabled *arg1 = (EQEmuLogSys::LogEnabled *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQEmuLogSys::LogEnabled *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->log_to_gmsay_enabled = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EQEmuLogSys_LogEnabled_log_to_gmsay_enabled_get(void * jarg1) {
+  unsigned int jresult ;
+  EQEmuLogSys::LogEnabled *arg1 = (EQEmuLogSys::LogEnabled *) 0 ;
+  bool result;
+  
+  arg1 = (EQEmuLogSys::LogEnabled *)jarg1; 
+  result = (bool) ((arg1)->log_to_gmsay_enabled);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_LogEnabled_log_to_discord_enabled_set(void * jarg1, unsigned int jarg2) {
+  EQEmuLogSys::LogEnabled *arg1 = (EQEmuLogSys::LogEnabled *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQEmuLogSys::LogEnabled *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->log_to_discord_enabled = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EQEmuLogSys_LogEnabled_log_to_discord_enabled_get(void * jarg1) {
+  unsigned int jresult ;
+  EQEmuLogSys::LogEnabled *arg1 = (EQEmuLogSys::LogEnabled *) 0 ;
+  bool result;
+  
+  arg1 = (EQEmuLogSys::LogEnabled *)jarg1; 
+  result = (bool) ((arg1)->log_to_discord_enabled);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_LogEnabled_log_enabled_set(void * jarg1, unsigned int jarg2) {
+  EQEmuLogSys::LogEnabled *arg1 = (EQEmuLogSys::LogEnabled *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQEmuLogSys::LogEnabled *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->log_enabled = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EQEmuLogSys_LogEnabled_log_enabled_get(void * jarg1) {
+  unsigned int jresult ;
+  EQEmuLogSys::LogEnabled *arg1 = (EQEmuLogSys::LogEnabled *) 0 ;
+  bool result;
+  
+  arg1 = (EQEmuLogSys::LogEnabled *)jarg1; 
+  result = (bool) ((arg1)->log_enabled);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EQEmuLogSys_LogEnabled() {
+  void * jresult ;
+  EQEmuLogSys::LogEnabled *result = 0 ;
+  
+  result = (EQEmuLogSys::LogEnabled *)new EQEmuLogSys::LogEnabled();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_EQEmuLogSys_LogEnabled(void * jarg1) {
+  EQEmuLogSys::LogEnabled *arg1 = (EQEmuLogSys::LogEnabled *) 0 ;
+  
+  arg1 = (EQEmuLogSys::LogEnabled *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQEmuLogSys_GetLogsEnabled(void * jarg1, int jarg2, unsigned short jarg3) {
+  void * jresult ;
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  Logs::DebugLevel *arg2 = 0 ;
+  uint16 *arg3 = 0 ;
+  Logs::DebugLevel temp2 ;
+  uint16 temp3 ;
+  EQEmuLogSys::LogEnabled result;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  temp2 = (Logs::DebugLevel)jarg2; 
+  arg2 = &temp2; 
+  temp3 = (uint16)jarg3; 
+  arg3 = &temp3; 
+  result = (arg1)->GetLogsEnabled((Logs::DebugLevel const &)*arg2,(uint16 const &)*arg3);
+  jresult = new EQEmuLogSys::LogEnabled(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EQEmuLogSys_IsLogEnabled(void * jarg1, int jarg2, unsigned short jarg3) {
+  unsigned int jresult ;
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  Logs::DebugLevel *arg2 = 0 ;
+  uint16 *arg3 = 0 ;
+  Logs::DebugLevel temp2 ;
+  uint16 temp3 ;
+  bool result;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  temp2 = (Logs::DebugLevel)jarg2; 
+  arg2 = &temp2; 
+  temp3 = (uint16)jarg3; 
+  arg3 = &temp3; 
+  result = (bool)(arg1)->IsLogEnabled((Logs::DebugLevel const &)*arg2,(uint16 const &)*arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_DiscordWebhooks_id_set(void * jarg1, int jarg2) {
+  EQEmuLogSys::DiscordWebhooks *arg1 = (EQEmuLogSys::DiscordWebhooks *) 0 ;
+  int arg2 ;
+  
+  arg1 = (EQEmuLogSys::DiscordWebhooks *)jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->id = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_EQEmuLogSys_DiscordWebhooks_id_get(void * jarg1) {
+  int jresult ;
+  EQEmuLogSys::DiscordWebhooks *arg1 = (EQEmuLogSys::DiscordWebhooks *) 0 ;
+  int result;
+  
+  arg1 = (EQEmuLogSys::DiscordWebhooks *)jarg1; 
+  result = (int) ((arg1)->id);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_DiscordWebhooks_webhook_name_set(void * jarg1, const char * jarg2) {
+  EQEmuLogSys::DiscordWebhooks *arg1 = (EQEmuLogSys::DiscordWebhooks *) 0 ;
+  std::string *arg2 = 0 ;
+  
+  arg1 = (EQEmuLogSys::DiscordWebhooks *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->webhook_name = *arg2;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_EQEmuLogSys_DiscordWebhooks_webhook_name_get(void * jarg1) {
+  const char * jresult ;
+  EQEmuLogSys::DiscordWebhooks *arg1 = (EQEmuLogSys::DiscordWebhooks *) 0 ;
+  std::string *result = 0 ;
+  
+  arg1 = (EQEmuLogSys::DiscordWebhooks *)jarg1; 
+  result = (std::string *) & ((arg1)->webhook_name);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_DiscordWebhooks_webhook_url_set(void * jarg1, const char * jarg2) {
+  EQEmuLogSys::DiscordWebhooks *arg1 = (EQEmuLogSys::DiscordWebhooks *) 0 ;
+  std::string *arg2 = 0 ;
+  
+  arg1 = (EQEmuLogSys::DiscordWebhooks *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->webhook_url = *arg2;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_EQEmuLogSys_DiscordWebhooks_webhook_url_get(void * jarg1) {
+  const char * jresult ;
+  EQEmuLogSys::DiscordWebhooks *arg1 = (EQEmuLogSys::DiscordWebhooks *) 0 ;
+  std::string *result = 0 ;
+  
+  arg1 = (EQEmuLogSys::DiscordWebhooks *)jarg1; 
+  result = (std::string *) & ((arg1)->webhook_url);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EQEmuLogSys_DiscordWebhooks() {
+  void * jresult ;
+  EQEmuLogSys::DiscordWebhooks *result = 0 ;
+  
+  result = (EQEmuLogSys::DiscordWebhooks *)new EQEmuLogSys::DiscordWebhooks();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_EQEmuLogSys_DiscordWebhooks(void * jarg1) {
+  EQEmuLogSys::DiscordWebhooks *arg1 = (EQEmuLogSys::DiscordWebhooks *) 0 ;
+  
+  arg1 = (EQEmuLogSys::DiscordWebhooks *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQEmuLogSys_GetDiscordWebhooks(void * jarg1) {
+  void * jresult ;
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  EQEmuLogSys::DiscordWebhooks *result = 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  result = (EQEmuLogSys::DiscordWebhooks *)((EQEmuLogSys const *)arg1)->GetDiscordWebhooks();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EQEmuLogSys_GetGMSayColorFromCategory(void * jarg1, unsigned short jarg2) {
+  unsigned short jresult ;
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  uint16 arg2 ;
+  uint16 result;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  result = (uint16)(arg1)->GetGMSayColorFromCategory(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQEmuLogSys_SetGMSayHandler(void * jarg1, void * jarg2) {
+  void * jresult ;
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  std::function< void (uint16,char const *,std::string const &) > *arg2 = 0 ;
+  EQEmuLogSys *result = 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  arg2 = (std::function< void (uint16,char const *,std::string const &) > *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::function< void (uint16,char const *,std::string const &) > const & is null", 0);
+    return 0;
+  } 
+  result = (EQEmuLogSys *)(arg1)->SetGMSayHandler((std::function< void (uint16,char const *,std::string const &) > const &)*arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQEmuLogSys_SetDiscordHandler(void * jarg1, void * jarg2) {
+  void * jresult ;
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  SwigValueWrapper< std::function< void (unsigned short,int,std::string const &) > > arg2 ;
+  std::function< void (uint16,int,std::string const &) > *argp2 ;
+  EQEmuLogSys *result = 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  argp2 = (std::function< void (uint16,int,std::string const &) > *)jarg2; 
+  if (!argp2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::function< void (uint16,int,std::string const &) >", 0);
+    return 0;
+  }
+  arg2 = *argp2; 
+  result = (EQEmuLogSys *)(arg1)->SetDiscordHandler(arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_SetConsoleHandler(void * jarg1, void * jarg2) {
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  SwigValueWrapper< std::function< void (unsigned short,std::string const &) > > arg2 ;
+  std::function< void (uint16,std::string const &) > *argp2 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  argp2 = (std::function< void (uint16,std::string const &) > *)jarg2; 
+  if (!argp2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::function< void (uint16,std::string const &) >", 0);
+    return ;
+  }
+  arg2 = *argp2; 
+  (arg1)->SetConsoleHandler(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_SilenceConsoleLogging(void * jarg1) {
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  (arg1)->SilenceConsoleLogging();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_EnableConsoleLogging(void * jarg1) {
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  (arg1)->EnableConsoleLogging();
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQEmuLogSys_SetDatabase(void * jarg1, void * jarg2) {
+  void * jresult ;
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  Database *arg2 = (Database *) 0 ;
+  EQEmuLogSys *result = 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  arg2 = (Database *)jarg2; 
+  result = (EQEmuLogSys *)(arg1)->SetDatabase(arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_EQEmuLogSys_GetLogPath(void * jarg1) {
+  const char * jresult ;
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  std::string *result = 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  result = (std::string *) &((EQEmuLogSys const *)arg1)->GetLogPath();
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQEmuLogSys_SetLogPath(void * jarg1, const char * jarg2) {
+  void * jresult ;
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  std::string *arg2 = 0 ;
+  EQEmuLogSys *result = 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  result = (EQEmuLogSys *)(arg1)->SetLogPath((std::string const &)*arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_DisableMySQLErrorLogs(void * jarg1) {
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  (arg1)->DisableMySQLErrorLogs();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQEmuLogSys_EnableMySQLErrorLogs(void * jarg1) {
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  (arg1)->EnableMySQLErrorLogs();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_LogSys_set(void * jarg1) {
+  EQEmuLogSys *arg1 = (EQEmuLogSys *) 0 ;
+  
+  arg1 = (EQEmuLogSys *)jarg1; 
+  LogSys = *arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_LogSys_get() {
+  void * jresult ;
+  EQEmuLogSys *result = 0 ;
+  
+  result = (EQEmuLogSys *)&LogSys;
   jresult = (void *)result; 
   return jresult;
 }
@@ -95462,106 +113407,108 @@ SWIGEXPORT void SWIGSTDCALL CSharp_LinkedListElementZonePoint_ReplaceData(void *
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_new_IntVector__SWIG_0() {
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_ExtraDataVector__SWIG_0() {
   void * jresult ;
-  std::vector< int > *result = 0 ;
+  std::vector< std::any > *result = 0 ;
   
-  result = (std::vector< int > *)new std::vector< int >();
+  result = (std::vector< std::any > *)new std::vector< std::any >();
   jresult = (void *)result; 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_new_IntVector__SWIG_1(void * jarg1) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_ExtraDataVector__SWIG_1(void * jarg1) {
   void * jresult ;
-  std::vector< int > *arg1 = 0 ;
-  std::vector< int > *result = 0 ;
+  std::vector< std::any > *arg1 = 0 ;
+  std::vector< std::any > *result = 0 ;
   
-  arg1 = (std::vector< int > *)jarg1;
+  arg1 = (std::vector< std::any > *)jarg1;
   if (!arg1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< int > const & is null", 0);
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< std::any > const & is null", 0);
     return 0;
   } 
-  result = (std::vector< int > *)new std::vector< int >((std::vector< int > const &)*arg1);
+  result = (std::vector< std::any > *)new std::vector< std::any >((std::vector< std::any > const &)*arg1);
   jresult = (void *)result; 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_IntVector_Clear(void * jarg1) {
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_ExtraDataVector_Clear(void * jarg1) {
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
   
-  arg1 = (std::vector< int > *)jarg1; 
+  arg1 = (std::vector< std::any > *)jarg1; 
   (arg1)->clear();
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_IntVector_Add(void * jarg1, int jarg2) {
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
-  int *arg2 = 0 ;
-  int temp2 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_ExtraDataVector_Add(void * jarg1, void * jarg2) {
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
+  std::any *arg2 = 0 ;
   
-  arg1 = (std::vector< int > *)jarg1; 
-  temp2 = (int)jarg2; 
-  arg2 = &temp2; 
-  (arg1)->push_back((int const &)*arg2);
+  arg1 = (std::vector< std::any > *)jarg1; 
+  arg2 = (std::any *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::any const & is null", 0);
+    return ;
+  } 
+  (arg1)->push_back((std::any const &)*arg2);
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_IntVector_size(void * jarg1) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ExtraDataVector_size(void * jarg1) {
   unsigned int jresult ;
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
-  std::vector< int >::size_type result;
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
+  std::vector< std::any >::size_type result;
   
-  arg1 = (std::vector< int > *)jarg1; 
-  result = ((std::vector< int > const *)arg1)->size();
+  arg1 = (std::vector< std::any > *)jarg1; 
+  result = ((std::vector< std::any > const *)arg1)->size();
   jresult = (unsigned int)result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_IntVector_empty(void * jarg1) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ExtraDataVector_empty(void * jarg1) {
   unsigned int jresult ;
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
   bool result;
   
-  arg1 = (std::vector< int > *)jarg1; 
-  result = (bool)((std::vector< int > const *)arg1)->empty();
+  arg1 = (std::vector< std::any > *)jarg1; 
+  result = (bool)((std::vector< std::any > const *)arg1)->empty();
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_IntVector_capacity(void * jarg1) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ExtraDataVector_capacity(void * jarg1) {
   unsigned int jresult ;
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
-  std::vector< int >::size_type result;
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
+  std::vector< std::any >::size_type result;
   
-  arg1 = (std::vector< int > *)jarg1; 
-  result = ((std::vector< int > const *)arg1)->capacity();
+  arg1 = (std::vector< std::any > *)jarg1; 
+  result = ((std::vector< std::any > const *)arg1)->capacity();
   jresult = (unsigned int)result; 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_IntVector_reserve(void * jarg1, unsigned int jarg2) {
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
-  std::vector< int >::size_type arg2 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_ExtraDataVector_reserve(void * jarg1, unsigned int jarg2) {
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
+  std::vector< std::any >::size_type arg2 ;
   
-  arg1 = (std::vector< int > *)jarg1; 
-  arg2 = (std::vector< int >::size_type)jarg2; 
+  arg1 = (std::vector< std::any > *)jarg1; 
+  arg2 = (std::vector< std::any >::size_type)jarg2; 
   (arg1)->reserve(arg2);
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_new_IntVector__SWIG_2(int jarg1) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_ExtraDataVector__SWIG_2(int jarg1) {
   void * jresult ;
   int arg1 ;
-  std::vector< int > *result = 0 ;
+  std::vector< std::any > *result = 0 ;
   
   arg1 = (int)jarg1; 
   try {
-    result = (std::vector< int > *)new_std_vector_Sl_int_Sg___SWIG_2(arg1);
+    result = (std::vector< std::any > *)new_std_vector_Sl_std_any_Sg___SWIG_2(arg1);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return 0;
@@ -95571,56 +113518,58 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_new_IntVector__SWIG_2(int jarg1) {
 }
 
 
-SWIGEXPORT int SWIGSTDCALL CSharp_IntVector_getitemcopy(void * jarg1, int jarg2) {
-  int jresult ;
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
+SWIGEXPORT void * SWIGSTDCALL CSharp_ExtraDataVector_getitemcopy(void * jarg1, int jarg2) {
+  void * jresult ;
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
   int arg2 ;
-  int result;
+  std::any result;
   
-  arg1 = (std::vector< int > *)jarg1; 
+  arg1 = (std::vector< std::any > *)jarg1; 
   arg2 = (int)jarg2; 
   try {
-    result = (int)std_vector_Sl_int_Sg__getitemcopy(arg1,arg2);
+    result = std_vector_Sl_std_any_Sg__getitemcopy(arg1,arg2);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return 0;
   }
-  jresult = result; 
+  jresult = new std::any(result); 
   return jresult;
 }
 
 
-SWIGEXPORT int SWIGSTDCALL CSharp_IntVector_getitem(void * jarg1, int jarg2) {
-  int jresult ;
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
+SWIGEXPORT void * SWIGSTDCALL CSharp_ExtraDataVector_getitem(void * jarg1, int jarg2) {
+  void * jresult ;
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
   int arg2 ;
-  std::vector< int >::value_type *result = 0 ;
+  std::vector< std::any >::value_type *result = 0 ;
   
-  arg1 = (std::vector< int > *)jarg1; 
+  arg1 = (std::vector< std::any > *)jarg1; 
   arg2 = (int)jarg2; 
   try {
-    result = (std::vector< int >::value_type *) &std_vector_Sl_int_Sg__getitem(arg1,arg2);
+    result = (std::vector< std::any >::value_type *) &std_vector_Sl_std_any_Sg__getitem(arg1,arg2);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return 0;
   }
-  jresult = *result; 
+  jresult = (void *)result; 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_IntVector_setitem(void * jarg1, int jarg2, int jarg3) {
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_ExtraDataVector_setitem(void * jarg1, int jarg2, void * jarg3) {
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
   int arg2 ;
-  int *arg3 = 0 ;
-  int temp3 ;
+  std::any *arg3 = 0 ;
   
-  arg1 = (std::vector< int > *)jarg1; 
+  arg1 = (std::vector< std::any > *)jarg1; 
   arg2 = (int)jarg2; 
-  temp3 = (int)jarg3; 
-  arg3 = &temp3; 
+  arg3 = (std::any *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::any const & is null", 0);
+    return ;
+  } 
   try {
-    std_vector_Sl_int_Sg__setitem(arg1,arg2,(int const &)*arg3);
+    std_vector_Sl_std_any_Sg__setitem(arg1,arg2,(std::any const &)*arg3);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return ;
@@ -95628,32 +113577,32 @@ SWIGEXPORT void SWIGSTDCALL CSharp_IntVector_setitem(void * jarg1, int jarg2, in
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_IntVector_AddRange(void * jarg1, void * jarg2) {
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
-  std::vector< int > *arg2 = 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_ExtraDataVector_AddRange(void * jarg1, void * jarg2) {
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
+  std::vector< std::any > *arg2 = 0 ;
   
-  arg1 = (std::vector< int > *)jarg1; 
-  arg2 = (std::vector< int > *)jarg2;
+  arg1 = (std::vector< std::any > *)jarg1; 
+  arg2 = (std::vector< std::any > *)jarg2;
   if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< int > const & is null", 0);
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< std::any > const & is null", 0);
     return ;
   } 
-  std_vector_Sl_int_Sg__AddRange(arg1,(std::vector< int > const &)*arg2);
+  std_vector_Sl_std_any_Sg__AddRange(arg1,(std::vector< std::any > const &)*arg2);
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_IntVector_GetRange(void * jarg1, int jarg2, int jarg3) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_ExtraDataVector_GetRange(void * jarg1, int jarg2, int jarg3) {
   void * jresult ;
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
   int arg2 ;
   int arg3 ;
-  std::vector< int > *result = 0 ;
+  std::vector< std::any > *result = 0 ;
   
-  arg1 = (std::vector< int > *)jarg1; 
+  arg1 = (std::vector< std::any > *)jarg1; 
   arg2 = (int)jarg2; 
   arg3 = (int)jarg3; 
   try {
-    result = (std::vector< int > *)std_vector_Sl_int_Sg__GetRange(arg1,arg2,arg3);
+    result = (std::vector< std::any > *)std_vector_Sl_std_any_Sg__GetRange(arg1,arg2,arg3);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return 0;
@@ -95666,39 +113615,20 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_IntVector_GetRange(void * jarg1, int jarg2,
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_IntVector_Insert(void * jarg1, int jarg2, int jarg3) {
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_ExtraDataVector_Insert(void * jarg1, int jarg2, void * jarg3) {
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
   int arg2 ;
-  int *arg3 = 0 ;
-  int temp3 ;
+  std::any *arg3 = 0 ;
   
-  arg1 = (std::vector< int > *)jarg1; 
+  arg1 = (std::vector< std::any > *)jarg1; 
   arg2 = (int)jarg2; 
-  temp3 = (int)jarg3; 
-  arg3 = &temp3; 
-  try {
-    std_vector_Sl_int_Sg__Insert(arg1,arg2,(int const &)*arg3);
-  } catch(std::out_of_range &_e) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
-    return ;
-  }
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_IntVector_InsertRange(void * jarg1, int jarg2, void * jarg3) {
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
-  int arg2 ;
-  std::vector< int > *arg3 = 0 ;
-  
-  arg1 = (std::vector< int > *)jarg1; 
-  arg2 = (int)jarg2; 
-  arg3 = (std::vector< int > *)jarg3;
+  arg3 = (std::any *)jarg3;
   if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< int > const & is null", 0);
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::any const & is null", 0);
     return ;
   } 
   try {
-    std_vector_Sl_int_Sg__InsertRange(arg1,arg2,(std::vector< int > const &)*arg3);
+    std_vector_Sl_std_any_Sg__Insert(arg1,arg2,(std::any const &)*arg3);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return ;
@@ -95706,14 +113636,35 @@ SWIGEXPORT void SWIGSTDCALL CSharp_IntVector_InsertRange(void * jarg1, int jarg2
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_IntVector_RemoveAt(void * jarg1, int jarg2) {
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_ExtraDataVector_InsertRange(void * jarg1, int jarg2, void * jarg3) {
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
+  int arg2 ;
+  std::vector< std::any > *arg3 = 0 ;
+  
+  arg1 = (std::vector< std::any > *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (std::vector< std::any > *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< std::any > const & is null", 0);
+    return ;
+  } 
+  try {
+    std_vector_Sl_std_any_Sg__InsertRange(arg1,arg2,(std::vector< std::any > const &)*arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  }
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ExtraDataVector_RemoveAt(void * jarg1, int jarg2) {
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
   int arg2 ;
   
-  arg1 = (std::vector< int > *)jarg1; 
+  arg1 = (std::vector< std::any > *)jarg1; 
   arg2 = (int)jarg2; 
   try {
-    std_vector_Sl_int_Sg__RemoveAt(arg1,arg2);
+    std_vector_Sl_std_any_Sg__RemoveAt(arg1,arg2);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return ;
@@ -95721,16 +113672,16 @@ SWIGEXPORT void SWIGSTDCALL CSharp_IntVector_RemoveAt(void * jarg1, int jarg2) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_IntVector_RemoveRange(void * jarg1, int jarg2, int jarg3) {
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_ExtraDataVector_RemoveRange(void * jarg1, int jarg2, int jarg3) {
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
   int arg2 ;
   int arg3 ;
   
-  arg1 = (std::vector< int > *)jarg1; 
+  arg1 = (std::vector< std::any > *)jarg1; 
   arg2 = (int)jarg2; 
   arg3 = (int)jarg3; 
   try {
-    std_vector_Sl_int_Sg__RemoveRange(arg1,arg2,arg3);
+    std_vector_Sl_std_any_Sg__RemoveRange(arg1,arg2,arg3);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return ;
@@ -95741,18 +113692,20 @@ SWIGEXPORT void SWIGSTDCALL CSharp_IntVector_RemoveRange(void * jarg1, int jarg2
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_IntVector_Repeat(int jarg1, int jarg2) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_ExtraDataVector_Repeat(void * jarg1, int jarg2) {
   void * jresult ;
-  int *arg1 = 0 ;
+  std::any *arg1 = 0 ;
   int arg2 ;
-  int temp1 ;
-  std::vector< int > *result = 0 ;
+  std::vector< std::any > *result = 0 ;
   
-  temp1 = (int)jarg1; 
-  arg1 = &temp1; 
+  arg1 = (std::any *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::any const & is null", 0);
+    return 0;
+  } 
   arg2 = (int)jarg2; 
   try {
-    result = (std::vector< int > *)std_vector_Sl_int_Sg__Repeat((int const &)*arg1,arg2);
+    result = (std::vector< std::any > *)std_vector_Sl_std_any_Sg__Repeat((std::any const &)*arg1,arg2);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return 0;
@@ -95762,24 +113715,24 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_IntVector_Repeat(int jarg1, int jarg2) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_IntVector_Reverse__SWIG_0(void * jarg1) {
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_ExtraDataVector_Reverse__SWIG_0(void * jarg1) {
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
   
-  arg1 = (std::vector< int > *)jarg1; 
-  std_vector_Sl_int_Sg__Reverse__SWIG_0(arg1);
+  arg1 = (std::vector< std::any > *)jarg1; 
+  std_vector_Sl_std_any_Sg__Reverse__SWIG_0(arg1);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_IntVector_Reverse__SWIG_1(void * jarg1, int jarg2, int jarg3) {
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_ExtraDataVector_Reverse__SWIG_1(void * jarg1, int jarg2, int jarg3) {
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
   int arg2 ;
   int arg3 ;
   
-  arg1 = (std::vector< int > *)jarg1; 
+  arg1 = (std::vector< std::any > *)jarg1; 
   arg2 = (int)jarg2; 
   arg3 = (int)jarg3; 
   try {
-    std_vector_Sl_int_Sg__Reverse__SWIG_1(arg1,arg2,arg3);
+    std_vector_Sl_std_any_Sg__Reverse__SWIG_1(arg1,arg2,arg3);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return ;
@@ -95790,20 +113743,20 @@ SWIGEXPORT void SWIGSTDCALL CSharp_IntVector_Reverse__SWIG_1(void * jarg1, int j
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_IntVector_SetRange(void * jarg1, int jarg2, void * jarg3) {
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_ExtraDataVector_SetRange(void * jarg1, int jarg2, void * jarg3) {
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
   int arg2 ;
-  std::vector< int > *arg3 = 0 ;
+  std::vector< std::any > *arg3 = 0 ;
   
-  arg1 = (std::vector< int > *)jarg1; 
+  arg1 = (std::vector< std::any > *)jarg1; 
   arg2 = (int)jarg2; 
-  arg3 = (std::vector< int > *)jarg3;
+  arg3 = (std::vector< std::any > *)jarg3;
   if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< int > const & is null", 0);
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< std::any > const & is null", 0);
     return ;
   } 
   try {
-    std_vector_Sl_int_Sg__SetRange(arg1,arg2,(std::vector< int > const &)*arg3);
+    std_vector_Sl_std_any_Sg__SetRange(arg1,arg2,(std::vector< std::any > const &)*arg3);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return ;
@@ -95811,178 +113764,117 @@ SWIGEXPORT void SWIGSTDCALL CSharp_IntVector_SetRange(void * jarg1, int jarg2, v
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_IntVector_Contains(void * jarg1, int jarg2) {
-  unsigned int jresult ;
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
-  int *arg2 = 0 ;
-  int temp2 ;
-  bool result;
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_ExtraDataVector(void * jarg1) {
+  std::vector< std::any > *arg1 = (std::vector< std::any > *) 0 ;
   
-  arg1 = (std::vector< int > *)jarg1; 
-  temp2 = (int)jarg2; 
-  arg2 = &temp2; 
-  result = (bool)std_vector_Sl_int_Sg__Contains(arg1,(int const &)*arg2);
-  jresult = result; 
-  return jresult;
-}
-
-
-SWIGEXPORT int SWIGSTDCALL CSharp_IntVector_IndexOf(void * jarg1, int jarg2) {
-  int jresult ;
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
-  int *arg2 = 0 ;
-  int temp2 ;
-  int result;
-  
-  arg1 = (std::vector< int > *)jarg1; 
-  temp2 = (int)jarg2; 
-  arg2 = &temp2; 
-  result = (int)std_vector_Sl_int_Sg__IndexOf(arg1,(int const &)*arg2);
-  jresult = result; 
-  return jresult;
-}
-
-
-SWIGEXPORT int SWIGSTDCALL CSharp_IntVector_LastIndexOf(void * jarg1, int jarg2) {
-  int jresult ;
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
-  int *arg2 = 0 ;
-  int temp2 ;
-  int result;
-  
-  arg1 = (std::vector< int > *)jarg1; 
-  temp2 = (int)jarg2; 
-  arg2 = &temp2; 
-  result = (int)std_vector_Sl_int_Sg__LastIndexOf(arg1,(int const &)*arg2);
-  jresult = result; 
-  return jresult;
-}
-
-
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_IntVector_Remove(void * jarg1, int jarg2) {
-  unsigned int jresult ;
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
-  int *arg2 = 0 ;
-  int temp2 ;
-  bool result;
-  
-  arg1 = (std::vector< int > *)jarg1; 
-  temp2 = (int)jarg2; 
-  arg2 = &temp2; 
-  result = (bool)std_vector_Sl_int_Sg__Remove(arg1,(int const &)*arg2);
-  jresult = result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_delete_IntVector(void * jarg1) {
-  std::vector< int > *arg1 = (std::vector< int > *) 0 ;
-  
-  arg1 = (std::vector< int > *)jarg1; 
+  arg1 = (std::vector< std::any > *)jarg1; 
   delete arg1;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_new_DoubleVector__SWIG_0() {
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_StringVector__SWIG_0() {
   void * jresult ;
-  std::vector< double > *result = 0 ;
+  std::vector< std::string > *result = 0 ;
   
-  result = (std::vector< double > *)new std::vector< double >();
+  result = (std::vector< std::string > *)new std::vector< std::string >();
   jresult = (void *)result; 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_new_DoubleVector__SWIG_1(void * jarg1) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_StringVector__SWIG_1(void * jarg1) {
   void * jresult ;
-  std::vector< double > *arg1 = 0 ;
-  std::vector< double > *result = 0 ;
+  std::vector< std::string > *arg1 = 0 ;
+  std::vector< std::string > *result = 0 ;
   
-  arg1 = (std::vector< double > *)jarg1;
+  arg1 = (std::vector< std::string > *)jarg1;
   if (!arg1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< double > const & is null", 0);
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< std::string > const & is null", 0);
     return 0;
   } 
-  result = (std::vector< double > *)new std::vector< double >((std::vector< double > const &)*arg1);
+  result = (std::vector< std::string > *)new std::vector< std::string >((std::vector< std::string > const &)*arg1);
   jresult = (void *)result; 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_Clear(void * jarg1) {
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_StringVector_Clear(void * jarg1) {
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
   
-  arg1 = (std::vector< double > *)jarg1; 
+  arg1 = (std::vector< std::string > *)jarg1; 
   (arg1)->clear();
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_Add(void * jarg1, double jarg2) {
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
-  double *arg2 = 0 ;
-  double temp2 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_StringVector_Add(void * jarg1, const char * jarg2) {
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::string *arg2 = 0 ;
   
-  arg1 = (std::vector< double > *)jarg1; 
-  temp2 = (double)jarg2; 
-  arg2 = &temp2; 
-  (arg1)->push_back((double const &)*arg2);
+  arg1 = (std::vector< std::string > *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  (arg1)->push_back((std::string const &)*arg2);
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DoubleVector_size(void * jarg1) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_StringVector_size(void * jarg1) {
   unsigned int jresult ;
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
-  std::vector< double >::size_type result;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::vector< std::string >::size_type result;
   
-  arg1 = (std::vector< double > *)jarg1; 
-  result = ((std::vector< double > const *)arg1)->size();
+  arg1 = (std::vector< std::string > *)jarg1; 
+  result = ((std::vector< std::string > const *)arg1)->size();
   jresult = (unsigned int)result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DoubleVector_empty(void * jarg1) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_StringVector_empty(void * jarg1) {
   unsigned int jresult ;
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
   bool result;
   
-  arg1 = (std::vector< double > *)jarg1; 
-  result = (bool)((std::vector< double > const *)arg1)->empty();
+  arg1 = (std::vector< std::string > *)jarg1; 
+  result = (bool)((std::vector< std::string > const *)arg1)->empty();
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DoubleVector_capacity(void * jarg1) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_StringVector_capacity(void * jarg1) {
   unsigned int jresult ;
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
-  std::vector< double >::size_type result;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::vector< std::string >::size_type result;
   
-  arg1 = (std::vector< double > *)jarg1; 
-  result = ((std::vector< double > const *)arg1)->capacity();
+  arg1 = (std::vector< std::string > *)jarg1; 
+  result = ((std::vector< std::string > const *)arg1)->capacity();
   jresult = (unsigned int)result; 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_reserve(void * jarg1, unsigned int jarg2) {
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
-  std::vector< double >::size_type arg2 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_StringVector_reserve(void * jarg1, unsigned int jarg2) {
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::vector< std::string >::size_type arg2 ;
   
-  arg1 = (std::vector< double > *)jarg1; 
-  arg2 = (std::vector< double >::size_type)jarg2; 
+  arg1 = (std::vector< std::string > *)jarg1; 
+  arg2 = (std::vector< std::string >::size_type)jarg2; 
   (arg1)->reserve(arg2);
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_new_DoubleVector__SWIG_2(int jarg1) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_StringVector__SWIG_2(int jarg1) {
   void * jresult ;
   int arg1 ;
-  std::vector< double > *result = 0 ;
+  std::vector< std::string > *result = 0 ;
   
   arg1 = (int)jarg1; 
   try {
-    result = (std::vector< double > *)new_std_vector_Sl_double_Sg___SWIG_2(arg1);
+    result = (std::vector< std::string > *)new_std_vector_Sl_std_string_Sg___SWIG_2(arg1);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return 0;
@@ -95992,56 +113884,59 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_new_DoubleVector__SWIG_2(int jarg1) {
 }
 
 
-SWIGEXPORT double SWIGSTDCALL CSharp_DoubleVector_getitemcopy(void * jarg1, int jarg2) {
-  double jresult ;
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_StringVector_getitemcopy(void * jarg1, int jarg2) {
+  const char * jresult ;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
   int arg2 ;
-  double result;
+  std::string result;
   
-  arg1 = (std::vector< double > *)jarg1; 
+  arg1 = (std::vector< std::string > *)jarg1; 
   arg2 = (int)jarg2; 
   try {
-    result = (double)std_vector_Sl_double_Sg__getitemcopy(arg1,arg2);
+    result = std_vector_Sl_std_string_Sg__getitemcopy(arg1,arg2);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return 0;
   }
-  jresult = result; 
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT double SWIGSTDCALL CSharp_DoubleVector_getitem(void * jarg1, int jarg2) {
-  double jresult ;
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_StringVector_getitem(void * jarg1, int jarg2) {
+  const char * jresult ;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
   int arg2 ;
-  std::vector< double >::value_type *result = 0 ;
+  std::vector< std::string >::value_type *result = 0 ;
   
-  arg1 = (std::vector< double > *)jarg1; 
+  arg1 = (std::vector< std::string > *)jarg1; 
   arg2 = (int)jarg2; 
   try {
-    result = (std::vector< double >::value_type *) &std_vector_Sl_double_Sg__getitem(arg1,arg2);
+    result = (std::vector< std::string >::value_type *) &std_vector_Sl_std_string_Sg__getitem(arg1,arg2);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return 0;
   }
-  jresult = *result; 
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_setitem(void * jarg1, int jarg2, double jarg3) {
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_StringVector_setitem(void * jarg1, int jarg2, const char * jarg3) {
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
   int arg2 ;
-  double *arg3 = 0 ;
-  double temp3 ;
+  std::string *arg3 = 0 ;
   
-  arg1 = (std::vector< double > *)jarg1; 
+  arg1 = (std::vector< std::string > *)jarg1; 
   arg2 = (int)jarg2; 
-  temp3 = (double)jarg3; 
-  arg3 = &temp3; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   try {
-    std_vector_Sl_double_Sg__setitem(arg1,arg2,(double const &)*arg3);
+    std_vector_Sl_std_string_Sg__setitem(arg1,arg2,(std::string const &)*arg3);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return ;
@@ -96049,32 +113944,32 @@ SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_setitem(void * jarg1, int jarg2,
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_AddRange(void * jarg1, void * jarg2) {
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
-  std::vector< double > *arg2 = 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_StringVector_AddRange(void * jarg1, void * jarg2) {
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::vector< std::string > *arg2 = 0 ;
   
-  arg1 = (std::vector< double > *)jarg1; 
-  arg2 = (std::vector< double > *)jarg2;
+  arg1 = (std::vector< std::string > *)jarg1; 
+  arg2 = (std::vector< std::string > *)jarg2;
   if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< double > const & is null", 0);
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< std::string > const & is null", 0);
     return ;
   } 
-  std_vector_Sl_double_Sg__AddRange(arg1,(std::vector< double > const &)*arg2);
+  std_vector_Sl_std_string_Sg__AddRange(arg1,(std::vector< std::string > const &)*arg2);
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_DoubleVector_GetRange(void * jarg1, int jarg2, int jarg3) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_StringVector_GetRange(void * jarg1, int jarg2, int jarg3) {
   void * jresult ;
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
   int arg2 ;
   int arg3 ;
-  std::vector< double > *result = 0 ;
+  std::vector< std::string > *result = 0 ;
   
-  arg1 = (std::vector< double > *)jarg1; 
+  arg1 = (std::vector< std::string > *)jarg1; 
   arg2 = (int)jarg2; 
   arg3 = (int)jarg3; 
   try {
-    result = (std::vector< double > *)std_vector_Sl_double_Sg__GetRange(arg1,arg2,arg3);
+    result = (std::vector< std::string > *)std_vector_Sl_std_string_Sg__GetRange(arg1,arg2,arg3);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return 0;
@@ -96087,18 +113982,21 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DoubleVector_GetRange(void * jarg1, int jar
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_Insert(void * jarg1, int jarg2, double jarg3) {
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_StringVector_Insert(void * jarg1, int jarg2, const char * jarg3) {
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
   int arg2 ;
-  double *arg3 = 0 ;
-  double temp3 ;
+  std::string *arg3 = 0 ;
   
-  arg1 = (std::vector< double > *)jarg1; 
+  arg1 = (std::vector< std::string > *)jarg1; 
   arg2 = (int)jarg2; 
-  temp3 = (double)jarg3; 
-  arg3 = &temp3; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
   try {
-    std_vector_Sl_double_Sg__Insert(arg1,arg2,(double const &)*arg3);
+    std_vector_Sl_std_string_Sg__Insert(arg1,arg2,(std::string const &)*arg3);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return ;
@@ -96106,20 +114004,20 @@ SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_Insert(void * jarg1, int jarg2, 
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_InsertRange(void * jarg1, int jarg2, void * jarg3) {
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_StringVector_InsertRange(void * jarg1, int jarg2, void * jarg3) {
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
   int arg2 ;
-  std::vector< double > *arg3 = 0 ;
+  std::vector< std::string > *arg3 = 0 ;
   
-  arg1 = (std::vector< double > *)jarg1; 
+  arg1 = (std::vector< std::string > *)jarg1; 
   arg2 = (int)jarg2; 
-  arg3 = (std::vector< double > *)jarg3;
+  arg3 = (std::vector< std::string > *)jarg3;
   if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< double > const & is null", 0);
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< std::string > const & is null", 0);
     return ;
   } 
   try {
-    std_vector_Sl_double_Sg__InsertRange(arg1,arg2,(std::vector< double > const &)*arg3);
+    std_vector_Sl_std_string_Sg__InsertRange(arg1,arg2,(std::vector< std::string > const &)*arg3);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return ;
@@ -96127,14 +114025,14 @@ SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_InsertRange(void * jarg1, int ja
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_RemoveAt(void * jarg1, int jarg2) {
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_StringVector_RemoveAt(void * jarg1, int jarg2) {
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
   int arg2 ;
   
-  arg1 = (std::vector< double > *)jarg1; 
+  arg1 = (std::vector< std::string > *)jarg1; 
   arg2 = (int)jarg2; 
   try {
-    std_vector_Sl_double_Sg__RemoveAt(arg1,arg2);
+    std_vector_Sl_std_string_Sg__RemoveAt(arg1,arg2);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return ;
@@ -96142,16 +114040,16 @@ SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_RemoveAt(void * jarg1, int jarg2
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_RemoveRange(void * jarg1, int jarg2, int jarg3) {
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_StringVector_RemoveRange(void * jarg1, int jarg2, int jarg3) {
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
   int arg2 ;
   int arg3 ;
   
-  arg1 = (std::vector< double > *)jarg1; 
+  arg1 = (std::vector< std::string > *)jarg1; 
   arg2 = (int)jarg2; 
   arg3 = (int)jarg3; 
   try {
-    std_vector_Sl_double_Sg__RemoveRange(arg1,arg2,arg3);
+    std_vector_Sl_std_string_Sg__RemoveRange(arg1,arg2,arg3);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return ;
@@ -96162,18 +114060,21 @@ SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_RemoveRange(void * jarg1, int ja
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_DoubleVector_Repeat(double jarg1, int jarg2) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_StringVector_Repeat(const char * jarg1, int jarg2) {
   void * jresult ;
-  double *arg1 = 0 ;
+  std::string *arg1 = 0 ;
   int arg2 ;
-  double temp1 ;
-  std::vector< double > *result = 0 ;
+  std::vector< std::string > *result = 0 ;
   
-  temp1 = (double)jarg1; 
-  arg1 = &temp1; 
+  if (!jarg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg1_str(jarg1);
+  arg1 = &arg1_str; 
   arg2 = (int)jarg2; 
   try {
-    result = (std::vector< double > *)std_vector_Sl_double_Sg__Repeat((double const &)*arg1,arg2);
+    result = (std::vector< std::string > *)std_vector_Sl_std_string_Sg__Repeat((std::string const &)*arg1,arg2);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return 0;
@@ -96183,24 +114084,24 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_DoubleVector_Repeat(double jarg1, int jarg2
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_Reverse__SWIG_0(void * jarg1) {
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_StringVector_Reverse__SWIG_0(void * jarg1) {
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
   
-  arg1 = (std::vector< double > *)jarg1; 
-  std_vector_Sl_double_Sg__Reverse__SWIG_0(arg1);
+  arg1 = (std::vector< std::string > *)jarg1; 
+  std_vector_Sl_std_string_Sg__Reverse__SWIG_0(arg1);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_Reverse__SWIG_1(void * jarg1, int jarg2, int jarg3) {
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_StringVector_Reverse__SWIG_1(void * jarg1, int jarg2, int jarg3) {
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
   int arg2 ;
   int arg3 ;
   
-  arg1 = (std::vector< double > *)jarg1; 
+  arg1 = (std::vector< std::string > *)jarg1; 
   arg2 = (int)jarg2; 
   arg3 = (int)jarg3; 
   try {
-    std_vector_Sl_double_Sg__Reverse__SWIG_1(arg1,arg2,arg3);
+    std_vector_Sl_std_string_Sg__Reverse__SWIG_1(arg1,arg2,arg3);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return ;
@@ -96211,20 +114112,20 @@ SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_Reverse__SWIG_1(void * jarg1, in
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_SetRange(void * jarg1, int jarg2, void * jarg3) {
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_StringVector_SetRange(void * jarg1, int jarg2, void * jarg3) {
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
   int arg2 ;
-  std::vector< double > *arg3 = 0 ;
+  std::vector< std::string > *arg3 = 0 ;
   
-  arg1 = (std::vector< double > *)jarg1; 
+  arg1 = (std::vector< std::string > *)jarg1; 
   arg2 = (int)jarg2; 
-  arg3 = (std::vector< double > *)jarg3;
+  arg3 = (std::vector< std::string > *)jarg3;
   if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< double > const & is null", 0);
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< std::string > const & is null", 0);
     return ;
   } 
   try {
-    std_vector_Sl_double_Sg__SetRange(arg1,arg2,(std::vector< double > const &)*arg3);
+    std_vector_Sl_std_string_Sg__SetRange(arg1,arg2,(std::vector< std::string > const &)*arg3);
   } catch(std::out_of_range &_e) {
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return ;
@@ -96232,594 +114133,1349 @@ SWIGEXPORT void SWIGSTDCALL CSharp_DoubleVector_SetRange(void * jarg1, int jarg2
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DoubleVector_Contains(void * jarg1, double jarg2) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_StringVector_Contains(void * jarg1, const char * jarg2) {
   unsigned int jresult ;
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
-  double *arg2 = 0 ;
-  double temp2 ;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::string *arg2 = 0 ;
   bool result;
   
-  arg1 = (std::vector< double > *)jarg1; 
-  temp2 = (double)jarg2; 
-  arg2 = &temp2; 
-  result = (bool)std_vector_Sl_double_Sg__Contains(arg1,(double const &)*arg2);
+  arg1 = (std::vector< std::string > *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  result = (bool)std_vector_Sl_std_string_Sg__Contains(arg1,(std::string const &)*arg2);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT int SWIGSTDCALL CSharp_DoubleVector_IndexOf(void * jarg1, double jarg2) {
+SWIGEXPORT int SWIGSTDCALL CSharp_StringVector_IndexOf(void * jarg1, const char * jarg2) {
   int jresult ;
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
-  double *arg2 = 0 ;
-  double temp2 ;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::string *arg2 = 0 ;
   int result;
   
-  arg1 = (std::vector< double > *)jarg1; 
-  temp2 = (double)jarg2; 
-  arg2 = &temp2; 
-  result = (int)std_vector_Sl_double_Sg__IndexOf(arg1,(double const &)*arg2);
+  arg1 = (std::vector< std::string > *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  result = (int)std_vector_Sl_std_string_Sg__IndexOf(arg1,(std::string const &)*arg2);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT int SWIGSTDCALL CSharp_DoubleVector_LastIndexOf(void * jarg1, double jarg2) {
+SWIGEXPORT int SWIGSTDCALL CSharp_StringVector_LastIndexOf(void * jarg1, const char * jarg2) {
   int jresult ;
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
-  double *arg2 = 0 ;
-  double temp2 ;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::string *arg2 = 0 ;
   int result;
   
-  arg1 = (std::vector< double > *)jarg1; 
-  temp2 = (double)jarg2; 
-  arg2 = &temp2; 
-  result = (int)std_vector_Sl_double_Sg__LastIndexOf(arg1,(double const &)*arg2);
+  arg1 = (std::vector< std::string > *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  result = (int)std_vector_Sl_std_string_Sg__LastIndexOf(arg1,(std::string const &)*arg2);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DoubleVector_Remove(void * jarg1, double jarg2) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_StringVector_Remove(void * jarg1, const char * jarg2) {
   unsigned int jresult ;
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
-  double *arg2 = 0 ;
-  double temp2 ;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::string *arg2 = 0 ;
   bool result;
   
-  arg1 = (std::vector< double > *)jarg1; 
-  temp2 = (double)jarg2; 
-  arg2 = &temp2; 
-  result = (bool)std_vector_Sl_double_Sg__Remove(arg1,(double const &)*arg2);
+  arg1 = (std::vector< std::string > *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  result = (bool)std_vector_Sl_std_string_Sg__Remove(arg1,(std::string const &)*arg2);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_delete_DoubleVector(void * jarg1) {
-  std::vector< double > *arg1 = (std::vector< double > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_StringVector(void * jarg1) {
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
   
-  arg1 = (std::vector< double > *)jarg1; 
+  arg1 = (std::vector< std::string > *)jarg1; 
   delete arg1;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_IntList_push_front(void * jarg1, int jarg2) {
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
-  int *arg2 = 0 ;
-  int temp2 ;
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_ItemVector__SWIG_0() {
+  void * jresult ;
+  std::vector< EQ::ItemInstance * > *result = 0 ;
   
-  arg1 = (std::list< int > *)jarg1; 
-  temp2 = (int)jarg2; 
-  arg2 = &temp2; 
-  (arg1)->push_front((int const &)*arg2);
+  result = (std::vector< EQ::ItemInstance * > *)new std::vector< EQ::ItemInstance * >();
+  jresult = (void *)result; 
+  return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_IntList_push_back(void * jarg1, int jarg2) {
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
-  int *arg2 = 0 ;
-  int temp2 ;
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_ItemVector__SWIG_1(void * jarg1) {
+  void * jresult ;
+  std::vector< EQ::ItemInstance * > *arg1 = 0 ;
+  std::vector< EQ::ItemInstance * > *result = 0 ;
   
-  arg1 = (std::list< int > *)jarg1; 
-  temp2 = (int)jarg2; 
-  arg2 = &temp2; 
-  (arg1)->push_back((int const &)*arg2);
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< EQ::ItemInstance * > const & is null", 0);
+    return 0;
+  } 
+  result = (std::vector< EQ::ItemInstance * > *)new std::vector< EQ::ItemInstance * >((std::vector< EQ::ItemInstance * > const &)*arg1);
+  jresult = (void *)result; 
+  return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_IntList_RemoveFirst(void * jarg1) {
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemVector_Clear(void * jarg1) {
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
   
-  arg1 = (std::list< int > *)jarg1; 
-  (arg1)->pop_front();
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  (arg1)->clear();
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_IntList_RemoveLast(void * jarg1) {
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemVector_Add(void * jarg1, void * jarg2) {
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  EQ::ItemInstance **arg2 = 0 ;
+  EQ::ItemInstance *temp2 = 0 ;
   
-  arg1 = (std::list< int > *)jarg1; 
-  (arg1)->pop_back();
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  temp2 = (EQ::ItemInstance *)jarg2;
+  arg2 = (EQ::ItemInstance **)&temp2; 
+  (arg1)->push_back((EQ::ItemInstance *const &)*arg2);
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_IntList_size(void * jarg1) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemVector_size(void * jarg1) {
   unsigned int jresult ;
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
-  std::list< int >::size_type result;
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  std::vector< EQ::ItemInstance * >::size_type result;
   
-  arg1 = (std::list< int > *)jarg1; 
-  result = ((std::list< int > const *)arg1)->size();
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  result = ((std::vector< EQ::ItemInstance * > const *)arg1)->size();
   jresult = (unsigned int)result; 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_IntList_Clear(void * jarg1) {
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
-  
-  arg1 = (std::list< int > *)jarg1; 
-  (arg1)->clear();
-}
-
-
-SWIGEXPORT int SWIGSTDCALL CSharp_IntList_getItem(void * jarg1, void * jarg2) {
-  int jresult ;
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
-  std::list< int >::iterator *arg2 = (std::list< int >::iterator *) 0 ;
-  std::list< int >::value_type *result = 0 ;
-  
-  arg1 = (std::list< int > *)jarg1; 
-  arg2 = (std::list< int >::iterator *)jarg2; 
-  result = (std::list< int >::value_type *) &std_list_Sl_int_Sg__getItem(arg1,arg2);
-  jresult = *result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_IntList_setItem(void * jarg1, void * jarg2, int jarg3) {
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
-  std::list< int >::iterator *arg2 = (std::list< int >::iterator *) 0 ;
-  int *arg3 = 0 ;
-  int temp3 ;
-  
-  arg1 = (std::list< int > *)jarg1; 
-  arg2 = (std::list< int >::iterator *)jarg2; 
-  temp3 = (int)jarg3; 
-  arg3 = &temp3; 
-  std_list_Sl_int_Sg__setItem(arg1,arg2,(int const &)*arg3);
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_IntList_getFirstIter(void * jarg1) {
-  void * jresult ;
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
-  std::list< int >::iterator *result = 0 ;
-  
-  arg1 = (std::list< int > *)jarg1; 
-  result = (std::list< int >::iterator *)std_list_Sl_int_Sg__getFirstIter(arg1);
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_IntList_getLastIter(void * jarg1) {
-  void * jresult ;
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
-  std::list< int >::iterator *result = 0 ;
-  
-  arg1 = (std::list< int > *)jarg1; 
-  result = (std::list< int >::iterator *)std_list_Sl_int_Sg__getLastIter(arg1);
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_IntList_getNextIter(void * jarg1, void * jarg2) {
-  void * jresult ;
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
-  std::list< int >::iterator *arg2 = (std::list< int >::iterator *) 0 ;
-  std::list< int >::iterator *result = 0 ;
-  
-  arg1 = (std::list< int > *)jarg1; 
-  arg2 = (std::list< int >::iterator *)jarg2; 
-  result = (std::list< int >::iterator *)std_list_Sl_int_Sg__getNextIter(arg1,arg2);
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_IntList_getPrevIter(void * jarg1, void * jarg2) {
-  void * jresult ;
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
-  std::list< int >::iterator *arg2 = (std::list< int >::iterator *) 0 ;
-  std::list< int >::iterator *result = 0 ;
-  
-  arg1 = (std::list< int > *)jarg1; 
-  arg2 = (std::list< int >::iterator *)jarg2; 
-  result = (std::list< int >::iterator *)std_list_Sl_int_Sg__getPrevIter(arg1,arg2);
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_IntList_insertNode(void * jarg1, void * jarg2, int jarg3) {
-  void * jresult ;
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
-  std::list< int >::iterator *arg2 = (std::list< int >::iterator *) 0 ;
-  int *arg3 = 0 ;
-  int temp3 ;
-  std::list< int >::iterator *result = 0 ;
-  
-  arg1 = (std::list< int > *)jarg1; 
-  arg2 = (std::list< int >::iterator *)jarg2; 
-  temp3 = (int)jarg3; 
-  arg3 = &temp3; 
-  result = (std::list< int >::iterator *)std_list_Sl_int_Sg__insertNode(arg1,arg2,(int const &)*arg3);
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_IntList_eraseIter(void * jarg1, void * jarg2) {
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
-  std::list< int >::iterator *arg2 = (std::list< int >::iterator *) 0 ;
-  
-  arg1 = (std::list< int > *)jarg1; 
-  arg2 = (std::list< int >::iterator *)jarg2; 
-  std_list_Sl_int_Sg__eraseIter(arg1,arg2);
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_IntList_deleteIter(void * jarg1, void * jarg2) {
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
-  std::list< int >::iterator *arg2 = (std::list< int >::iterator *) 0 ;
-  
-  arg1 = (std::list< int > *)jarg1; 
-  arg2 = (std::list< int >::iterator *)jarg2; 
-  std_list_Sl_int_Sg__deleteIter(arg1,arg2);
-}
-
-
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_IntList_equals(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemVector_empty(void * jarg1) {
   unsigned int jresult ;
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
-  std::list< int >::iterator *arg2 = (std::list< int >::iterator *) 0 ;
-  std::list< int >::iterator *arg3 = (std::list< int >::iterator *) 0 ;
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
   bool result;
   
-  arg1 = (std::list< int > *)jarg1; 
-  arg2 = (std::list< int >::iterator *)jarg2; 
-  arg3 = (std::list< int >::iterator *)jarg3; 
-  result = (bool)std_list_Sl_int_Sg__equals(arg1,arg2,arg3);
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  result = (bool)((std::vector< EQ::ItemInstance * > const *)arg1)->empty();
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_IntList_Contains(void * jarg1, int jarg2) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemVector_capacity(void * jarg1) {
   unsigned int jresult ;
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
-  int *arg2 = 0 ;
-  int temp2 ;
-  bool result;
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  std::vector< EQ::ItemInstance * >::size_type result;
   
-  arg1 = (std::list< int > *)jarg1; 
-  temp2 = (int)jarg2; 
-  arg2 = &temp2; 
-  result = (bool)std_list_Sl_int_Sg__Contains(arg1,(int const &)*arg2);
-  jresult = result; 
-  return jresult;
-}
-
-
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_IntList_Remove(void * jarg1, int jarg2) {
-  unsigned int jresult ;
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
-  int *arg2 = 0 ;
-  int temp2 ;
-  bool result;
-  
-  arg1 = (std::list< int > *)jarg1; 
-  temp2 = (int)jarg2; 
-  arg2 = &temp2; 
-  result = (bool)std_list_Sl_int_Sg__Remove(arg1,(int const &)*arg2);
-  jresult = result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_IntList_find(void * jarg1, int jarg2) {
-  void * jresult ;
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
-  int *arg2 = 0 ;
-  int temp2 ;
-  std::list< int >::iterator *result = 0 ;
-  
-  arg1 = (std::list< int > *)jarg1; 
-  temp2 = (int)jarg2; 
-  arg2 = &temp2; 
-  result = (std::list< int >::iterator *)std_list_Sl_int_Sg__find(arg1,(int const &)*arg2);
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_new_IntList() {
-  void * jresult ;
-  std::list< int > *result = 0 ;
-  
-  result = (std::list< int > *)new std::list< int >();
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_delete_IntList(void * jarg1) {
-  std::list< int > *arg1 = (std::list< int > *) 0 ;
-  
-  arg1 = (std::list< int > *)jarg1; 
-  delete arg1;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleList_push_front(void * jarg1, double jarg2) {
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
-  double *arg2 = 0 ;
-  double temp2 ;
-  
-  arg1 = (std::list< double > *)jarg1; 
-  temp2 = (double)jarg2; 
-  arg2 = &temp2; 
-  (arg1)->push_front((double const &)*arg2);
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleList_push_back(void * jarg1, double jarg2) {
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
-  double *arg2 = 0 ;
-  double temp2 ;
-  
-  arg1 = (std::list< double > *)jarg1; 
-  temp2 = (double)jarg2; 
-  arg2 = &temp2; 
-  (arg1)->push_back((double const &)*arg2);
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleList_RemoveFirst(void * jarg1) {
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
-  
-  arg1 = (std::list< double > *)jarg1; 
-  (arg1)->pop_front();
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleList_RemoveLast(void * jarg1) {
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
-  
-  arg1 = (std::list< double > *)jarg1; 
-  (arg1)->pop_back();
-}
-
-
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DoubleList_size(void * jarg1) {
-  unsigned int jresult ;
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
-  std::list< double >::size_type result;
-  
-  arg1 = (std::list< double > *)jarg1; 
-  result = ((std::list< double > const *)arg1)->size();
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  result = ((std::vector< EQ::ItemInstance * > const *)arg1)->capacity();
   jresult = (unsigned int)result; 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleList_Clear(void * jarg1) {
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemVector_reserve(void * jarg1, unsigned int jarg2) {
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  std::vector< EQ::ItemInstance * >::size_type arg2 ;
   
-  arg1 = (std::list< double > *)jarg1; 
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  arg2 = (std::vector< EQ::ItemInstance * >::size_type)jarg2; 
+  (arg1)->reserve(arg2);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_ItemVector__SWIG_2(int jarg1) {
+  void * jresult ;
+  int arg1 ;
+  std::vector< EQ::ItemInstance * > *result = 0 ;
+  
+  arg1 = (int)jarg1; 
+  try {
+    result = (std::vector< EQ::ItemInstance * > *)new_std_vector_Sl_EQ_ItemInstance_Sm__Sg___SWIG_2(arg1);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return 0;
+  }
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemVector_getitemcopy(void * jarg1, int jarg2) {
+  void * jresult ;
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  int arg2 ;
+  EQ::ItemInstance *result = 0 ;
+  
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  try {
+    result = (EQ::ItemInstance *)std_vector_Sl_EQ_ItemInstance_Sm__Sg__getitemcopy(arg1,arg2);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return 0;
+  }
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemVector_getitem(void * jarg1, int jarg2) {
+  void * jresult ;
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  int arg2 ;
+  std::vector< EQ::ItemInstance * >::value_type *result = 0 ;
+  
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  try {
+    result = (std::vector< EQ::ItemInstance * >::value_type *) &std_vector_Sl_EQ_ItemInstance_Sm__Sg__getitem(arg1,arg2);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return 0;
+  }
+  jresult = (void *)*result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemVector_setitem(void * jarg1, int jarg2, void * jarg3) {
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  int arg2 ;
+  EQ::ItemInstance **arg3 = 0 ;
+  EQ::ItemInstance *temp3 = 0 ;
+  
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  temp3 = (EQ::ItemInstance *)jarg3;
+  arg3 = (EQ::ItemInstance **)&temp3; 
+  try {
+    std_vector_Sl_EQ_ItemInstance_Sm__Sg__setitem(arg1,arg2,(EQ::ItemInstance *const &)*arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  }
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemVector_AddRange(void * jarg1, void * jarg2) {
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  std::vector< EQ::ItemInstance * > *arg2 = 0 ;
+  
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  arg2 = (std::vector< EQ::ItemInstance * > *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< EQ::ItemInstance * > const & is null", 0);
+    return ;
+  } 
+  std_vector_Sl_EQ_ItemInstance_Sm__Sg__AddRange(arg1,(std::vector< EQ::ItemInstance * > const &)*arg2);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemVector_GetRange(void * jarg1, int jarg2, int jarg3) {
+  void * jresult ;
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  std::vector< EQ::ItemInstance * > *result = 0 ;
+  
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  try {
+    result = (std::vector< EQ::ItemInstance * > *)std_vector_Sl_EQ_ItemInstance_Sm__Sg__GetRange(arg1,arg2,arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return 0;
+  } catch(std::invalid_argument &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, (&_e)->what(), "");
+    return 0;
+  }
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemVector_Insert(void * jarg1, int jarg2, void * jarg3) {
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  int arg2 ;
+  EQ::ItemInstance **arg3 = 0 ;
+  EQ::ItemInstance *temp3 = 0 ;
+  
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  temp3 = (EQ::ItemInstance *)jarg3;
+  arg3 = (EQ::ItemInstance **)&temp3; 
+  try {
+    std_vector_Sl_EQ_ItemInstance_Sm__Sg__Insert(arg1,arg2,(EQ::ItemInstance *const &)*arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  }
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemVector_InsertRange(void * jarg1, int jarg2, void * jarg3) {
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  int arg2 ;
+  std::vector< EQ::ItemInstance * > *arg3 = 0 ;
+  
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (std::vector< EQ::ItemInstance * > *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< EQ::ItemInstance * > const & is null", 0);
+    return ;
+  } 
+  try {
+    std_vector_Sl_EQ_ItemInstance_Sm__Sg__InsertRange(arg1,arg2,(std::vector< EQ::ItemInstance * > const &)*arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  }
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemVector_RemoveAt(void * jarg1, int jarg2) {
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  int arg2 ;
+  
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  try {
+    std_vector_Sl_EQ_ItemInstance_Sm__Sg__RemoveAt(arg1,arg2);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  }
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemVector_RemoveRange(void * jarg1, int jarg2, int jarg3) {
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  try {
+    std_vector_Sl_EQ_ItemInstance_Sm__Sg__RemoveRange(arg1,arg2,arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  } catch(std::invalid_argument &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, (&_e)->what(), "");
+    return ;
+  }
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_ItemVector_Repeat(void * jarg1, int jarg2) {
+  void * jresult ;
+  EQ::ItemInstance **arg1 = 0 ;
+  int arg2 ;
+  EQ::ItemInstance *temp1 = 0 ;
+  std::vector< EQ::ItemInstance * > *result = 0 ;
+  
+  temp1 = (EQ::ItemInstance *)jarg1;
+  arg1 = (EQ::ItemInstance **)&temp1; 
+  arg2 = (int)jarg2; 
+  try {
+    result = (std::vector< EQ::ItemInstance * > *)std_vector_Sl_EQ_ItemInstance_Sm__Sg__Repeat((EQ::ItemInstance *const &)*arg1,arg2);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return 0;
+  }
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemVector_Reverse__SWIG_0(void * jarg1) {
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  std_vector_Sl_EQ_ItemInstance_Sm__Sg__Reverse__SWIG_0(arg1);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemVector_Reverse__SWIG_1(void * jarg1, int jarg2, int jarg3) {
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  try {
+    std_vector_Sl_EQ_ItemInstance_Sm__Sg__Reverse__SWIG_1(arg1,arg2,arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  } catch(std::invalid_argument &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, (&_e)->what(), "");
+    return ;
+  }
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_ItemVector_SetRange(void * jarg1, int jarg2, void * jarg3) {
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  int arg2 ;
+  std::vector< EQ::ItemInstance * > *arg3 = 0 ;
+  
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (std::vector< EQ::ItemInstance * > *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< EQ::ItemInstance * > const & is null", 0);
+    return ;
+  } 
+  try {
+    std_vector_Sl_EQ_ItemInstance_Sm__Sg__SetRange(arg1,arg2,(std::vector< EQ::ItemInstance * > const &)*arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  }
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemVector_Contains(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  EQ::ItemInstance **arg2 = 0 ;
+  EQ::ItemInstance *temp2 = 0 ;
+  bool result;
+  
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  temp2 = (EQ::ItemInstance *)jarg2;
+  arg2 = (EQ::ItemInstance **)&temp2; 
+  result = (bool)std_vector_Sl_EQ_ItemInstance_Sm__Sg__Contains(arg1,(EQ::ItemInstance *const &)*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemVector_IndexOf(void * jarg1, void * jarg2) {
+  int jresult ;
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  EQ::ItemInstance **arg2 = 0 ;
+  EQ::ItemInstance *temp2 = 0 ;
+  int result;
+  
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  temp2 = (EQ::ItemInstance *)jarg2;
+  arg2 = (EQ::ItemInstance **)&temp2; 
+  result = (int)std_vector_Sl_EQ_ItemInstance_Sm__Sg__IndexOf(arg1,(EQ::ItemInstance *const &)*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ItemVector_LastIndexOf(void * jarg1, void * jarg2) {
+  int jresult ;
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  EQ::ItemInstance **arg2 = 0 ;
+  EQ::ItemInstance *temp2 = 0 ;
+  int result;
+  
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  temp2 = (EQ::ItemInstance *)jarg2;
+  arg2 = (EQ::ItemInstance **)&temp2; 
+  result = (int)std_vector_Sl_EQ_ItemInstance_Sm__Sg__LastIndexOf(arg1,(EQ::ItemInstance *const &)*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ItemVector_Remove(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  EQ::ItemInstance **arg2 = 0 ;
+  EQ::ItemInstance *temp2 = 0 ;
+  bool result;
+  
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  temp2 = (EQ::ItemInstance *)jarg2;
+  arg2 = (EQ::ItemInstance **)&temp2; 
+  result = (bool)std_vector_Sl_EQ_ItemInstance_Sm__Sg__Remove(arg1,(EQ::ItemInstance *const &)*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_ItemVector(void * jarg1) {
+  std::vector< EQ::ItemInstance * > *arg1 = (std::vector< EQ::ItemInstance * > *) 0 ;
+  
+  arg1 = (std::vector< EQ::ItemInstance * > *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_MobVector__SWIG_0() {
+  void * jresult ;
+  std::vector< Mob * > *result = 0 ;
+  
+  result = (std::vector< Mob * > *)new std::vector< Mob * >();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_MobVector__SWIG_1(void * jarg1) {
+  void * jresult ;
+  std::vector< Mob * > *arg1 = 0 ;
+  std::vector< Mob * > *result = 0 ;
+  
+  arg1 = (std::vector< Mob * > *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< Mob * > const & is null", 0);
+    return 0;
+  } 
+  result = (std::vector< Mob * > *)new std::vector< Mob * >((std::vector< Mob * > const &)*arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MobVector_Clear(void * jarg1) {
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  
+  arg1 = (std::vector< Mob * > *)jarg1; 
   (arg1)->clear();
 }
 
 
-SWIGEXPORT double SWIGSTDCALL CSharp_DoubleList_getItem(void * jarg1, void * jarg2) {
-  double jresult ;
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
-  std::list< double >::iterator *arg2 = (std::list< double >::iterator *) 0 ;
-  std::list< double >::value_type *result = 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_MobVector_Add(void * jarg1, void * jarg2) {
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  Mob **arg2 = 0 ;
+  Mob *temp2 = 0 ;
   
-  arg1 = (std::list< double > *)jarg1; 
-  arg2 = (std::list< double >::iterator *)jarg2; 
-  result = (std::list< double >::value_type *) &std_list_Sl_double_Sg__getItem(arg1,arg2);
-  jresult = *result; 
-  return jresult;
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  temp2 = (Mob *)jarg2;
+  arg2 = (Mob **)&temp2; 
+  (arg1)->push_back((Mob *const &)*arg2);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleList_setItem(void * jarg1, void * jarg2, double jarg3) {
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
-  std::list< double >::iterator *arg2 = (std::list< double >::iterator *) 0 ;
-  double *arg3 = 0 ;
-  double temp3 ;
-  
-  arg1 = (std::list< double > *)jarg1; 
-  arg2 = (std::list< double >::iterator *)jarg2; 
-  temp3 = (double)jarg3; 
-  arg3 = &temp3; 
-  std_list_Sl_double_Sg__setItem(arg1,arg2,(double const &)*arg3);
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_DoubleList_getFirstIter(void * jarg1) {
-  void * jresult ;
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
-  std::list< double >::iterator *result = 0 ;
-  
-  arg1 = (std::list< double > *)jarg1; 
-  result = (std::list< double >::iterator *)std_list_Sl_double_Sg__getFirstIter(arg1);
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_DoubleList_getLastIter(void * jarg1) {
-  void * jresult ;
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
-  std::list< double >::iterator *result = 0 ;
-  
-  arg1 = (std::list< double > *)jarg1; 
-  result = (std::list< double >::iterator *)std_list_Sl_double_Sg__getLastIter(arg1);
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_DoubleList_getNextIter(void * jarg1, void * jarg2) {
-  void * jresult ;
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
-  std::list< double >::iterator *arg2 = (std::list< double >::iterator *) 0 ;
-  std::list< double >::iterator *result = 0 ;
-  
-  arg1 = (std::list< double > *)jarg1; 
-  arg2 = (std::list< double >::iterator *)jarg2; 
-  result = (std::list< double >::iterator *)std_list_Sl_double_Sg__getNextIter(arg1,arg2);
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_DoubleList_getPrevIter(void * jarg1, void * jarg2) {
-  void * jresult ;
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
-  std::list< double >::iterator *arg2 = (std::list< double >::iterator *) 0 ;
-  std::list< double >::iterator *result = 0 ;
-  
-  arg1 = (std::list< double > *)jarg1; 
-  arg2 = (std::list< double >::iterator *)jarg2; 
-  result = (std::list< double >::iterator *)std_list_Sl_double_Sg__getPrevIter(arg1,arg2);
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_DoubleList_insertNode(void * jarg1, void * jarg2, double jarg3) {
-  void * jresult ;
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
-  std::list< double >::iterator *arg2 = (std::list< double >::iterator *) 0 ;
-  double *arg3 = 0 ;
-  double temp3 ;
-  std::list< double >::iterator *result = 0 ;
-  
-  arg1 = (std::list< double > *)jarg1; 
-  arg2 = (std::list< double >::iterator *)jarg2; 
-  temp3 = (double)jarg3; 
-  arg3 = &temp3; 
-  result = (std::list< double >::iterator *)std_list_Sl_double_Sg__insertNode(arg1,arg2,(double const &)*arg3);
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleList_eraseIter(void * jarg1, void * jarg2) {
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
-  std::list< double >::iterator *arg2 = (std::list< double >::iterator *) 0 ;
-  
-  arg1 = (std::list< double > *)jarg1; 
-  arg2 = (std::list< double >::iterator *)jarg2; 
-  std_list_Sl_double_Sg__eraseIter(arg1,arg2);
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_DoubleList_deleteIter(void * jarg1, void * jarg2) {
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
-  std::list< double >::iterator *arg2 = (std::list< double >::iterator *) 0 ;
-  
-  arg1 = (std::list< double > *)jarg1; 
-  arg2 = (std::list< double >::iterator *)jarg2; 
-  std_list_Sl_double_Sg__deleteIter(arg1,arg2);
-}
-
-
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DoubleList_equals(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_MobVector_size(void * jarg1) {
   unsigned int jresult ;
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
-  std::list< double >::iterator *arg2 = (std::list< double >::iterator *) 0 ;
-  std::list< double >::iterator *arg3 = (std::list< double >::iterator *) 0 ;
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  std::vector< Mob * >::size_type result;
+  
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  result = ((std::vector< Mob * > const *)arg1)->size();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_MobVector_empty(void * jarg1) {
+  unsigned int jresult ;
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
   bool result;
   
-  arg1 = (std::list< double > *)jarg1; 
-  arg2 = (std::list< double >::iterator *)jarg2; 
-  arg3 = (std::list< double >::iterator *)jarg3; 
-  result = (bool)std_list_Sl_double_Sg__equals(arg1,arg2,arg3);
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  result = (bool)((std::vector< Mob * > const *)arg1)->empty();
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DoubleList_Contains(void * jarg1, double jarg2) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_MobVector_capacity(void * jarg1) {
   unsigned int jresult ;
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
-  double *arg2 = 0 ;
-  double temp2 ;
-  bool result;
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  std::vector< Mob * >::size_type result;
   
-  arg1 = (std::list< double > *)jarg1; 
-  temp2 = (double)jarg2; 
-  arg2 = &temp2; 
-  result = (bool)std_list_Sl_double_Sg__Contains(arg1,(double const &)*arg2);
-  jresult = result; 
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  result = ((std::vector< Mob * > const *)arg1)->capacity();
+  jresult = (unsigned int)result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DoubleList_Remove(void * jarg1, double jarg2) {
-  unsigned int jresult ;
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
-  double *arg2 = 0 ;
-  double temp2 ;
-  bool result;
+SWIGEXPORT void SWIGSTDCALL CSharp_MobVector_reserve(void * jarg1, unsigned int jarg2) {
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  std::vector< Mob * >::size_type arg2 ;
   
-  arg1 = (std::list< double > *)jarg1; 
-  temp2 = (double)jarg2; 
-  arg2 = &temp2; 
-  result = (bool)std_list_Sl_double_Sg__Remove(arg1,(double const &)*arg2);
-  jresult = result; 
-  return jresult;
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  arg2 = (std::vector< Mob * >::size_type)jarg2; 
+  (arg1)->reserve(arg2);
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_DoubleList_find(void * jarg1, double jarg2) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_MobVector__SWIG_2(int jarg1) {
   void * jresult ;
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
-  double *arg2 = 0 ;
-  double temp2 ;
-  std::list< double >::iterator *result = 0 ;
+  int arg1 ;
+  std::vector< Mob * > *result = 0 ;
   
-  arg1 = (std::list< double > *)jarg1; 
-  temp2 = (double)jarg2; 
-  arg2 = &temp2; 
-  result = (std::list< double >::iterator *)std_list_Sl_double_Sg__find(arg1,(double const &)*arg2);
+  arg1 = (int)jarg1; 
+  try {
+    result = (std::vector< Mob * > *)new_std_vector_Sl_Mob_Sm__Sg___SWIG_2(arg1);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return 0;
+  }
   jresult = (void *)result; 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_new_DoubleList() {
+SWIGEXPORT void * SWIGSTDCALL CSharp_MobVector_getitemcopy(void * jarg1, int jarg2) {
   void * jresult ;
-  std::list< double > *result = 0 ;
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  int arg2 ;
+  Mob *result = 0 ;
   
-  result = (std::list< double > *)new std::list< double >();
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  try {
+    result = (Mob *)std_vector_Sl_Mob_Sm__Sg__getitemcopy(arg1,arg2);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return 0;
+  }
   jresult = (void *)result; 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_delete_DoubleList(void * jarg1) {
-  std::list< double > *arg1 = (std::list< double > *) 0 ;
+SWIGEXPORT void * SWIGSTDCALL CSharp_MobVector_getitem(void * jarg1, int jarg2) {
+  void * jresult ;
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  int arg2 ;
+  std::vector< Mob * >::value_type *result = 0 ;
   
-  arg1 = (std::list< double > *)jarg1; 
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  try {
+    result = (std::vector< Mob * >::value_type *) &std_vector_Sl_Mob_Sm__Sg__getitem(arg1,arg2);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return 0;
+  }
+  jresult = (void *)*result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MobVector_setitem(void * jarg1, int jarg2, void * jarg3) {
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  int arg2 ;
+  Mob **arg3 = 0 ;
+  Mob *temp3 = 0 ;
+  
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  temp3 = (Mob *)jarg3;
+  arg3 = (Mob **)&temp3; 
+  try {
+    std_vector_Sl_Mob_Sm__Sg__setitem(arg1,arg2,(Mob *const &)*arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  }
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MobVector_AddRange(void * jarg1, void * jarg2) {
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  std::vector< Mob * > *arg2 = 0 ;
+  
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  arg2 = (std::vector< Mob * > *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< Mob * > const & is null", 0);
+    return ;
+  } 
+  std_vector_Sl_Mob_Sm__Sg__AddRange(arg1,(std::vector< Mob * > const &)*arg2);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_MobVector_GetRange(void * jarg1, int jarg2, int jarg3) {
+  void * jresult ;
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  std::vector< Mob * > *result = 0 ;
+  
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  try {
+    result = (std::vector< Mob * > *)std_vector_Sl_Mob_Sm__Sg__GetRange(arg1,arg2,arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return 0;
+  } catch(std::invalid_argument &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, (&_e)->what(), "");
+    return 0;
+  }
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MobVector_Insert(void * jarg1, int jarg2, void * jarg3) {
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  int arg2 ;
+  Mob **arg3 = 0 ;
+  Mob *temp3 = 0 ;
+  
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  temp3 = (Mob *)jarg3;
+  arg3 = (Mob **)&temp3; 
+  try {
+    std_vector_Sl_Mob_Sm__Sg__Insert(arg1,arg2,(Mob *const &)*arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  }
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MobVector_InsertRange(void * jarg1, int jarg2, void * jarg3) {
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  int arg2 ;
+  std::vector< Mob * > *arg3 = 0 ;
+  
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (std::vector< Mob * > *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< Mob * > const & is null", 0);
+    return ;
+  } 
+  try {
+    std_vector_Sl_Mob_Sm__Sg__InsertRange(arg1,arg2,(std::vector< Mob * > const &)*arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  }
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MobVector_RemoveAt(void * jarg1, int jarg2) {
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  int arg2 ;
+  
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  try {
+    std_vector_Sl_Mob_Sm__Sg__RemoveAt(arg1,arg2);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  }
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MobVector_RemoveRange(void * jarg1, int jarg2, int jarg3) {
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  try {
+    std_vector_Sl_Mob_Sm__Sg__RemoveRange(arg1,arg2,arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  } catch(std::invalid_argument &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, (&_e)->what(), "");
+    return ;
+  }
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_MobVector_Repeat(void * jarg1, int jarg2) {
+  void * jresult ;
+  Mob **arg1 = 0 ;
+  int arg2 ;
+  Mob *temp1 = 0 ;
+  std::vector< Mob * > *result = 0 ;
+  
+  temp1 = (Mob *)jarg1;
+  arg1 = (Mob **)&temp1; 
+  arg2 = (int)jarg2; 
+  try {
+    result = (std::vector< Mob * > *)std_vector_Sl_Mob_Sm__Sg__Repeat((Mob *const &)*arg1,arg2);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return 0;
+  }
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MobVector_Reverse__SWIG_0(void * jarg1) {
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  std_vector_Sl_Mob_Sm__Sg__Reverse__SWIG_0(arg1);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MobVector_Reverse__SWIG_1(void * jarg1, int jarg2, int jarg3) {
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  try {
+    std_vector_Sl_Mob_Sm__Sg__Reverse__SWIG_1(arg1,arg2,arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  } catch(std::invalid_argument &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, (&_e)->what(), "");
+    return ;
+  }
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_MobVector_SetRange(void * jarg1, int jarg2, void * jarg3) {
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  int arg2 ;
+  std::vector< Mob * > *arg3 = 0 ;
+  
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (std::vector< Mob * > *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< Mob * > const & is null", 0);
+    return ;
+  } 
+  try {
+    std_vector_Sl_Mob_Sm__Sg__SetRange(arg1,arg2,(std::vector< Mob * > const &)*arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  }
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_MobVector_Contains(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  Mob **arg2 = 0 ;
+  Mob *temp2 = 0 ;
+  bool result;
+  
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  temp2 = (Mob *)jarg2;
+  arg2 = (Mob **)&temp2; 
+  result = (bool)std_vector_Sl_Mob_Sm__Sg__Contains(arg1,(Mob *const &)*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_MobVector_IndexOf(void * jarg1, void * jarg2) {
+  int jresult ;
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  Mob **arg2 = 0 ;
+  Mob *temp2 = 0 ;
+  int result;
+  
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  temp2 = (Mob *)jarg2;
+  arg2 = (Mob **)&temp2; 
+  result = (int)std_vector_Sl_Mob_Sm__Sg__IndexOf(arg1,(Mob *const &)*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_MobVector_LastIndexOf(void * jarg1, void * jarg2) {
+  int jresult ;
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  Mob **arg2 = 0 ;
+  Mob *temp2 = 0 ;
+  int result;
+  
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  temp2 = (Mob *)jarg2;
+  arg2 = (Mob **)&temp2; 
+  result = (int)std_vector_Sl_Mob_Sm__Sg__LastIndexOf(arg1,(Mob *const &)*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_MobVector_Remove(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  Mob **arg2 = 0 ;
+  Mob *temp2 = 0 ;
+  bool result;
+  
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  temp2 = (Mob *)jarg2;
+  arg2 = (Mob **)&temp2; 
+  result = (bool)std_vector_Sl_Mob_Sm__Sg__Remove(arg1,(Mob *const &)*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_MobVector(void * jarg1) {
+  std::vector< Mob * > *arg1 = (std::vector< Mob * > *) 0 ;
+  
+  arg1 = (std::vector< Mob * > *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_PacketVector__SWIG_0() {
+  void * jresult ;
+  std::vector< EQApplicationPacket * > *result = 0 ;
+  
+  result = (std::vector< EQApplicationPacket * > *)new std::vector< EQApplicationPacket * >();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_PacketVector__SWIG_1(void * jarg1) {
+  void * jresult ;
+  std::vector< EQApplicationPacket * > *arg1 = 0 ;
+  std::vector< EQApplicationPacket * > *result = 0 ;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< EQApplicationPacket * > const & is null", 0);
+    return 0;
+  } 
+  result = (std::vector< EQApplicationPacket * > *)new std::vector< EQApplicationPacket * >((std::vector< EQApplicationPacket * > const &)*arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_PacketVector_Clear(void * jarg1) {
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  (arg1)->clear();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_PacketVector_Add(void * jarg1, void * jarg2) {
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  EQApplicationPacket **arg2 = 0 ;
+  EQApplicationPacket *temp2 = 0 ;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  temp2 = (EQApplicationPacket *)jarg2;
+  arg2 = (EQApplicationPacket **)&temp2; 
+  (arg1)->push_back((EQApplicationPacket *const &)*arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_PacketVector_size(void * jarg1) {
+  unsigned int jresult ;
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  std::vector< EQApplicationPacket * >::size_type result;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  result = ((std::vector< EQApplicationPacket * > const *)arg1)->size();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_PacketVector_empty(void * jarg1) {
+  unsigned int jresult ;
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  bool result;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  result = (bool)((std::vector< EQApplicationPacket * > const *)arg1)->empty();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_PacketVector_capacity(void * jarg1) {
+  unsigned int jresult ;
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  std::vector< EQApplicationPacket * >::size_type result;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  result = ((std::vector< EQApplicationPacket * > const *)arg1)->capacity();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_PacketVector_reserve(void * jarg1, unsigned int jarg2) {
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  std::vector< EQApplicationPacket * >::size_type arg2 ;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  arg2 = (std::vector< EQApplicationPacket * >::size_type)jarg2; 
+  (arg1)->reserve(arg2);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_PacketVector__SWIG_2(int jarg1) {
+  void * jresult ;
+  int arg1 ;
+  std::vector< EQApplicationPacket * > *result = 0 ;
+  
+  arg1 = (int)jarg1; 
+  try {
+    result = (std::vector< EQApplicationPacket * > *)new_std_vector_Sl_EQApplicationPacket_Sm__Sg___SWIG_2(arg1);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return 0;
+  }
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_PacketVector_getitemcopy(void * jarg1, int jarg2) {
+  void * jresult ;
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  int arg2 ;
+  EQApplicationPacket *result = 0 ;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  try {
+    result = (EQApplicationPacket *)std_vector_Sl_EQApplicationPacket_Sm__Sg__getitemcopy(arg1,arg2);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return 0;
+  }
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_PacketVector_getitem(void * jarg1, int jarg2) {
+  void * jresult ;
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  int arg2 ;
+  std::vector< EQApplicationPacket * >::value_type *result = 0 ;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  try {
+    result = (std::vector< EQApplicationPacket * >::value_type *) &std_vector_Sl_EQApplicationPacket_Sm__Sg__getitem(arg1,arg2);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return 0;
+  }
+  jresult = (void *)*result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_PacketVector_setitem(void * jarg1, int jarg2, void * jarg3) {
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  int arg2 ;
+  EQApplicationPacket **arg3 = 0 ;
+  EQApplicationPacket *temp3 = 0 ;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  temp3 = (EQApplicationPacket *)jarg3;
+  arg3 = (EQApplicationPacket **)&temp3; 
+  try {
+    std_vector_Sl_EQApplicationPacket_Sm__Sg__setitem(arg1,arg2,(EQApplicationPacket *const &)*arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  }
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_PacketVector_AddRange(void * jarg1, void * jarg2) {
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  std::vector< EQApplicationPacket * > *arg2 = 0 ;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  arg2 = (std::vector< EQApplicationPacket * > *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< EQApplicationPacket * > const & is null", 0);
+    return ;
+  } 
+  std_vector_Sl_EQApplicationPacket_Sm__Sg__AddRange(arg1,(std::vector< EQApplicationPacket * > const &)*arg2);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_PacketVector_GetRange(void * jarg1, int jarg2, int jarg3) {
+  void * jresult ;
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  std::vector< EQApplicationPacket * > *result = 0 ;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  try {
+    result = (std::vector< EQApplicationPacket * > *)std_vector_Sl_EQApplicationPacket_Sm__Sg__GetRange(arg1,arg2,arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return 0;
+  } catch(std::invalid_argument &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, (&_e)->what(), "");
+    return 0;
+  }
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_PacketVector_Insert(void * jarg1, int jarg2, void * jarg3) {
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  int arg2 ;
+  EQApplicationPacket **arg3 = 0 ;
+  EQApplicationPacket *temp3 = 0 ;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  temp3 = (EQApplicationPacket *)jarg3;
+  arg3 = (EQApplicationPacket **)&temp3; 
+  try {
+    std_vector_Sl_EQApplicationPacket_Sm__Sg__Insert(arg1,arg2,(EQApplicationPacket *const &)*arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  }
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_PacketVector_InsertRange(void * jarg1, int jarg2, void * jarg3) {
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  int arg2 ;
+  std::vector< EQApplicationPacket * > *arg3 = 0 ;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (std::vector< EQApplicationPacket * > *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< EQApplicationPacket * > const & is null", 0);
+    return ;
+  } 
+  try {
+    std_vector_Sl_EQApplicationPacket_Sm__Sg__InsertRange(arg1,arg2,(std::vector< EQApplicationPacket * > const &)*arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  }
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_PacketVector_RemoveAt(void * jarg1, int jarg2) {
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  int arg2 ;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  try {
+    std_vector_Sl_EQApplicationPacket_Sm__Sg__RemoveAt(arg1,arg2);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  }
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_PacketVector_RemoveRange(void * jarg1, int jarg2, int jarg3) {
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  try {
+    std_vector_Sl_EQApplicationPacket_Sm__Sg__RemoveRange(arg1,arg2,arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  } catch(std::invalid_argument &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, (&_e)->what(), "");
+    return ;
+  }
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_PacketVector_Repeat(void * jarg1, int jarg2) {
+  void * jresult ;
+  EQApplicationPacket **arg1 = 0 ;
+  int arg2 ;
+  EQApplicationPacket *temp1 = 0 ;
+  std::vector< EQApplicationPacket * > *result = 0 ;
+  
+  temp1 = (EQApplicationPacket *)jarg1;
+  arg1 = (EQApplicationPacket **)&temp1; 
+  arg2 = (int)jarg2; 
+  try {
+    result = (std::vector< EQApplicationPacket * > *)std_vector_Sl_EQApplicationPacket_Sm__Sg__Repeat((EQApplicationPacket *const &)*arg1,arg2);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return 0;
+  }
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_PacketVector_Reverse__SWIG_0(void * jarg1) {
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  std_vector_Sl_EQApplicationPacket_Sm__Sg__Reverse__SWIG_0(arg1);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_PacketVector_Reverse__SWIG_1(void * jarg1, int jarg2, int jarg3) {
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  try {
+    std_vector_Sl_EQApplicationPacket_Sm__Sg__Reverse__SWIG_1(arg1,arg2,arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  } catch(std::invalid_argument &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentException, (&_e)->what(), "");
+    return ;
+  }
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_PacketVector_SetRange(void * jarg1, int jarg2, void * jarg3) {
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  int arg2 ;
+  std::vector< EQApplicationPacket * > *arg3 = 0 ;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (std::vector< EQApplicationPacket * > *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< EQApplicationPacket * > const & is null", 0);
+    return ;
+  } 
+  try {
+    std_vector_Sl_EQApplicationPacket_Sm__Sg__SetRange(arg1,arg2,(std::vector< EQApplicationPacket * > const &)*arg3);
+  } catch(std::out_of_range &_e) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
+    return ;
+  }
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_PacketVector_Contains(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  EQApplicationPacket **arg2 = 0 ;
+  EQApplicationPacket *temp2 = 0 ;
+  bool result;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  temp2 = (EQApplicationPacket *)jarg2;
+  arg2 = (EQApplicationPacket **)&temp2; 
+  result = (bool)std_vector_Sl_EQApplicationPacket_Sm__Sg__Contains(arg1,(EQApplicationPacket *const &)*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_PacketVector_IndexOf(void * jarg1, void * jarg2) {
+  int jresult ;
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  EQApplicationPacket **arg2 = 0 ;
+  EQApplicationPacket *temp2 = 0 ;
+  int result;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  temp2 = (EQApplicationPacket *)jarg2;
+  arg2 = (EQApplicationPacket **)&temp2; 
+  result = (int)std_vector_Sl_EQApplicationPacket_Sm__Sg__IndexOf(arg1,(EQApplicationPacket *const &)*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_PacketVector_LastIndexOf(void * jarg1, void * jarg2) {
+  int jresult ;
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  EQApplicationPacket **arg2 = 0 ;
+  EQApplicationPacket *temp2 = 0 ;
+  int result;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  temp2 = (EQApplicationPacket *)jarg2;
+  arg2 = (EQApplicationPacket **)&temp2; 
+  result = (int)std_vector_Sl_EQApplicationPacket_Sm__Sg__LastIndexOf(arg1,(EQApplicationPacket *const &)*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_PacketVector_Remove(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  EQApplicationPacket **arg2 = 0 ;
+  EQApplicationPacket *temp2 = 0 ;
+  bool result;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
+  temp2 = (EQApplicationPacket *)jarg2;
+  arg2 = (EQApplicationPacket **)&temp2; 
+  result = (bool)std_vector_Sl_EQApplicationPacket_Sm__Sg__Remove(arg1,(EQApplicationPacket *const &)*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_PacketVector(void * jarg1) {
+  std::vector< EQApplicationPacket * > *arg1 = (std::vector< EQApplicationPacket * > *) 0 ;
+  
+  arg1 = (std::vector< EQApplicationPacket * > *)jarg1; 
   delete arg1;
 }
 
@@ -97322,8 +115978,8 @@ SWIGEXPORT void SWIGSTDCALL CSharp_IntStringMap_Clear(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_IntStringMap_getitem(void * jarg1, int jarg2) {
-  void * jresult ;
+SWIGEXPORT const char * SWIGSTDCALL CSharp_IntStringMap_getitem(void * jarg1, int jarg2) {
+  const char * jresult ;
   std::unordered_map< int,std::string > *arg1 = (std::unordered_map< int,std::string > *) 0 ;
   std::unordered_map< int,std::string >::key_type *arg2 = 0 ;
   std::unordered_map< int,std::string >::key_type temp2 ;
@@ -97338,12 +115994,12 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_IntStringMap_getitem(void * jarg1, int jarg
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentOutOfRangeException, 0, (&_e)->what());
     return 0;
   }
-  jresult = (void *)result; 
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_IntStringMap_setitem(void * jarg1, int jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_IntStringMap_setitem(void * jarg1, int jarg2, const char * jarg3) {
   std::unordered_map< int,std::string > *arg1 = (std::unordered_map< int,std::string > *) 0 ;
   std::unordered_map< int,std::string >::key_type *arg2 = 0 ;
   std::unordered_map< int,std::string >::mapped_type *arg3 = 0 ;
@@ -97352,11 +116008,12 @@ SWIGEXPORT void SWIGSTDCALL CSharp_IntStringMap_setitem(void * jarg1, int jarg2,
   arg1 = (std::unordered_map< int,std::string > *)jarg1; 
   temp2 = (std::unordered_map< int,std::string >::key_type)jarg2; 
   arg2 = &temp2; 
-  arg3 = (std::unordered_map< int,std::string >::mapped_type *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::unordered_map< int,std::string >::mapped_type const & is null", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::unordered_map< int,std::string >::mapped_type arg3_str(jarg3);
+  arg3 = &arg3_str; 
   std_unordered_map_Sl_int_Sc_std_string_Sg__setitem(arg1,(int const &)*arg2,(std::string const &)*arg3);
 }
 
@@ -97377,7 +116034,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_IntStringMap_ContainsKey(void * jarg1
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_IntStringMap_Add(void * jarg1, int jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_IntStringMap_Add(void * jarg1, int jarg2, const char * jarg3) {
   std::unordered_map< int,std::string > *arg1 = (std::unordered_map< int,std::string > *) 0 ;
   std::unordered_map< int,std::string >::key_type *arg2 = 0 ;
   std::unordered_map< int,std::string >::mapped_type *arg3 = 0 ;
@@ -97386,11 +116043,12 @@ SWIGEXPORT void SWIGSTDCALL CSharp_IntStringMap_Add(void * jarg1, int jarg2, voi
   arg1 = (std::unordered_map< int,std::string > *)jarg1; 
   temp2 = (std::unordered_map< int,std::string >::key_type)jarg2; 
   arg2 = &temp2; 
-  arg3 = (std::unordered_map< int,std::string >::mapped_type *)jarg3;
-  if (!arg3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::unordered_map< int,std::string >::mapped_type const & is null", 0);
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
     return ;
-  } 
+  }
+  std::unordered_map< int,std::string >::mapped_type arg3_str(jarg3);
+  arg3 = &arg3_str; 
   try {
     std_unordered_map_Sl_int_Sc_std_string_Sg__Add(arg1,(int const &)*arg2,(std::string const &)*arg3);
   } catch(std::out_of_range &_e) {
@@ -100959,6 +119617,14 @@ SWIGEXPORT void SWIGSTDCALL CSharp_delete_AreaList(void * jarg1) {
   delete arg1;
 }
 
+
+SWIGEXPORT EQPacket * SWIGSTDCALL CSharp_EQApplicationPacket_SWIGUpcast(EQApplicationPacket *jarg1) {
+    return (EQPacket *)jarg1;
+}
+
+SWIGEXPORT EQApplicationPacket * SWIGSTDCALL CSharp_EQRawApplicationPacket_SWIGUpcast(EQRawApplicationPacket *jarg1) {
+    return (EQApplicationPacket *)jarg1;
+}
 
 SWIGEXPORT Entity * SWIGSTDCALL CSharp_Mob_SWIGUpcast(Mob *jarg1) {
     return (Entity *)jarg1;

@@ -1,15 +1,17 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
-using Microsoft.CodeAnalysis.Scripting;
+﻿using System.Diagnostics;
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
+using System.Runtime.Loader;
+using System.Runtime.CompilerServices;
+
 
 public static class DotNetQuest
 {
     public static Zone? zone = null;
     public static EntityList? entityList = null;
+    public static EQEmuLogSys? logSys = null;
+    public static WorldServer? worldServer = null;
+    public static QuestManager? questManager = null;
     public static InitArgs? initArgs = null;
 
     [StructLayout(LayoutKind.Sequential)]
@@ -17,6 +19,9 @@ public static class DotNetQuest
     {
         public IntPtr Zone;
         public IntPtr EntityList;
+        public IntPtr WorldServer;
+        public IntPtr QuestManager;
+        public IntPtr LogSys;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -26,11 +31,17 @@ public static class DotNetQuest
         public IntPtr Npc;
         public IntPtr Mob;
         public IntPtr Data;
+        public uint ExtraData;
+        public IntPtr ItemVector;
+        public IntPtr MobVector;
+        public IntPtr PacketVector;
+        public IntPtr StringVector;
+        public bool PlayerEvent;
     }
 
     public static NPC? GetNPCByName(EntityList entityList, string name)
     {
-        foreach (var npc in entityList.npc_list)
+        foreach (var npc in entityList.GetNPCList())
         {
             if (npc.Value.GetOrigName() == name)
             {
@@ -40,8 +51,6 @@ public static class DotNetQuest
         return null;
     }
 
-    private static Dictionary<string, object> NpcMap = new Dictionary<string, object>();
-
     public delegate void InitializeDelegate(InitArgs initArgs);
     public delegate void ReloadDelegate();
     public delegate void NpcEventDelegate(NpcEventArgs npcEventArgs);
@@ -50,103 +59,143 @@ public static class DotNetQuest
     {
         zone = EqFactory.CreateZone(initArgs.Zone, false);
         entityList = EqFactory.CreateEntityList(initArgs.EntityList, false);
+        logSys = EqFactory.CreateLogSys(initArgs.LogSys, false);
+        worldServer = EqFactory.CreateWorldServer(initArgs.WorldServer, false);
+        questManager = EqFactory.CreateQuestManager(initArgs.QuestManager, false);
         DotNetQuest.initArgs = initArgs;
     }
 
+    private static CollectibleAssemblyLoadContext? assemblyContext_ = null;
+    private static Assembly? questAssembly_ = null;
     public static void Reload()
     {
-        NpcMap.Clear();
+        if (assemblyContext_ != null)
+        {
+            assemblyContext_.Unload();
+            assemblyContext_ = null;
+            questAssembly_ = null;
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+        }
+        assemblyContext_ = new CollectibleAssemblyLoadContext();
+
+        string assemblyLocation = Assembly.GetExecutingAssembly().Location;
+
+        // Get the directory path from the full assembly path
+        var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
+
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "dotnet", // Adjust this path
+            Arguments = $"{assemblyDirectory}/RoslynCompiler.dll {zone?.GetShortName()}",
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true
+        };
+
+        using (var process = Process.Start(startInfo))
+        {
+            if (process == null)
+            {
+                logSys?.QuestError($"Process was null when loading zone quests: {zone?.GetShortName()}");
+                return;
+            }
+            try
+            {
+                string output = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+                string errorOutput = process.StandardError.ReadToEnd();
+                if (errorOutput.Length > 0)
+                {
+                    logSys?.QuestError($"Error compiling quests:");
+                    logSys?.QuestError(errorOutput);
+                }
+                else
+                {
+                    var data = Convert.FromBase64String(output);
+                    questAssembly_ = assemblyContext_.LoadFromStream(new MemoryStream(data));
+                    logSys?.QuestDebug($"Successfully compiled .NET quests with {questAssembly_.GetTypes().Count()} exported types.");
+                }
+            }
+            catch (Exception e)
+            {
+                logSys?.QuestError($"Exception in loading zone quest {e.Message}");
+            }
+        }
     }
 
     public static void NpcEvent(NpcEventArgs npcEventArgs)
     {
-        if (zone == null || entityList == null)
+        if (zone == null || entityList == null || logSys == null || worldServer == null || questAssembly_ == null || questManager == null)
         {
             return;
         }
-        Console.WriteLine($"NpcEvent Invoked");
 
         QuestEventID id = (QuestEventID)npcEventArgs.QuestEventId;
-        var npc = EqFactory.CreateNPC(npcEventArgs.Npc, false);
-        var mob = EqFactory.CreateMob(npcEventArgs.Mob, false);
+
+        var stringList = EqFactory.CreateStringVector(npcEventArgs.StringVector, false);
+        var mobList = EqFactory.CreateMobVector(npcEventArgs.MobVector, false);
+        var itemList = EqFactory.CreateItemVector(npcEventArgs.ItemVector, false);
+        var packetList = EqFactory.CreatePacketVector(npcEventArgs.PacketVector, false);
 
         string? message = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
             ? Marshal.PtrToStringUni(npcEventArgs.Data)
             : Marshal.PtrToStringUTF8(npcEventArgs.Data);
 
-        NpcEvent p = new NpcEvent
+        try
         {
-            zone = zone,
-            entityList = entityList,
-            mob = mob,
-            npc = npc,
-            data = message ?? ""
-        };
-
-        var npcName = npc.GetOrigName();
-        // if (NpcMap.ContainsKey(npcName))
-        // {
-        //     Task.Run(() =>
-        //     {
-        //         var instance = NpcMap[npcName];
-        //         var createNpcEvent = instance.GetType()?.GetInterfaces()[0]?.Assembly.ExportedTypes.FirstOrDefault(f => f.FullName == "EqFactory")?.GetMethod("CreateNpcEvent");
-        //         if (createNpcEvent != null)
-        //         {
-        //             var npcEvent = createNpcEvent.Invoke(instance, [initArgs?.Zone, initArgs?.EntityList, npcEventArgs.Npc, npcEventArgs.Mob, message ?? ""]);
-        //             var methodInfo = instance.GetType().GetMethod(MethodMap[id]);
-        //             if (methodInfo != null)
-        //             {
-        //                 methodInfo.Invoke(instance, [npcEvent]);
-        //             }
-        //         }
-        //     });
-
-        //     return;
-        // }
-        var path = Assembly.GetExecutingAssembly().Location;
-
-        var directory = Path.GetDirectoryName(path);
-        var scriptName = $"{directory}/dotnet_quests/{zone.GetShortName()}/{npcName}.csx";
-        if (File.Exists(scriptName))
-        {
-            Task.Run(async () =>
+            if (npcEventArgs.PlayerEvent && questAssembly_.GetType("player")?.GetMethod(MethodMap[id]) != null)
             {
-                var text = File.ReadAllText(scriptName);
-                text = text.Replace("#r \"../../DotNetTypes.dll\"", "");
-                // Idea for wrapping class
-                // text = @$"
-                //        public class TypeWrapper<NpcEvent>
-                //         {{
-                //             {text}
-                //             public Npc GenerateWrapper()
-                //             {{
-                //                 return new Npc();
-                //             }}
-                //         }}
-                //         return typeof(TypeWrapper);
-                // ";
-                
-                var scriptOptions = ScriptOptions.Default.WithReferences(MetadataReference.CreateFromFile($"{directory}/DotNetTypes.dll"));
-                var state = await CSharpScript.RunAsync(text, scriptOptions);
-                // var retValue = state.ReturnValue;
-                NpcMap[npcName] = state.ReturnValue;
-                var instance = NpcMap[npcName];
-                var createNpcEvent = instance.GetType()?.GetInterfaces()[0]?.Assembly.ExportedTypes.FirstOrDefault(f => f.FullName == "EqFactory")?.GetMethod("CreateNpcEvent");
-                if (createNpcEvent != null)
+                questAssembly_.GetType("player").GetMethod(MethodMap[id]).Invoke(Activator.CreateInstance(questAssembly_.GetType("player")), [new PlayerEvent() {
+                        player = EqFactory.CreateMob(npcEventArgs.Mob, false).CastToClient(),
+                        zone = zone,
+                        logSys = logSys,
+                        worldServer = worldServer,
+                        questManager = questManager,
+                        entityList = entityList,
+                        extra_data = npcEventArgs.ExtraData,
+                        data = message ?? "",
+                        stringList = stringList,
+                        mobList = mobList,
+                        itemList = itemList,
+                        packetList = packetList
+                    }]);
+            }
+            else if (!npcEventArgs.PlayerEvent)
+            {
+                var npc = EqFactory.CreateNPC(npcEventArgs.Npc, false);
+                var mob = EqFactory.CreateMob(npcEventArgs.Mob, false);
+                var npcName = npc.GetOrigName();
+                if (questAssembly_.GetType(npcName)?.GetMethod(MethodMap[id]) != null)
                 {
-                    var npcEvent = createNpcEvent.Invoke(instance, [initArgs?.Zone, initArgs?.EntityList, npcEventArgs.Npc, npcEventArgs.Mob, message ?? ""]);
-                    var methodInfo = instance.GetType().GetMethod(MethodMap[id]);
-                    if (methodInfo != null)
-                    {
-                        methodInfo.Invoke(instance, [npcEvent]);
-                    }
+
+                    questAssembly_.GetType(npcName).GetMethod(MethodMap[id]).Invoke(Activator.CreateInstance(questAssembly_.GetType(npcName)), [new NpcEvent() {
+                        npc = npc,
+                        mob = mob,
+                        zone = zone,
+                        logSys = logSys,
+                        worldServer = worldServer,
+                        questManager = questManager,
+                        entityList = entityList,
+                        extra_data = npcEventArgs.ExtraData,
+                        data = message ?? "",
+                        stringList = stringList,
+                        mobList = mobList,
+                        itemList = itemList,
+                        packetList = packetList
+                    }]);
                 }
-            });
+            }
         }
+        catch (Exception e)
+        {
+            logSys?.QuestError($"Error running quest {e.Message}");
+        }
+
     }
 
-
- 
     private static readonly Dictionary<QuestEventID, string> MethodMap = new Dictionary<QuestEventID, string> {
        {QuestEventID.EVENT_SAY, "Say"},
        {QuestEventID.EVENT_TRADE, "Trade"},
@@ -291,4 +340,10 @@ public static class DotNetQuest
         {QuestEventID.EVENT_SPELL_EFFECT_BOT, "SpellEffectBot"},
         {QuestEventID.EVENT_SPELL_EFFECT_BUFF_TIC_BOT, "SpellEffectBuffTicBot"},
     };
+}
+
+public class CollectibleAssemblyLoadContext : AssemblyLoadContext
+{
+    public CollectibleAssemblyLoadContext() : base(isCollectible: true) { }
+
 }

@@ -29,7 +29,7 @@ void DotnetParser::DotnetLoad()
     {
         return;
     }
-    initialize(zone, &entity_list);
+    initialize(zone, &entity_list, &worldserver, &LogSys);
     reload_quests();
 }
 
@@ -39,7 +39,7 @@ int DotnetParser::EventNPC(QuestEventID evt, NPC *npc, Mob *init, std::string da
 
     Client *c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
     quest_manager.StartQuest(npc, c);
-    npc_event(evt, npc, init, data);
+    event(evt, npc, init, data, extra_data, extra_pointers);
     quest_manager.EndQuest();
 
     return 0;
@@ -50,7 +50,7 @@ int DotnetParser::EventGlobalNPC(QuestEventID evt, NPC *npc, Mob *init, std::str
 {
     Client *c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
     quest_manager.StartQuest(npc, c);
-    npc_event(evt, npc, init, data);
+    event(evt, npc, init, data, extra_data, extra_pointers);
     quest_manager.EndQuest();
 }
 
@@ -58,6 +58,7 @@ int DotnetParser::EventPlayer(QuestEventID evt, Client *client, std::string data
                               std::vector<std::any> *extra_pointers)
 {
     quest_manager.StartQuest(client, client);
+    event(evt, nullptr, client, data, extra_data, extra_pointers, true);
     quest_manager.EndQuest();
 
     return 0;
@@ -67,6 +68,7 @@ int DotnetParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::strin
                                     std::vector<std::any> *extra_pointers)
 {
     quest_manager.StartQuest(client, client);
+    event(evt, nullptr, client, data, extra_data, extra_pointers, true);
     quest_manager.EndQuest();
 
     return 0;
