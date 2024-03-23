@@ -349,20 +349,6 @@ template <typename T> T SwigValueInit() {
 #endif
 
 
-    namespace custom_glm {
-        struct vec4 {
-            public:
-            float x, y, z, w;
-            vec4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
-        };
-        struct vec3 {
-            public:
-            float x, y, z;
-            vec3(float x, float y, float z) : x(x), y(y), z(z) {}
-        };
-    }
-
-
 
 #include <string>
 #include <list>
@@ -370,6 +356,15 @@ template <typename T> T SwigValueInit() {
 #include <set>
 #include <vector>
 #include <memory>
+
+// init default values in constructors
+#define GLM_FORCE_CTOR_INIT
+
+// these included in math/ofVectorMath.h
+// we declare some things manually, so some includes are commented out
+#include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
+#include "glm/vec4.hpp"
 
 #include "../../../common/ruletypes.h"
 #include "../../../common/eq_packet.h"
@@ -409,7 +404,6 @@ template <typename T> T SwigValueInit() {
 using namespace EQ;
 using namespace Logs;
 using namespace glm;
-using namespace custom_glm;
 
 
 #include <typeinfo>
@@ -1933,125 +1927,157 @@ SWIGINTERN bool std_list_Sl_Area_Sg__equals(std::list< Area > *self,std::list< A
 extern "C" {
 #endif
 
-SWIGEXPORT void SWIGSTDCALL CSharp_vec4_x_set(void * jarg1, float jarg2) {
-  custom_glm::vec4 *arg1 = (custom_glm::vec4 *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_vec2_x_set(void * jarg1, float jarg2) {
+  glm::vec2 *arg1 = (glm::vec2 *) 0 ;
   float arg2 ;
   
-  arg1 = (custom_glm::vec4 *)jarg1; 
+  arg1 = (glm::vec2 *)jarg1; 
   arg2 = (float)jarg2; 
   if (arg1) (arg1)->x = arg2;
 }
 
 
-SWIGEXPORT float SWIGSTDCALL CSharp_vec4_x_get(void * jarg1) {
+SWIGEXPORT float SWIGSTDCALL CSharp_vec2_x_get(void * jarg1) {
   float jresult ;
-  custom_glm::vec4 *arg1 = (custom_glm::vec4 *) 0 ;
+  glm::vec2 *arg1 = (glm::vec2 *) 0 ;
   float result;
   
-  arg1 = (custom_glm::vec4 *)jarg1; 
+  arg1 = (glm::vec2 *)jarg1; 
   result = (float) ((arg1)->x);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_vec4_y_set(void * jarg1, float jarg2) {
-  custom_glm::vec4 *arg1 = (custom_glm::vec4 *) 0 ;
+SWIGEXPORT void SWIGSTDCALL CSharp_vec2_y_set(void * jarg1, float jarg2) {
+  glm::vec2 *arg1 = (glm::vec2 *) 0 ;
   float arg2 ;
   
-  arg1 = (custom_glm::vec4 *)jarg1; 
+  arg1 = (glm::vec2 *)jarg1; 
   arg2 = (float)jarg2; 
   if (arg1) (arg1)->y = arg2;
 }
 
 
-SWIGEXPORT float SWIGSTDCALL CSharp_vec4_y_get(void * jarg1) {
+SWIGEXPORT float SWIGSTDCALL CSharp_vec2_y_get(void * jarg1) {
   float jresult ;
-  custom_glm::vec4 *arg1 = (custom_glm::vec4 *) 0 ;
+  glm::vec2 *arg1 = (glm::vec2 *) 0 ;
   float result;
   
-  arg1 = (custom_glm::vec4 *)jarg1; 
+  arg1 = (glm::vec2 *)jarg1; 
   result = (float) ((arg1)->y);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_vec4_z_set(void * jarg1, float jarg2) {
-  custom_glm::vec4 *arg1 = (custom_glm::vec4 *) 0 ;
-  float arg2 ;
+SWIGEXPORT int SWIGSTDCALL CSharp_vec2_length() {
+  int jresult ;
+  glm::length_t result;
   
-  arg1 = (custom_glm::vec4 *)jarg1; 
-  arg2 = (float)jarg2; 
-  if (arg1) (arg1)->z = arg2;
-}
-
-
-SWIGEXPORT float SWIGSTDCALL CSharp_vec4_z_get(void * jarg1) {
-  float jresult ;
-  custom_glm::vec4 *arg1 = (custom_glm::vec4 *) 0 ;
-  float result;
-  
-  arg1 = (custom_glm::vec4 *)jarg1; 
-  result = (float) ((arg1)->z);
+  result = (glm::length_t)glm::vec2::length();
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_vec4_w_set(void * jarg1, float jarg2) {
-  custom_glm::vec4 *arg1 = (custom_glm::vec4 *) 0 ;
-  float arg2 ;
-  
-  arg1 = (custom_glm::vec4 *)jarg1; 
-  arg2 = (float)jarg2; 
-  if (arg1) (arg1)->w = arg2;
-}
-
-
-SWIGEXPORT float SWIGSTDCALL CSharp_vec4_w_get(void * jarg1) {
-  float jresult ;
-  custom_glm::vec4 *arg1 = (custom_glm::vec4 *) 0 ;
-  float result;
-  
-  arg1 = (custom_glm::vec4 *)jarg1; 
-  result = (float) ((arg1)->w);
-  jresult = result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec4(float jarg1, float jarg2, float jarg3, float jarg4) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec2__SWIG_0() {
   void * jresult ;
-  float arg1 ;
-  float arg2 ;
-  float arg3 ;
-  float arg4 ;
-  custom_glm::vec4 *result = 0 ;
+  glm::vec2 *result = 0 ;
   
-  arg1 = (float)jarg1; 
-  arg2 = (float)jarg2; 
-  arg3 = (float)jarg3; 
-  arg4 = (float)jarg4; 
-  result = (custom_glm::vec4 *)new custom_glm::vec4(arg1,arg2,arg3,arg4);
+  result = (glm::vec2 *)new glm::vec2();
   jresult = (void *)result; 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_delete_vec4(void * jarg1) {
-  custom_glm::vec4 *arg1 = (custom_glm::vec4 *) 0 ;
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec2__SWIG_1(void * jarg1) {
+  void * jresult ;
+  glm::vec2 *arg1 = 0 ;
+  glm::vec2 *result = 0 ;
   
-  arg1 = (custom_glm::vec4 *)jarg1; 
+  arg1 = (glm::vec2 *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec2 const & is null", 0);
+    return 0;
+  } 
+  result = (glm::vec2 *)new glm::vec2((glm::vec2 const &)*arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec2__SWIG_2(float jarg1) {
+  void * jresult ;
+  float arg1 ;
+  glm::vec2 *result = 0 ;
+  
+  arg1 = (float)jarg1; 
+  result = (glm::vec2 *)new glm::vec2(arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec2__SWIG_3(float jarg1, float jarg2) {
+  void * jresult ;
+  float arg1 ;
+  float arg2 ;
+  glm::vec2 *result = 0 ;
+  
+  arg1 = (float)jarg1; 
+  arg2 = (float)jarg2; 
+  result = (glm::vec2 *)new glm::vec2(arg1,arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec2__SWIG_4(void * jarg1) {
+  void * jresult ;
+  glm::vec3 *arg1 = 0 ;
+  glm::vec2 *result = 0 ;
+  
+  arg1 = (glm::vec3 *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec3 const & is null", 0);
+    return 0;
+  } 
+  result = (glm::vec2 *)new glm::vec2((glm::vec3 const &)*arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec2__SWIG_5(void * jarg1) {
+  void * jresult ;
+  glm::vec4 *arg1 = 0 ;
+  glm::vec2 *result = 0 ;
+  
+  arg1 = (glm::vec4 *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec4 const & is null", 0);
+    return 0;
+  } 
+  result = (glm::vec2 *)new glm::vec2((glm::vec4 const &)*arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_vec2(void * jarg1) {
+  glm::vec2 *arg1 = (glm::vec2 *) 0 ;
+  
+  arg1 = (glm::vec2 *)jarg1; 
   delete arg1;
 }
 
 
 SWIGEXPORT void SWIGSTDCALL CSharp_vec3_x_set(void * jarg1, float jarg2) {
-  custom_glm::vec3 *arg1 = (custom_glm::vec3 *) 0 ;
+  glm::vec3 *arg1 = (glm::vec3 *) 0 ;
   float arg2 ;
   
-  arg1 = (custom_glm::vec3 *)jarg1; 
+  arg1 = (glm::vec3 *)jarg1; 
   arg2 = (float)jarg2; 
   if (arg1) (arg1)->x = arg2;
 }
@@ -2059,10 +2085,10 @@ SWIGEXPORT void SWIGSTDCALL CSharp_vec3_x_set(void * jarg1, float jarg2) {
 
 SWIGEXPORT float SWIGSTDCALL CSharp_vec3_x_get(void * jarg1) {
   float jresult ;
-  custom_glm::vec3 *arg1 = (custom_glm::vec3 *) 0 ;
+  glm::vec3 *arg1 = (glm::vec3 *) 0 ;
   float result;
   
-  arg1 = (custom_glm::vec3 *)jarg1; 
+  arg1 = (glm::vec3 *)jarg1; 
   result = (float) ((arg1)->x);
   jresult = result; 
   return jresult;
@@ -2070,10 +2096,10 @@ SWIGEXPORT float SWIGSTDCALL CSharp_vec3_x_get(void * jarg1) {
 
 
 SWIGEXPORT void SWIGSTDCALL CSharp_vec3_y_set(void * jarg1, float jarg2) {
-  custom_glm::vec3 *arg1 = (custom_glm::vec3 *) 0 ;
+  glm::vec3 *arg1 = (glm::vec3 *) 0 ;
   float arg2 ;
   
-  arg1 = (custom_glm::vec3 *)jarg1; 
+  arg1 = (glm::vec3 *)jarg1; 
   arg2 = (float)jarg2; 
   if (arg1) (arg1)->y = arg2;
 }
@@ -2081,10 +2107,10 @@ SWIGEXPORT void SWIGSTDCALL CSharp_vec3_y_set(void * jarg1, float jarg2) {
 
 SWIGEXPORT float SWIGSTDCALL CSharp_vec3_y_get(void * jarg1) {
   float jresult ;
-  custom_glm::vec3 *arg1 = (custom_glm::vec3 *) 0 ;
+  glm::vec3 *arg1 = (glm::vec3 *) 0 ;
   float result;
   
-  arg1 = (custom_glm::vec3 *)jarg1; 
+  arg1 = (glm::vec3 *)jarg1; 
   result = (float) ((arg1)->y);
   jresult = result; 
   return jresult;
@@ -2092,10 +2118,10 @@ SWIGEXPORT float SWIGSTDCALL CSharp_vec3_y_get(void * jarg1) {
 
 
 SWIGEXPORT void SWIGSTDCALL CSharp_vec3_z_set(void * jarg1, float jarg2) {
-  custom_glm::vec3 *arg1 = (custom_glm::vec3 *) 0 ;
+  glm::vec3 *arg1 = (glm::vec3 *) 0 ;
   float arg2 ;
   
-  arg1 = (custom_glm::vec3 *)jarg1; 
+  arg1 = (glm::vec3 *)jarg1; 
   arg2 = (float)jarg2; 
   if (arg1) (arg1)->z = arg2;
 }
@@ -2103,36 +2129,416 @@ SWIGEXPORT void SWIGSTDCALL CSharp_vec3_z_set(void * jarg1, float jarg2) {
 
 SWIGEXPORT float SWIGSTDCALL CSharp_vec3_z_get(void * jarg1) {
   float jresult ;
-  custom_glm::vec3 *arg1 = (custom_glm::vec3 *) 0 ;
+  glm::vec3 *arg1 = (glm::vec3 *) 0 ;
   float result;
   
-  arg1 = (custom_glm::vec3 *)jarg1; 
+  arg1 = (glm::vec3 *)jarg1; 
   result = (float) ((arg1)->z);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec3(float jarg1, float jarg2, float jarg3) {
+SWIGEXPORT int SWIGSTDCALL CSharp_vec3_length() {
+  int jresult ;
+  glm::length_t result;
+  
+  result = (glm::length_t)glm::vec3::length();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec3__SWIG_0() {
+  void * jresult ;
+  glm::vec3 *result = 0 ;
+  
+  result = (glm::vec3 *)new glm::vec3();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec3__SWIG_1(void * jarg1) {
+  void * jresult ;
+  glm::vec3 *arg1 = 0 ;
+  glm::vec3 *result = 0 ;
+  
+  arg1 = (glm::vec3 *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec3 const & is null", 0);
+    return 0;
+  } 
+  result = (glm::vec3 *)new glm::vec3((glm::vec3 const &)*arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec3__SWIG_2(float jarg1) {
+  void * jresult ;
+  float arg1 ;
+  glm::vec3 *result = 0 ;
+  
+  arg1 = (float)jarg1; 
+  result = (glm::vec3 *)new glm::vec3(arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec3__SWIG_3(float jarg1, float jarg2, float jarg3) {
   void * jresult ;
   float arg1 ;
   float arg2 ;
   float arg3 ;
-  custom_glm::vec3 *result = 0 ;
+  glm::vec3 *result = 0 ;
   
   arg1 = (float)jarg1; 
   arg2 = (float)jarg2; 
   arg3 = (float)jarg3; 
-  result = (custom_glm::vec3 *)new custom_glm::vec3(arg1,arg2,arg3);
+  result = (glm::vec3 *)new glm::vec3(arg1,arg2,arg3);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec3__SWIG_4(void * jarg1, float jarg2) {
+  void * jresult ;
+  glm::vec2 *arg1 = 0 ;
+  float arg2 ;
+  glm::vec3 *result = 0 ;
+  
+  arg1 = (glm::vec2 *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec2 const & is null", 0);
+    return 0;
+  } 
+  arg2 = (float)jarg2; 
+  result = (glm::vec3 *)new glm::vec3((glm::vec2 const &)*arg1,arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec3__SWIG_5(float jarg1, void * jarg2) {
+  void * jresult ;
+  float arg1 ;
+  glm::vec2 *arg2 = 0 ;
+  glm::vec3 *result = 0 ;
+  
+  arg1 = (float)jarg1; 
+  arg2 = (glm::vec2 *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec2 const & is null", 0);
+    return 0;
+  } 
+  result = (glm::vec3 *)new glm::vec3(arg1,(glm::vec2 const &)*arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec3__SWIG_6(void * jarg1) {
+  void * jresult ;
+  glm::vec4 *arg1 = 0 ;
+  glm::vec3 *result = 0 ;
+  
+  arg1 = (glm::vec4 *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec4 const & is null", 0);
+    return 0;
+  } 
+  result = (glm::vec3 *)new glm::vec3((glm::vec4 const &)*arg1);
   jresult = (void *)result; 
   return jresult;
 }
 
 
 SWIGEXPORT void SWIGSTDCALL CSharp_delete_vec3(void * jarg1) {
-  custom_glm::vec3 *arg1 = (custom_glm::vec3 *) 0 ;
+  glm::vec3 *arg1 = (glm::vec3 *) 0 ;
   
-  arg1 = (custom_glm::vec3 *)jarg1; 
+  arg1 = (glm::vec3 *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_vec4_x_set(void * jarg1, float jarg2) {
+  glm::vec4 *arg1 = (glm::vec4 *) 0 ;
+  float arg2 ;
+  
+  arg1 = (glm::vec4 *)jarg1; 
+  arg2 = (float)jarg2; 
+  if (arg1) (arg1)->x = arg2;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_vec4_x_get(void * jarg1) {
+  float jresult ;
+  glm::vec4 *arg1 = (glm::vec4 *) 0 ;
+  float result;
+  
+  arg1 = (glm::vec4 *)jarg1; 
+  result = (float) ((arg1)->x);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_vec4_y_set(void * jarg1, float jarg2) {
+  glm::vec4 *arg1 = (glm::vec4 *) 0 ;
+  float arg2 ;
+  
+  arg1 = (glm::vec4 *)jarg1; 
+  arg2 = (float)jarg2; 
+  if (arg1) (arg1)->y = arg2;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_vec4_y_get(void * jarg1) {
+  float jresult ;
+  glm::vec4 *arg1 = (glm::vec4 *) 0 ;
+  float result;
+  
+  arg1 = (glm::vec4 *)jarg1; 
+  result = (float) ((arg1)->y);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_vec4_z_set(void * jarg1, float jarg2) {
+  glm::vec4 *arg1 = (glm::vec4 *) 0 ;
+  float arg2 ;
+  
+  arg1 = (glm::vec4 *)jarg1; 
+  arg2 = (float)jarg2; 
+  if (arg1) (arg1)->z = arg2;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_vec4_z_get(void * jarg1) {
+  float jresult ;
+  glm::vec4 *arg1 = (glm::vec4 *) 0 ;
+  float result;
+  
+  arg1 = (glm::vec4 *)jarg1; 
+  result = (float) ((arg1)->z);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_vec4_w_set(void * jarg1, float jarg2) {
+  glm::vec4 *arg1 = (glm::vec4 *) 0 ;
+  float arg2 ;
+  
+  arg1 = (glm::vec4 *)jarg1; 
+  arg2 = (float)jarg2; 
+  if (arg1) (arg1)->w = arg2;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_vec4_w_get(void * jarg1) {
+  float jresult ;
+  glm::vec4 *arg1 = (glm::vec4 *) 0 ;
+  float result;
+  
+  arg1 = (glm::vec4 *)jarg1; 
+  result = (float) ((arg1)->w);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_vec4_length() {
+  int jresult ;
+  glm::length_t result;
+  
+  result = (glm::length_t)glm::vec4::length();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec4__SWIG_0() {
+  void * jresult ;
+  glm::vec4 *result = 0 ;
+  
+  result = (glm::vec4 *)new glm::vec4();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec4__SWIG_1(void * jarg1) {
+  void * jresult ;
+  glm::vec4 *arg1 = 0 ;
+  glm::vec4 *result = 0 ;
+  
+  arg1 = (glm::vec4 *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec4 const & is null", 0);
+    return 0;
+  } 
+  result = (glm::vec4 *)new glm::vec4((glm::vec4 const &)*arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec4__SWIG_2(float jarg1) {
+  void * jresult ;
+  float arg1 ;
+  glm::vec4 *result = 0 ;
+  
+  arg1 = (float)jarg1; 
+  result = (glm::vec4 *)new glm::vec4(arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec4__SWIG_3(float jarg1, float jarg2, float jarg3, float jarg4) {
+  void * jresult ;
+  float arg1 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  glm::vec4 *result = 0 ;
+  
+  arg1 = (float)jarg1; 
+  arg2 = (float)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  result = (glm::vec4 *)new glm::vec4(arg1,arg2,arg3,arg4);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec4__SWIG_4(void * jarg1, void * jarg2) {
+  void * jresult ;
+  glm::vec2 *arg1 = 0 ;
+  glm::vec2 *arg2 = 0 ;
+  glm::vec4 *result = 0 ;
+  
+  arg1 = (glm::vec2 *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec2 const & is null", 0);
+    return 0;
+  } 
+  arg2 = (glm::vec2 *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec2 const & is null", 0);
+    return 0;
+  } 
+  result = (glm::vec4 *)new glm::vec4((glm::vec2 const &)*arg1,(glm::vec2 const &)*arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec4__SWIG_5(void * jarg1, float jarg2, float jarg3) {
+  void * jresult ;
+  glm::vec2 *arg1 = 0 ;
+  float arg2 ;
+  float arg3 ;
+  glm::vec4 *result = 0 ;
+  
+  arg1 = (glm::vec2 *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec2 const & is null", 0);
+    return 0;
+  } 
+  arg2 = (float)jarg2; 
+  arg3 = (float)jarg3; 
+  result = (glm::vec4 *)new glm::vec4((glm::vec2 const &)*arg1,arg2,arg3);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec4__SWIG_6(float jarg1, void * jarg2, float jarg3) {
+  void * jresult ;
+  float arg1 ;
+  glm::vec2 *arg2 = 0 ;
+  float arg3 ;
+  glm::vec4 *result = 0 ;
+  
+  arg1 = (float)jarg1; 
+  arg2 = (glm::vec2 *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec2 const & is null", 0);
+    return 0;
+  } 
+  arg3 = (float)jarg3; 
+  result = (glm::vec4 *)new glm::vec4(arg1,(glm::vec2 const &)*arg2,arg3);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec4__SWIG_7(float jarg1, float jarg2, void * jarg3) {
+  void * jresult ;
+  float arg1 ;
+  float arg2 ;
+  glm::vec2 *arg3 = 0 ;
+  glm::vec4 *result = 0 ;
+  
+  arg1 = (float)jarg1; 
+  arg2 = (float)jarg2; 
+  arg3 = (glm::vec2 *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec2 const & is null", 0);
+    return 0;
+  } 
+  result = (glm::vec4 *)new glm::vec4(arg1,arg2,(glm::vec2 const &)*arg3);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec4__SWIG_8(void * jarg1, float jarg2) {
+  void * jresult ;
+  glm::vec3 *arg1 = 0 ;
+  float arg2 ;
+  glm::vec4 *result = 0 ;
+  
+  arg1 = (glm::vec3 *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec3 const & is null", 0);
+    return 0;
+  } 
+  arg2 = (float)jarg2; 
+  result = (glm::vec4 *)new glm::vec4((glm::vec3 const &)*arg1,arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_vec4__SWIG_9(float jarg1, void * jarg2) {
+  void * jresult ;
+  float arg1 ;
+  glm::vec3 *arg2 = 0 ;
+  glm::vec4 *result = 0 ;
+  
+  arg1 = (float)jarg1; 
+  arg2 = (glm::vec3 *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "glm::vec3 const & is null", 0);
+    return 0;
+  } 
+  result = (glm::vec4 *)new glm::vec4(arg1,(glm::vec3 const &)*arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_vec4(void * jarg1) {
+  glm::vec4 *arg1 = (glm::vec4 *) 0 ;
+  
+  arg1 = (glm::vec4 *)jarg1; 
   delete arg1;
 }
 

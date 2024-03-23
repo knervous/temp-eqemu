@@ -39,17 +39,7 @@ public static class DotNetQuest
         public bool PlayerEvent;
     }
 
-    public static NPC? GetNPCByName(EntityList entityList, string name)
-    {
-        foreach (var npc in entityList.GetNPCList())
-        {
-            if (npc.Value.GetOrigName() == name)
-            {
-                return npc.Value;
-            }
-        }
-        return null;
-    }
+
 
     public delegate void InitializeDelegate(InitArgs initArgs);
     public delegate void ReloadDelegate();
@@ -87,7 +77,7 @@ public static class DotNetQuest
 
         var startInfo = new ProcessStartInfo
         {
-            FileName = "dotnet", // Adjust this path
+            FileName = "dotnet",
             Arguments = $"{assemblyDirectory}/RoslynCompiler.dll {zone?.GetShortName()}",
             UseShellExecute = false,
             RedirectStandardOutput = true,
@@ -114,8 +104,7 @@ public static class DotNetQuest
                 }
                 else
                 {
-                    var data = Convert.FromBase64String(output);
-                    questAssembly_ = assemblyContext_.LoadFromStream(new MemoryStream(data));
+                    questAssembly_ = assemblyContext_.LoadFromAssemblyPath($"{assemblyDirectory}/dotnet_quests/{zone?.GetShortName()}/{zone?.GetShortName()}.dll");
                     logSys?.QuestDebug($"Successfully compiled .NET quests with {questAssembly_.GetTypes().Count()} exported types.");
                 }
             }
@@ -191,7 +180,12 @@ public static class DotNetQuest
         }
         catch (Exception e)
         {
-            logSys?.QuestError($"Error running quest {e.Message}");
+            logSys?.QuestError($"Error running quest {EqFactory.CreateMob(npcEventArgs.Mob, false).GetOrigName()}::{MethodMap[id]} {e.Message}");
+            var inner = e.InnerException;
+            while (inner != null) {
+                logSys?.QuestError($"Error running quest. Inner Exception: {inner.Message}");
+                inner = inner.InnerException;
+            }
         }
 
     }

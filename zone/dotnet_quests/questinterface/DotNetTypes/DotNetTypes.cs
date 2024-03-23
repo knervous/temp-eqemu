@@ -1,4 +1,7 @@
+using System.Reflection;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 public class EqFactory
 {
@@ -101,6 +104,16 @@ public class EqFactory
         }
         return list;
     }
+
+    public static Assembly GetCallerAssembly()
+    {
+        // Create a new StackTrace that captures filename, line number, and column information.
+        StackTrace stackTrace = new StackTrace(fNeedFileInfo: true);
+        // Get the calling method (skip 0 as it is the current method, 1 is the immediate caller)
+        StackFrame callingFrame = stackTrace.GetFrame(2);
+        MethodBase callingMethod = callingFrame.GetMethod();
+        return  callingMethod?.DeclaringType.Assembly;
+    }
 }
 
 public static class EQEmuLogSysExtensions
@@ -119,6 +132,57 @@ public static class EQEmuLogSysExtensions
         logSys.Out(DebugLevel.General, (ushort)LogCategory.QuestErrors, file, member, line, message);
     }
 }
+
+
+
+public static class EntityListExtensions
+{
+    public static NPC? GetNPCByName(this EntityList entityList, string name)
+    {
+        foreach (var npc in entityList.GetNPCList())
+        {
+            if (npc.Value.GetOrigName() == name)
+            {
+                return npc.Value;
+            }
+        }
+        return null;
+    }
+}
+
+public static class NPCExtensions
+{
+    public static void Signal(this NPC npc, NpcEvent e, int signalCode = 0)
+    {
+        // Get the currently executing assembly
+        Assembly currentAssembly = EqFactory.GetCallerAssembly();
+
+        // Get all types defined in the assembly
+        Type[] types = currentAssembly.GetTypes();
+
+        // Iterate through the types
+        foreach (Type type in types)
+        {
+            if (type.FullName == npc.GetOrigName()) {
+                e.npc = npc;
+                e.data = signalCode.ToString();
+                if (type != null && type.GetMethod("Signal") != null) {
+                    var instance = Activator.CreateInstance(type);
+                    var newEvent = new NpcEvent{
+                        npc = npc,
+                        data = signalCode.ToString(),
+                        entityList = e.entityList,
+                        zone = e.zone,
+                        worldServer = e.worldServer,
+                        logSys = e.logSys
+                    };
+                    type.GetMethod("Signal")?.Invoke(instance, [newEvent]);
+                }
+            }
+        }
+    }
+}
+
 
 // INPCEvent is accessible from an npc script e.g. Guard_Gehnus.csx located under a zone directory
 public interface INpcEvent
@@ -449,6 +513,8 @@ public struct PlayerEvent
 
 }
 
+[StructLayout(LayoutKind.Sequential)]
+
 public struct Vec3
 {
     public float x, y, z;
@@ -460,10 +526,11 @@ public struct Vec3
         this.z = z;
     }
 }
-
+[StructLayout(LayoutKind.Sequential)]
 public struct Vec4
 {
     public float x, y, z, w;
+
 
     public Vec4(float x, float y, float z, float w)
     {

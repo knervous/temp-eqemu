@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RoslynBridge")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d4fdb3463b0f7e7ad2a2bd5fc41918d4297b5763")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7447dbc04509a99bea673356591c0f4c61549b11")]
 [assembly: System.Reflection.AssemblyProductAttribute("RoslynBridge")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RoslynBridge")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

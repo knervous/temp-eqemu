@@ -85,21 +85,6 @@
 %ignore ListElement::ListElement(const ListElement<Spawn2*>&);
 %ignore ListElement::ListElement(const ListElement<ZonePoint*>&);
 
-%inline %{
-    namespace custom_glm {
-        struct vec4 {
-            public:
-            float x, y, z, w;
-            vec4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
-        };
-        struct vec3 {
-            public:
-            float x, y, z;
-            vec3(float x, float y, float z) : x(x), y(y), z(z) {}
-        };
-    }
-%}
-
 %{
 
 #include <string>
@@ -108,6 +93,15 @@
 #include <set>
 #include <vector>
 #include <memory>
+
+// init default values in constructors
+#define GLM_FORCE_CTOR_INIT
+
+// these included in math/ofVectorMath.h
+// we declare some things manually, so some includes are commented out
+#include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
+#include "glm/vec4.hpp"
 
 #include "../../../common/ruletypes.h"
 #include "../../../common/eq_packet.h"
@@ -147,20 +141,68 @@
 using namespace EQ;
 using namespace Logs;
 using namespace glm;
-using namespace custom_glm;
 %}
 
 %include <std_list.i>
+%include <std_except.i>
 %include <std_vector.i>
 %include <std_string.i>
 %include <std_unordered_map.i>
 %include <std_shared_ptr.i>
 %include <stdint.i>
 
+namespace glm {
+    %typedef int length_t;
+    %include "glm.i"
+} // namespace
 
 
-%typemap(cstype) glm::vec4*, glm::vec4& "vec4"
-%typemap(imtype) glm::vec4*, glm::vec4& "vec4"
+
+// glm::vec3
+// %typemap(cstype) glm::vec3 "Vec3"
+// %typemap(imtype) glm::vec3 "Vec3"
+// %typemap(csin) glm::vec3 "$csinput"
+// %typemap(in) glm::vec3 %{
+//     $1 = glm::vec3($input.x, $input.y, $input.z);
+// %}
+// %typemap(csout) glm::vec3 {
+//     return new Vec3($.x, $1.y, $1.z);
+// }
+// %typemap(out) glm::vec3 %{
+//     $result = SWIG_NewPointerObj(new vec3($1.x, $1.y, $1.z), $descriptor(vec3 *), SWIG_POINTER_OWN | SWIG_POINTER_DISOWN);
+// %}
+// %typemap(out) glm::vec3* {
+//     $result = SWIG_NewPointerObj(new glm::vec3($1->x, $1->y, $1->z), $descriptor(glm::vec3 *), SWIG_POINTER_OWN);
+// }
+// %typemap(out) glm::vec3& {
+//     $result = SWIG_NewPointerObj(new vec3($1.x, $1.y, $1.z), $descriptor(vec3 *), SWIG_POINTER_OWN | SWIG_POINTER_DISOWN);
+// }
+
+// // glm::vec4
+// %typemap(cstype) glm::vec4 "Vec4"
+// %typemap(imtype) glm::vec4 "Vec4"
+// %typemap(csin) glm::vec4 "$csinput"
+// %typemap(in) glm::vec4 %{
+//     $1 = glm::vec4($input.x, $input.y, $input.z, $input.w);
+// %}
+// %typemap(csout) glm::vec4 {
+//     return new Vec4($1->x, $1->y, $1->z, $1->w);
+// }
+// %typemap(out) glm::vec4 %{
+//     $result = SWIG_NewPointerObj(new vec4($1.x, $1.y, $1.z, $1.w), $descriptor(Vec4 *), SWIG_POINTER_OWN | SWIG_POINTER_DISOWN);
+// %}
+// %typemap(out) glm::vec4* {
+//     $result = SWIG_NewPointerObj(new glm::vec4($1->x, $1->y, $1->z, $1->w), $descriptor(glm::vec4 *), SWIG_POINTER_OWN);
+// }
+// %typemap(out) glm::vec4& {
+//     $result = SWIG_NewPointerObj(new vec4($1.x, $1.y, $1.z, $1.w), $descriptor(Vec4 *), SWIG_POINTER_OWN | SWIG_POINTER_DISOWN);
+// }
+
+
+
+
+%typemap(cstype) glm::vec4*, glm::vec4& "Vec4"
+%typemap(imtype) glm::vec4*, glm::vec4& "Vec4"
 %typemap(csin) glm::vec4* "new vec4($csinput.x, $csinput.y, $csinput.z, $csinput.w)"
 %typemap(csin) glm::vec4& "$csinput"
 %typemap(in) glm::vec4* %{
@@ -179,8 +221,8 @@ using namespace custom_glm;
     $result = SWIG_NewPointerObj(new vec4($1.x, $1.y, $1.z, $1.w), $descriptor(Vec4 *), SWIG_POINTER_OWN | SWIG_POINTER_DISOWN);
 }
 
-%typemap(cstype) glm::vec3*, glm::vec3& "vec3"
-%typemap(imtype) glm::vec3*, glm::vec3& "vec3"
+%typemap(cstype) glm::vec3*, glm::vec3& "Vec3"
+%typemap(imtype) glm::vec3*, glm::vec3& "Vec3"
 %typemap(csin) glm::vec3* "new vec3($csinput.x, $csinput.y, $csinput.z)"
 %typemap(csin) glm::vec3& "$csinput"
 
